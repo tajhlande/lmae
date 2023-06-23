@@ -1,0 +1,66 @@
+{
+  "sunny" : {
+    "position": [0, 0],
+    "size" : [17, 17]
+  },
+  "cloudy" : {
+    "position": [17, 0],
+    "size" : [17, 17]
+  },
+  "rainy" : {
+    "position": [34, 0],
+    "size" : [17, 17]
+  },
+  "lightning" : {
+    "position": [51, 0],
+    "size" : [17, 17]
+  },
+  "snowflake-large" : {
+    "position": [68, 0],
+    "size" : [17, 17]
+  },
+  "snowflake-small" : {
+    "position": [85, 0],
+    "size" : [17, 17]
+  },
+  "foggy" : {
+    "position": [102, 0],
+    "size" : [17, 17]
+  },
+  "windy" : {
+    "position": [119, 0],
+    "size" : [17, 17]
+  },
+  "moon-full" : {
+    "position": [0, 17],
+    "size" : [17, 17]
+  },
+  "moon-waning-gibbous" : {
+    "position": [17, 17],
+    "size" : [17, 17]
+  },
+  "moon-waning-half" : {
+    "position": [34, 17],
+    "size" : [17, 17]
+  },
+  "moon-waning-crescent" : {
+    "position": [51, 17],
+    "size" : [17, 17]
+  },
+  "moon-new" : {
+    "position": [68, 17],
+    "size" : [17, 17]
+  },
+  "moon-waxing-crescent" : {
+    "position": [85, 17],
+    "size" : [17, 17]
+  },
+  "moon-waxing-half" : {
+    "position": [102, 17],
+    "size" : [17, 17]
+  },
+  "moon-waxing-gibbous" : {
+    "position": [119, 17],
+    "size" : [17, 17]
+  }
+}
