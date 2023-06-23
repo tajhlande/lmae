@@ -2,3 +2,5 @@ build/*
 **/*.so
 venv/*
 .idea/*
+samples/__pycache__
+
