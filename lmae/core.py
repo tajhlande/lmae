@@ -12,7 +12,7 @@ _current_sequence = dict()
 def _get_sequential_name(class_name : str = "Object"):
     if class_name not in _current_sequence:
         _current_sequence[class_name] = 0
-    return class_name + "_" + (++_current_sequence[class_name])
+    return f"{class_name}_{++_current_sequence[class_name]}"
 
 
 class LMAEObject:
