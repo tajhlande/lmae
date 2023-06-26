@@ -2,11 +2,17 @@
 import argparse
 import logging
 from random import randrange
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
-logging.basicConfig(level=logging.DEBUG)
+_current_sequence = dict()
+
+
+def _get_sequential_name(class_name : str = "Object"):
+    if class_name not in _current_sequence:
+        _current_sequence[class_name] = 0
+    return class_name + "_" + (++_current_sequence[class_name])
 
 
 class LMAEObject:
@@ -15,7 +21,7 @@ class LMAEObject:
     """
 
     def __init__(self, name: str = None):
-        self.name = name or 'Object_' + f'{randrange(65536):04X}'
+        self.name = name or _get_sequential_name("Object")  # 'Object_' + f'{randrange(65536):04X}'
 
 
 class Canvas(LMAEObject):
@@ -23,7 +29,7 @@ class Canvas(LMAEObject):
     A Canvas is an object on which other objects render themselves
     """
     def __init__(self, name: str = None, size: tuple[int, int] = (64, 32)):
-        name = name or 'Canvas_' + f'{randrange(65536):04X}'
+        name = name or _get_sequential_name("Canvas")  # 'Canvas_' + f'{randrange(65536):04X}'
         super().__init__(name=name)
         self.size = size
         self.image = Image.new("RGBA", self.size, (0, 0, 0))
@@ -39,7 +45,7 @@ class Actor(LMAEObject):
     An object that appears on a stage and knows how to render itself
     """
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0)):
-        name = name or 'Actor_' + f'{randrange(65536):04X}'
+        name = name or _get_sequential_name("Actor")  # 'Actor_' + f'{randrange(65536):04X}'
         super().__init__(name=name)
         self.position = position
         self.size = 0, 0
@@ -57,7 +63,7 @@ class StillImage(Actor):
     An unchanging image that can position itself on a stage
     """
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), image: Image = None):
-        name = name or 'StillImage_' + f'{randrange(65536):04X}'
+        name = name or _get_sequential_name("StillImage")  # 'StillImage_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
         self.image = image
         self.size = self.image.size if self.image else (0, 0)
@@ -74,6 +80,32 @@ class StillImage(Actor):
             canvas.image.alpha_composite(self.image, dest=self.position)
 
 
+class Text(Actor):
+    """
+    Text that renders on a stage
+    """
+
+    def __init__(self, font: ImageFont, name: str = None, position: tuple[int, int] = (0, 0),
+                 text: str = None, color: tuple[int, int, int] = (255, 255, 255),
+                 outline_color: tuple[int, int, int, int] = (0, 0, 0, 0),  # no outline by default
+                 stroke_width: int = 0):
+        name = name or _get_sequential_name("Text")  # 'Text_' + f'{randrange(65536):04X}'
+        super().__init__(name=name, position=position)
+        self.font = font
+        self.text = text
+        self.color = color
+        self.outline_color = outline_color
+        self.stroke_width = stroke_width
+
+    def render(self, canvas: Canvas):
+        super().render(canvas)
+        if self.text:
+            image = Image.new("RGBA", self.size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw()
+            draw.text(self.position, self.text, fill=self.color, font=self.font,
+                      stroke_fill=self.outline_color, stroke_width=self.stroke_width)
+
+
 class Stage(LMAEObject):
     """
     An environment with a set of actors who appear in a certain order, all of whom can
@@ -85,7 +117,7 @@ class Stage(LMAEObject):
     """
     def __init__(self, name=None, size: tuple[int, int] = (64, 32), actors: list = None, matrix: RGBMatrix = None,
                  matrix_options: RGBMatrixOptions = None):
-        name = name or 'Stage_' + f'{randrange(65536):04X}'
+        name = name or _get_sequential_name("Stage")  # 'Stage_' + f'{randrange(65536):04X}'
         super().__init__(name)
         self.size = size        # size in pixels
         self.actors = actors or list()

@@ -4,6 +4,10 @@
 *.iml
 
 ##################
+# Apple
+.DS_Store
+
+##################
 ### C template
 # Prerequisites
 *.d
