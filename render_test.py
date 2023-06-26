@@ -13,7 +13,7 @@ stage = Stage(matrix=matrix, matrix_options=options)
 kirby = StillImage(name='Kirby', position=(20, 5), image=Image.open("images/kirby_22.png").convert('RGBA'))
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
-stage.actors.append(kirby, trees, grass)
+stage.actors.extend((kirby, trees, grass))
 
 stage.render_frame()
 
