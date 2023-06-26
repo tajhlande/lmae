@@ -101,7 +101,7 @@ class Text(Actor):
         super().render(canvas)
         if self.text:
             image = Image.new("RGBA", self.size, (0, 0, 0, 0))
-            draw = ImageDraw.Draw()
+            draw = ImageDraw.Draw(image)
             draw.text(self.position, self.text, fill=self.color, font=self.font,
                       stroke_fill=self.outline_color, stroke_width=self.stroke_width)
 
