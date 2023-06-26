@@ -10,11 +10,18 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class LMAEObject:
+    """
+    Base object for everything
+    """
+
     def __init__(self, name: str = None):
         self.name = name or 'Object_' + f'{randrange(65536):04X}'
 
 
 class Canvas(LMAEObject):
+    """
+    A Canvas is an object on which other objects render themselves
+    """
     def __init__(self, name: str = None, size: tuple[int, int] = (64, 32)):
         name = name or 'Canvas_' + f'{randrange(65536):04X}'
         super().__init__(name=name)
@@ -28,17 +35,27 @@ class Canvas(LMAEObject):
 
 
 class Actor(LMAEObject):
+    """
+    An object that appears on a stage and knows how to render itself
+    """
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0)):
         name = name or 'Actor_' + f'{randrange(65536):04X}'
         super().__init__(name=name)
         self.position = position
         self.size = 0, 0
+        self.changes_since_last_render = True # since we've not been rendered yet
+
+    def update(self):
+        pass
 
     def render(self, canvas: Canvas):
-        pass
+        self.changes_since_last_render = False
 
 
 class StillImage(Actor):
+    """
+    An unchanging image that can position itself on a stage
+    """
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), image: Image = None):
         name = name or 'StillImage_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
@@ -52,11 +69,20 @@ class StillImage(Actor):
         self.size = self.image.size
 
     def render(self, canvas: Canvas):
+        super().render(canvas)
         if self.image:
             canvas.image.paste(self.image, self.position)
 
 
 class Stage(LMAEObject):
+    """
+    An environment with a set of actors who appear in a certain order, all of whom can
+    render themselves onto a canvas on demand.  The canvas can then be displayed on the
+    LED matrix.
+
+    Rendering to the canvas is double-buffered, to avoid seeing intermediate renders on
+    the LED matrix.
+    """
     def __init__(self, name=None, size: tuple[int, int] = (64, 32), actors: list = None, matrix: RGBMatrix = None,
                  matrix_options: RGBMatrixOptions = None):
         name = name or 'Stage_' + f'{randrange(65536):04X}'
@@ -68,18 +94,52 @@ class Stage(LMAEObject):
         self.double_buffer = self.matrix.CreateFrameCanvas()
 
     def prepare_frame(self):
+        """
+        Prepare for a frame to be rendered
+        :return:
+        """
         self.canvas.blank()
 
-    def render_frame(self):
+    def update_actors(self):
+        """
+        Let all the actors update themselves
+        :return:
+        """
+        for actor in self.actors:
+            actor.update()
+
+    def render_actors(self):
+        """
+        Draw all the actors in the frame
+        :return:
+        """
         for actor in self.actors:
             actor.render(self.canvas)
 
     def display_frame(self):
+        """
+        Swap out the rendered frame on a vertical sync
+        :return:
+        """
         self.double_buffer.SetImage(self.canvas.image, 0, 0)
         self.double_buffer = self.matrix.SwapOnVSync(self.double_buffer)
 
+    def render_frame(self):
+        """
+        Do all steps to render and display a frame update
+        :return:
+        """
+        self.update_actors()
+        self.prepare_frame()
+        self.render_actors()
+        self.display_frame()
+
 
 def parse_matrix_options_command_line():
+    """
+    Parse the command line options and construct a RGBMatrixOptions object
+    :return: an RGBMatrixOptions object
+    """
     options = RGBMatrixOptions()
     parser = argparse.ArgumentParser()
 
