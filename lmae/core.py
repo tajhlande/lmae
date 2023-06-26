@@ -85,16 +85,20 @@ class Text(Actor):
     Text that renders on a stage
     """
 
-    def __init__(self, font: ImageFont, name: str = None, position: tuple[int, int] = (0, 0),
-                 text: str = None, color: tuple[int, int, int] = (255, 255, 255),
-                 outline_color: tuple[int, int, int, int] = (0, 0, 0, 0),  # no outline by default
+    def __init__(self,
+                 font: ImageFont,
+                 name: str = None,
+                 position: tuple[int, int] = (0, 0),
+                 text: str = None,
+                 color: tuple[int, int, int] | tuple[int, int, int, int] = (255, 255, 255, 255),
+                 stroke_color: tuple[int, int, int] | tuple[int, int, int, int] = (0, 0, 0, 255),
                  stroke_width: int = 0):
         name = name or _get_sequential_name("Text")  # 'Text_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
         self.font = font
         self.text = text
         self.color = color
-        self.outline_color = outline_color
+        self.stroke_color = stroke_color
         self.stroke_width = stroke_width
 
     def render(self, canvas: Canvas):
@@ -103,7 +107,7 @@ class Text(Actor):
             image = Image.new("RGBA", self.size, (0, 0, 0, 0))
             draw = ImageDraw.Draw(image)
             draw.text(self.position, self.text, fill=self.color, font=self.font,
-                      stroke_fill=self.outline_color, stroke_width=self.stroke_width)
+                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
 
 
 class Stage(LMAEObject):
