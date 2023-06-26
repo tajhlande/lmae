@@ -121,7 +121,7 @@ class Stage(LMAEObject):
         Swap out the rendered frame on a vertical sync
         :return:
         """
-        self.double_buffer.SetImage(self.canvas.image, 0, 0)
+        self.double_buffer.SetImage(self.canvas.image.convert("RGB"), 0, 0)
         self.double_buffer = self.matrix.SwapOnVSync(self.double_buffer)
 
     def render_frame(self):
