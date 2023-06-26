@@ -71,7 +71,7 @@ class StillImage(Actor):
     def render(self, canvas: Canvas):
         super().render(canvas)
         if self.image:
-            canvas.image.paste(self.image, self.position)
+            canvas.image.alpha_composite(self.image, dest=self.position)
 
 
 class Stage(LMAEObject):
