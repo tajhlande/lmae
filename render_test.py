@@ -40,4 +40,5 @@ while True:
     i = 0 if i >= 64 else i + 1
     end_time = time.time()
     # if we are running faster than 120HZ, slow down
-    time.sleep(max((1.0/120.0) - (end_time - start_time)), 0)
+    time.sleep(max((1.0/120.0) - (end_time - start_time), 0))
+
