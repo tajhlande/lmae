@@ -50,7 +50,7 @@ try:
         elapsed_render_time = render_end_time - start_time
         # if we are running faster than 120HZ, slow down
         if elapsed_render_time < (1.0/120.0):
-            time.sleep((1.0/120.0) - elapsed_render_time, 0)
+            time.sleep((1.0/120.0) - elapsed_render_time)
         end_time = time.time()
         elapsed_time = end_time - start_time
         last_times.append(elapsed_time)
