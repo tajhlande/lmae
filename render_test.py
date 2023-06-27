@@ -39,29 +39,36 @@ stage.actors.extend((trees, words, moving_kirby, grass))
 
 print("Press CTRL-C to stop render loop")
 i = 0
-last_times = collections.deque((), 100)
+previous_elapsed_times = collections.deque((), 100)
 max_frame_rate = 120
+min_time_per_frame = 1.0 / max_frame_rate
 try:
     curses_window = curses.newwin(1, 7)
     hz_pos = curses_window.getyx();
+    last_time = time.time()
     while True:
-        start_time = time.time()
+        # render the frame
         stage.render_frame(i)
         i = i + 1
-        average_time = 1 if len(last_times) == 0 else sum(last_times) / len(last_times)
+
+        # calculate the frame rate and render that
+        average_time = 1 if len(previous_elapsed_times) == 0 \
+            else sum(previous_elapsed_times) / len(previous_elapsed_times)
         curses_window.erase()
         curses_window.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz")
         curses_window.refresh()
         render_end_time = time.time()
 
-        elapsed_render_time = render_end_time - start_time
-        # if we are running faster than max frame rate, slow down
-        if elapsed_render_time < (1.0/max_frame_rate):
-            time.sleep((1.0/max_frame_rate) - elapsed_render_time)
+        # if we are rendering faster than max frame rate, slow down
+        elapsed_render_time = render_end_time - last_time
+        if elapsed_render_time < min_time_per_frame:
+            time.sleep(min_time_per_frame - elapsed_render_time)
 
+        # record total elapsed time
         end_time = time.time()
-        elapsed_time = end_time - start_time
-        last_times.append(elapsed_time)
+        elapsed_time = end_time - last_time
+        previous_elapsed_times.appendleft(elapsed_time)
+        last_time = end_time
 
 finally:
     curses.endwin()
