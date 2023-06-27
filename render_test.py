@@ -20,7 +20,7 @@ words = Text(name='Text', text="Hello, world!", position=(5, 10),
              # font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez.ttf", 16),
              # font=ImageFont.truetype("fonts/poh-pixels-font/PohPixelsRegular-ljXw.ttf", 16),
              # font=ImageFont.truetype("fonts/sd-another-dimension-font/SdAnotherDimension-ljed.ttf", 10),
-             font=ImageFont.truetype("fonts/sparkly-font/SparklyFontRegular-zyA3.ttf", 12), # placement is top line
+             font=ImageFont.truetype("fonts/sparkly-font/SparklyFontRegular-zyA3.ttf", 8), # placement is top line
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
 stage.actors.extend((trees, words, kirby, grass))
 
