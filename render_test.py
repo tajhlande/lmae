@@ -39,7 +39,7 @@ stage.actors.extend((trees, words, moving_kirby, grass))
 
 print("Press CTRL-C to stop render loop")
 i = 0
-last_times = collections.deque(None, 100)
+last_times = collections.deque((), 100)
 try:
     hz_pos =  curses.getsyx()
     while True:
