@@ -12,7 +12,7 @@ stage = Stage(matrix=matrix, matrix_options=options)
 
 
 def kirby_movement(frame_number: int) -> tuple[int, int]:
-    return frame_number % 64, 5
+    return frame_number % 64, 12
 
 
 kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
