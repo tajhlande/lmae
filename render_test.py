@@ -12,7 +12,7 @@ stage = Stage(matrix=matrix, matrix_options=options)
 
 
 def kirby_movement(frame_number: int) -> tuple[int, int]:
-    return frame_number % 64, 12
+    return frame_number % 86 - 22, 12
 
 
 kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
@@ -37,7 +37,7 @@ i = 0
 while True:
     start_time = time.time()
     stage.render_frame(i)
-    i = 0 if i >= 64 else i + 1
+    i = i + 1
     end_time = time.time()
     # if we are running faster than 120HZ, slow down
     time.sleep(max((1.0/120.0) - (end_time - start_time), 0))
