@@ -41,7 +41,7 @@ print("Press CTRL-C to stop render loop")
 i = 0
 last_times = collections.deque((), 100)
 try:
-    hz_pos =  curses.getsyx()
+    hz_pos = curses.getsyx()
     while True:
         start_time = time.time()
         stage.render_frame(i)
@@ -56,7 +56,7 @@ try:
         last_times.append(elapsed_time)
         average_time = sum(last_times) / len(last_times)
         stdscr.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz    ")
-        stdscr.refresh()
+       # stdscr.refresh()
 
 finally:
     curses.endwin()
