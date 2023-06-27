@@ -63,9 +63,9 @@ try:
         # if we are rendering faster than max frame rate, slow down
         elapsed_render_time = render_end_time - last_time
         if elapsed_render_time < min_time_per_frame:
-            while (time.time() - last_time) < min_time_per_frame:
-                pass
-            # time.sleep(min_time_per_frame - elapsed_render_time)
+            # while (time.time() - last_time) < min_time_per_frame:
+            #     pass
+            time.sleep(min_time_per_frame - elapsed_render_time)
 
         # record total elapsed time
         end_time = time.time()
