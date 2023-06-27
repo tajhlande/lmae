@@ -104,8 +104,7 @@ class Text(Actor):
     def render(self, canvas: Canvas):
         super().render(canvas)
         if self.text:
-            image = Image.new("RGBA", self.size, (0, 0, 0, 0))
-            draw = ImageDraw.Draw(image)
+            draw = canvas.image_draw
             logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
                           f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
             draw.text(self.position, self.text, fill=self.color, font=self.font,
