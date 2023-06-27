@@ -47,7 +47,7 @@ try:
         end_time = time.time()
         # if we are running faster than 120HZ, slow down
         time.sleep(max((1.0/120.0) - (end_time - start_time), 0))
-        stdscr.addstr(hz_pos[0], hz_pos[1], f"{1/(end_time - start_time)} Hz    ")
+        stdscr.addstr(hz_pos[0], hz_pos[1], f"{round(1/(end_time - start_time))} Hz    ")
         stdscr.refresh()
 finally:
     curses.endwin()
