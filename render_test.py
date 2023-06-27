@@ -42,6 +42,7 @@ i = 0
 last_times = collections.deque((), 100)
 try:
     hz_pos = curses.getsyx()
+    curses_window = curses.newwin(1, 7)
     while True:
         start_time = time.time()
         stage.render_frame(i)
@@ -55,8 +56,9 @@ try:
         elapsed_time = end_time - start_time
         last_times.append(elapsed_time)
         average_time = sum(last_times) / len(last_times)
-        stdscr.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz    ")
-       # stdscr.refresh()
+        curses_window.erase()
+        curses_window.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz")
+        curses_window.refresh()
 
 finally:
     curses.endwin()
