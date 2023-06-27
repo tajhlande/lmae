@@ -15,7 +15,7 @@ trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello", position=(5, 5),
              # the following are the fonts native point sizes to avoid blurring
-             font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 12),
+             font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 13),
              # font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 12),
              # font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez.ttf", 16),
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
