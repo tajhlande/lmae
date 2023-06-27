@@ -140,8 +140,8 @@ class Text(Actor):
         super().render(canvas, frame_number)
         if self.text:
             draw = canvas.image_draw
-            logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
-                          f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
+            # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
+            #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
             draw.text(self.position, self.text, fill=self.color, font=self.font,
                       stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
 
