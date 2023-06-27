@@ -8,7 +8,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 logging.basicConfig(level=logging.DEBUG)
 
-#stdscr = curses.initscr()
+stdscr = curses.initscr()
 
 options: RGBMatrixOptions = parse_matrix_options_command_line()
 
