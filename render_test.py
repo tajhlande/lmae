@@ -37,4 +37,4 @@ i = 0
 while True:
     stage.render_frame(i)
     i = 0 if i >= 64 else i + 1
-    time.sleep(0.005)
+    #time.sleep(0.005)
