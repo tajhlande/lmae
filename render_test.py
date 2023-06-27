@@ -35,6 +35,9 @@ stage.actors.extend((trees, words, moving_kirby, grass))
 print("Press CTRL-C to stop render loop")
 i = 0
 while True:
+    start_time = time.time()
     stage.render_frame(i)
     i = 0 if i >= 64 else i + 1
-    #time.sleep(0.005)
+    end_time = time.time()
+    # if we are running faster than 120HZ, slow down
+    time.sleep(max((1.0/120.0) - (end_time - start_time)), 0)
