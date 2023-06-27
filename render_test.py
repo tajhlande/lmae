@@ -18,7 +18,8 @@ words = Text(name='Text', text="Hello", position=(5, 5),
              # font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 14), # not a perfect fit
              # font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 12),
              # font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez.ttf", 16),
-             font=ImageFont.truetype("fonts/poh-pixels-font/PohPixelsRegular-ljXw.ttf", 16),
+             # font=ImageFont.truetype("fonts/poh-pixels-font/PohPixelsRegular-ljXw.ttf", 16),
+             font=ImageFont.truetype("fonts/sd-another-dimension-font/SdAnotherDimension-ljed.ttf", 16),
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
 stage.actors.extend((trees, words, kirby, grass))
 
