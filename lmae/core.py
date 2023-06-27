@@ -90,8 +90,8 @@ class Text(Actor):
                  name: str = None,
                  position: tuple[int, int] = (0, 0),
                  text: str = None,
-                 color: tuple[int, int, int] | tuple[int, int, int, int] = (255, 255, 255, 255),
-                 stroke_color: tuple[int, int, int] | tuple[int, int, int, int] = (0, 0, 0, 255),
+                 color: tuple[int, int, int] = (255, 255, 255, 255),
+                 stroke_color: tuple[int, int, int] = (0, 0, 0, 255),
                  stroke_width: int = 0):
         name = name or _get_sequential_name("Text")  # 'Text_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
