@@ -42,8 +42,8 @@ i = 0
 last_times = collections.deque((), 100)
 max_frame_rate = 160
 try:
-    hz_pos = curses.getsyx()
     curses_window = curses.newwin(1, 7)
+    hz_pos = curses_window.getyx();
     while True:
         start_time = time.time()
         stage.render_frame(i)
