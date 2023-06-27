@@ -16,7 +16,7 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
 
 
 kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
-moving_kirby = MovingActor(actor=kirby, name="Moving Kirby", movement_function=kirby_movement)
+moving_kirby = MovingActor(kirby, name="Moving Kirby", movement_function=kirby_movement)
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello, world!", position=(5, 5),
