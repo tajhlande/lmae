@@ -1,9 +1,8 @@
 # Core classes for LED Matrix Animation Engine
 import argparse
 import logging
-from random import randrange
+from typing import Callable
 from PIL import Image, ImageDraw, ImageFont
-
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 _current_sequence = dict()
@@ -50,12 +49,14 @@ class Actor(LMAEObject):
         self.position = position
         self.size = 0, 0
         self.changes_since_last_render = True # since we've not been rendered yet
+        self.frame_number = 0
 
     def update(self):
         pass
 
-    def render(self, canvas: Canvas):
+    def render(self, canvas: Canvas, frame_number: int):
         self.changes_since_last_render = False
+        self.frame_number = frame_number
 
 
 class StillImage(Actor):
@@ -63,6 +64,12 @@ class StillImage(Actor):
     An unchanging image that can position itself on a stage
     """
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), image: Image = None):
+        """
+        Initialize a still image actor
+        :param name: The name of this image actor
+        :param position:The initial position of this still image actor
+        :param image: The PIL image for this image actor
+        """
         name = name or _get_sequential_name("StillImage")  # 'StillImage_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
         self.image = image
@@ -74,10 +81,38 @@ class StillImage(Actor):
             self.image = self.image.convert('RGBA')
         self.size = self.image.size
 
-    def render(self, canvas: Canvas):
-        super().render(canvas)
+    def render(self, canvas: Canvas, frame_number: int):
+        super().render(canvas, frame_number)
         if self.image:
             canvas.image.alpha_composite(self.image, dest=self.position)
+
+
+class MovingActor(Actor):
+    """
+    A container for an actor that moves the actor around
+    """
+
+    def __init(self,
+               actor: Actor,
+               movement_function: Callable[[int], tuple[int, int]],
+               name: str = None):
+        """
+        Initialize the moving actor
+        :param actor: The actor to move around
+        :param movement_function: A function that takes the frame number as input and returns a position
+        :param name: The name of this moving actor
+        :return:
+        """
+        name = name or _get_sequential_name("MovingActor")  # 'MovingActor_' + f'{randrange(65536):04X}'
+        super().__init__(name=name)
+        self.actor = actor
+        self.movement_function = movement_function
+
+    def render(self, canvas: Canvas, frame_number: int):
+        super().render(canvas, frame_number)
+        self.position = self.movement_function(frame_number)
+        self.actor.position = self.position
+        self.actor.render(canvas, frame_number)
 
 
 class Text(Actor):
@@ -101,8 +136,8 @@ class Text(Actor):
         self.stroke_color = stroke_color
         self.stroke_width = stroke_width
 
-    def render(self, canvas: Canvas):
-        super().render(canvas)
+    def render(self, canvas: Canvas, frame_number: int):
+        super().render(canvas, frame_number)
         if self.text:
             draw = canvas.image_draw
             logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
@@ -145,13 +180,13 @@ class Stage(LMAEObject):
         for actor in self.actors:
             actor.update()
 
-    def render_actors(self):
+    def render_actors(self, frame_number: int):
         """
         Draw all the actors in the frame
         :return:
         """
         for actor in self.actors:
-            actor.render(self.canvas)
+            actor.render(self.canvas, frame_number=frame_number)
 
     def display_frame(self):
         """
@@ -161,14 +196,14 @@ class Stage(LMAEObject):
         self.double_buffer.SetImage(self.canvas.image.convert("RGB"), 0, 0)
         self.double_buffer = self.matrix.SwapOnVSync(self.double_buffer)
 
-    def render_frame(self):
+    def render_frame(self, frame_number: int = 0):
         """
         Do all steps to render and display a frame update
         :return:
         """
         self.update_actors()
         self.prepare_frame()
-        self.render_actors()
+        self.render_actors(frame_number)
         self.display_frame()
 
 
