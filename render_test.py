@@ -15,7 +15,7 @@ trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello", position=(5, 5),
              font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 10))
-stage.actors.extend((trees, words, kirby, grass))
+stage.actors.extend((trees, words))
 
 stage.render_frame()
 
