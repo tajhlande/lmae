@@ -14,9 +14,9 @@ kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kir
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello", position=(5, 5),
-             # font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 10),
-             # font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 10),
-             font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez.ttf", 10),
+             # font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 12),
+             # font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 12),
+             font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez.ttf", 12),
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
 stage.actors.extend((trees, words, kirby, grass))
 
