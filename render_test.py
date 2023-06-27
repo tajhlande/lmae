@@ -40,6 +40,7 @@ stage.actors.extend((trees, words, moving_kirby, grass))
 print("Press CTRL-C to stop render loop")
 i = 0
 last_times = collections.deque((), 100)
+max_frame_rate = 160
 try:
     hz_pos = curses.getsyx()
     curses_window = curses.newwin(1, 7)
@@ -49,9 +50,9 @@ try:
         i = i + 1
         render_end_time = time.time()
         elapsed_render_time = render_end_time - start_time
-        # if we are running faster than 120HZ, slow down
-        if elapsed_render_time < (1.0/120.0):
-            time.sleep((1.0/120.0) - elapsed_render_time)
+        # if we are running faster than max frame rate, slow down
+        if elapsed_render_time < (1.0/max_frame_rate):
+            time.sleep((1.0/max_frame_rate) - elapsed_render_time)
         end_time = time.time()
         elapsed_time = end_time - start_time
         last_times.append(elapsed_time)
