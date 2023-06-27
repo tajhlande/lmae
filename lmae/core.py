@@ -106,6 +106,7 @@ class Text(Actor):
         if self.text:
             image = Image.new("RGBA", self.size, (0, 0, 0, 0))
             draw = ImageDraw.Draw(image)
+            logging.debug(f"Drawing text at {self.position} with color {self.color}: '{self.text}'")
             draw.text(self.position, self.text, fill=self.color, font=self.font,
                       stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
 
