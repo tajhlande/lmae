@@ -1,3 +1,4 @@
+import collections
 import curses
 import logging
 import time
@@ -38,17 +39,26 @@ stage.actors.extend((trees, words, moving_kirby, grass))
 
 print("Press CTRL-C to stop render loop")
 i = 0
+last_times = collections.deque()
+last_times.maxlen = 100
 try:
     hz_pos =  curses.getsyx()
     while True:
         start_time = time.time()
         stage.render_frame(i)
         i = i + 1
-        end_time = time.time()
+        render_end_time = time.time()
+        elapsed_render_time = render_end_time - start_time
         # if we are running faster than 120HZ, slow down
-        time.sleep(max((1.0/120.0) - (end_time - start_time), 0))
-        stdscr.addstr(hz_pos[0], hz_pos[1], f"{round(1/(end_time - start_time))} Hz    ")
+        if elapsed_render_time < (1.0/120.0):
+            time.sleep((1.0/120.0) - elapsed_render_time, 0)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        last_times.append(elapsed_time)
+        average_time = sum(last_times) / len(last_times)
+        stdscr.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz    ")
         stdscr.refresh()
+
 finally:
     curses.endwin()
 
