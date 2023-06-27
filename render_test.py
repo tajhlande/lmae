@@ -53,7 +53,7 @@ try:
         # if we are running faster than max frame rate, slow down
         if elapsed_render_time < (1.0/max_frame_rate):
             time.sleep((1.0/max_frame_rate) - elapsed_render_time)
-        average_time = 0 if len(last_times) == 0 else sum(last_times) / len(last_times)
+        average_time = 1 if len(last_times) == 0 else sum(last_times) / len(last_times)
         curses_window.erase()
         curses_window.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz")
         curses_window.refresh()
