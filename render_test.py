@@ -1,3 +1,4 @@
+import curses
 import logging
 import time
 from lmae.core import Stage, StillImage, MovingActor, Text, parse_matrix_options_command_line
@@ -5,6 +6,9 @@ from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 logging.basicConfig(level=logging.DEBUG)
+
+stdscr = curses.initscr()
+
 options: RGBMatrixOptions = parse_matrix_options_command_line()
 
 matrix = RGBMatrix(options=options)
@@ -34,11 +38,18 @@ stage.actors.extend((trees, words, moving_kirby, grass))
 
 print("Press CTRL-C to stop render loop")
 i = 0
-while True:
-    start_time = time.time()
-    stage.render_frame(i)
-    i = i + 1
-    end_time = time.time()
-    # if we are running faster than 120HZ, slow down
-    time.sleep(max((1.0/120.0) - (end_time - start_time), 0))
+try:
+    hz_pos =  curses.getsyx()
+    while True:
+        start_time = time.time()
+        stage.render_frame(i)
+        i = i + 1
+        end_time = time.time()
+        # if we are running faster than 120HZ, slow down
+        time.sleep(max((1.0/120.0) - (end_time - start_time), 0))
+        stdscr.addstr(hz_pos[0], hz_pos[1], f"{1/(end_time - start_time)} Hz    ")
+        stdscr.refresh()
+finally:
+    curses.endwin()
+
 
