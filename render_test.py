@@ -1,6 +1,7 @@
 import collections
 import curses
 import logging
+import math
 import time
 from lmae.core import Stage, StillImage, MovingActor, Text, parse_matrix_options_command_line
 from PIL import Image, ImageFont
@@ -44,7 +45,7 @@ max_frame_rate = 120
 min_time_per_frame = 1.0 / max_frame_rate
 try:
     curses_window = curses.newwin(1, 7)
-    hz_pos = curses_window.getyx();
+    hz_pos = curses_window.getyx()
     last_time = time.time()
     while True:
         # render the frame
@@ -61,8 +62,8 @@ try:
 
         # if we are rendering faster than max frame rate, slow down
         elapsed_render_time = render_end_time - last_time
-        # if elapsed_render_time < min_time_per_frame:
-        #     time.sleep(min_time_per_frame - elapsed_render_time)
+        if elapsed_render_time < min_time_per_frame:
+            time.sleep(math.floor((min_time_per_frame - elapsed_render_time) * 100) / 100)
 
         # record total elapsed time
         end_time = time.time()
