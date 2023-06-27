@@ -48,15 +48,17 @@ try:
         start_time = time.time()
         stage.render_frame(i)
         i = i + 1
-        render_end_time = time.time()
-        elapsed_render_time = render_end_time - start_time
-        # if we are running faster than max frame rate, slow down
-        if elapsed_render_time < (1.0/max_frame_rate):
-            time.sleep((1.0/max_frame_rate) - elapsed_render_time)
         average_time = 1 if len(last_times) == 0 else sum(last_times) / len(last_times)
         curses_window.erase()
         curses_window.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz")
         curses_window.refresh()
+        render_end_time = time.time()
+
+        elapsed_render_time = render_end_time - start_time
+        # if we are running faster than max frame rate, slow down
+        if elapsed_render_time < (1.0/max_frame_rate):
+            time.sleep((1.0/max_frame_rate) - elapsed_render_time)
+
         end_time = time.time()
         elapsed_time = end_time - start_time
         last_times.append(elapsed_time)
