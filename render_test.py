@@ -15,7 +15,8 @@ trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello", position=(5, 5),
              # font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 10),
-             font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 10),
+             # font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 10),
+             font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez", 10),
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
 stage.actors.extend((trees, words, kirby, grass))
 
