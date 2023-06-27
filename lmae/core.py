@@ -92,10 +92,10 @@ class MovingActor(Actor):
     A container for an actor that moves the actor around
     """
 
-    def __init(self,
-               actor: Actor,
-               movement_function: Callable[[int], tuple[int, int]],
-               name: str = None):
+    def __init__(self,
+                 actor: Actor,
+                 movement_function: Callable[[int], tuple[int, int]],
+                 name: str = None):
         """
         Initialize the moving actor
         :param actor: The actor to move around
