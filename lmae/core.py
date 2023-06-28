@@ -173,6 +173,7 @@ class Stage(LMAEObject):
         self.canvas = Canvas(size=self.size)
         self.matrix = matrix or RGBMatrix(options=matrix_options)
         self.double_buffer = self.matrix.CreateFrameCanvas()
+        self.needs_render = True
 
     def prepare_frame(self):
         """
@@ -181,21 +182,23 @@ class Stage(LMAEObject):
         """
         self.canvas.blank()
 
-    def update_actors(self):
+    def update_actors(self, frame_number: int):
         """
         Let all the actors update themselves
         :return:
         """
+        self.needs_render = False
         for actor in self.actors:
-            actor.update()
+            actor.update(frame_number)
+            self.needs_render = self.needs_render or actor.changes_since_last_render
 
-    def render_actors(self, frame_number: int):
+    def render_actors(self):
         """
         Draw all the actors in the frame
         :return:
         """
         for actor in self.actors:
-            actor.render(self.canvas, frame_number=frame_number)
+            actor.render(self.canvas)
 
     def display_frame(self):
         """
@@ -210,10 +213,13 @@ class Stage(LMAEObject):
         Do all steps to render and display a frame update
         :return:
         """
-        self.update_actors()
-        self.prepare_frame()
-        self.render_actors(frame_number)
-        self.display_frame()
+        self.update_actors(frame_number)
+        if self.needs_render:
+            self.prepare_frame()
+            self.render_actors()
+            self.display_frame()
+        else:
+            pass  # no update needed
 
 
 def parse_matrix_options_command_line():
