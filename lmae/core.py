@@ -51,12 +51,17 @@ class Actor(LMAEObject):
         self.changes_since_last_render = True # since we've not been rendered yet
         self.frame_number = 0
 
-    def update(self):
-        pass
+    def set_position(self, position: tuple[int, int]):
+        if not (position == self.position):
+            self.position = position
+            self.changes_since_last_render = True
 
-    def render(self, canvas: Canvas, frame_number: int):
-        self.changes_since_last_render = False
+    def update(self, frame_number: int):
         self.frame_number = frame_number
+
+    def render(self, canvas: Canvas):
+        self.changes_since_last_render = False
+        pass
 
 
 class StillImage(Actor):
@@ -81,10 +86,10 @@ class StillImage(Actor):
             self.image = self.image.convert('RGBA')
         self.size = self.image.size
 
-    def render(self, canvas: Canvas, frame_number: int):
-        super().render(canvas, frame_number)
+    def render(self, canvas: Canvas):
         if self.image:
             canvas.image.alpha_composite(self.image, dest=self.position)
+        self.changes_since_last_render = False
 
 
 class MovingActor(Actor):
@@ -108,11 +113,15 @@ class MovingActor(Actor):
         self.actor = actor
         self.movement_function = movement_function
 
-    def render(self, canvas: Canvas, frame_number: int):
-        super().render(canvas, frame_number)
+    def update(self, frame_number: int):
         self.position = self.movement_function(frame_number)
-        self.actor.position = self.position
-        self.actor.render(canvas, frame_number)
+        self.actor.set_position(self.position)
+        self.actor.update(frame_number)
+        self.changes_since_last_render = self.actor.changes_since_last_render
+
+    def render(self, canvas: Canvas):
+        self.actor.render(canvas)
+        self.changes_since_last_render = False
 
 
 class Text(Actor):
@@ -136,14 +145,14 @@ class Text(Actor):
         self.stroke_color = stroke_color
         self.stroke_width = stroke_width
 
-    def render(self, canvas: Canvas, frame_number: int):
-        super().render(canvas, frame_number)
+    def render(self, canvas: Canvas):
         if self.text:
             draw = canvas.image_draw
             # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
             #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
             draw.text(self.position, self.text, fill=self.color, font=self.font,
                       stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+        self.changes_since_last_render = False
 
 
 class Stage(LMAEObject):
