@@ -32,7 +32,7 @@ words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
              # font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 14), # not a perfect fit
              # font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez.ttf", 16),
              # font=ImageFont.truetype("fonts/poh-pixels-font/PohPixelsRegular-ljXw.ttf", 16),
-             font=ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8),
+             font=ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 4),
              # font=ImageFont.truetype("fonts/sd-another-dimension-font/SdAnotherDimension-ljed.ttf", 9),
              # font=ImageFont.truetype("fonts/sparkly-font/SparklyFontRegular-zyA3.ttf", 8),  # placement is top line
              # font=ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5),
