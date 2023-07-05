@@ -27,7 +27,7 @@ trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
              # the following are the fonts native point sizes to avoid blurring
-             font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 6),
+             font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 6),  # good option for fitting a lot
              # font=ImageFont.truetype("fonts/gorgeous-pixel-font/GorgeousPixel-BWO85.ttf", 6), # not a good fit at all
              # font=ImageFont.truetype("fonts/hardpixel-font/Hardpixel-nn51.otf", 14), # not a perfect fit
              # font=ImageFont.truetype("fonts/oseemono-font/Oseemono-V5Ez.ttf", 16),
@@ -74,6 +74,9 @@ try:
         elapsed_time = end_time - last_time
         previous_elapsed_times.appendleft(elapsed_time)
         last_time = end_time
+
+except KeyboardInterrupt as ki:
+    logging.info("User pressed CTRL-C")
 
 finally:
     pass
