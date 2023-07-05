@@ -7,7 +7,7 @@ from lmae.core import Stage, StillImage, MovingActor, Text, parse_matrix_options
 from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
-logging.basicConfig(level=logging.INFO, format='%(relativeCreated)6d %(name)s [%(levelname)s]: %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(relativeCreated)6d %(name)s [%(levelname)7s]: %(message)s')
 logger = logging.getLogger("render_test")
 logger.setLevel(logging.DEBUG)
 logger
