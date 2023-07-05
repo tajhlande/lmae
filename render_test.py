@@ -7,9 +7,10 @@ from lmae.core import Stage, StillImage, MovingActor, Text, parse_matrix_options
 from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s [%(levelname)s]: %(message)s')
 logger = logging.getLogger("render_test")
 logger.setLevel(logging.DEBUG)
+logger
 
 # stdscr = curses.initscr()
 
@@ -78,6 +79,7 @@ try:
         last_time = end_time
 
 except KeyboardInterrupt as ki:
+    print('\n')
     logging.info("User pressed CTRL-C")
 
 finally:
