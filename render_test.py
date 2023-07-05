@@ -9,7 +9,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 logging.basicConfig(level=logging.DEBUG)
 
-stdscr = curses.initscr()
+# stdscr = curses.initscr()
 
 options: RGBMatrixOptions = parse_matrix_options_command_line()
 
@@ -45,8 +45,8 @@ previous_elapsed_times = collections.deque((), 100)
 max_frame_rate = 120
 min_time_per_frame = 1.0 / max_frame_rate
 try:
-    curses_window = curses.newwin(1, 7)
-    hz_pos = curses_window.getyx()
+    # curses_window = curses.newwin(1, 7)
+    # hz_pos = curses_window.getyx()
     last_time = time.time()
     while True:
         # render the frame
@@ -56,9 +56,9 @@ try:
         # calculate the frame rate and render that
         average_time = 1 if len(previous_elapsed_times) == 0 \
             else sum(previous_elapsed_times) / len(previous_elapsed_times)
-        curses_window.erase()
-        curses_window.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz")
-        curses_window.refresh()
+        # curses_window.erase()
+        # curses_window.addstr(hz_pos[0], hz_pos[1], f"{round(1.0 / average_time)} Hz")
+        # curses_window.refresh()
         render_end_time = time.time()
 
         # if we are rendering faster than max frame rate, slow down
@@ -75,6 +75,7 @@ try:
         last_time = end_time
 
 finally:
-    curses.endwin()
+    pass
+    # curses.endwin()
 
 
