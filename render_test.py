@@ -10,7 +10,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)6d %(name)s [%(levelname)7s]: %(message)s')
 logger = logging.getLogger("render_test")
 logger.setLevel(logging.DEBUG)
-logger
+print("LED Matrix Rendering Test")
 
 # stdscr = curses.initscr()
 
