@@ -5,6 +5,9 @@ from typing import Callable
 from PIL import Image, ImageDraw, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
+logger = logging.getLogger("lmae.core")
+logger.setLevel(logging.DEBUG)
+
 _current_sequence = dict()
 
 
@@ -148,7 +151,7 @@ class Text(Actor):
     def render(self, canvas: Canvas):
         if self.text:
             draw = canvas.image_draw
-            # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
+            # logger.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
             #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
             draw.text(self.position, self.text, fill=self.color, font=self.font,
                       stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
@@ -300,23 +303,23 @@ def parse_matrix_options_command_line():
     if not args.drop_privileges:
         options.drop_privileges = False
 
-    logging.debug(f"Matrix configuration:")
-    logging.debug(f"    hardware_mapping:  {options.hardware_mapping}")
-    logging.debug(f"    rows:  {options.rows}")
-    logging.debug(f"    cols:  {options.cols}")
-    logging.debug(f"    chain_length:  {options.chain_length}")
-    logging.debug(f"    parallel:  {options.parallel}")
-    logging.debug(f"    row_address_type:  {options.row_address_type}")
-    logging.debug(f"    multiplexing:  {options.multiplexing}")
-    logging.debug(f"    pwm_bits:  {options.pwm_bits}")
-    logging.debug(f"    brightness:  {options.brightness}")
-    logging.debug(f"    pwm_lsb_nanoseconds:  {options.pwm_lsb_nanoseconds}")
-    logging.debug(f"    led_rgb_sequence:  {options.led_rgb_sequence}")
-    logging.debug(f"    pixel_mapper_config:  {options.pixel_mapper_config}")
-    logging.debug(f"    panel_type:  {options.panel_type}")
-    logging.debug(f"    show_refresh_rate:  {options.show_refresh_rate}")
-    logging.debug(f"    gpio_slowdown:  {options.gpio_slowdown}")
-    logging.debug(f"    disable_hardware_pulsing:  {options.disable_hardware_pulsing}")
-    logging.debug(f"    drop_privileges:  {options.drop_privileges}")
+    logger.debug(f"Matrix configuration:")
+    logger.debug(f"    hardware_mapping:  {options.hardware_mapping}")
+    logger.debug(f"    rows:  {options.rows}")
+    logger.debug(f"    cols:  {options.cols}")
+    logger.debug(f"    chain_length:  {options.chain_length}")
+    logger.debug(f"    parallel:  {options.parallel}")
+    logger.debug(f"    row_address_type:  {options.row_address_type}")
+    logger.debug(f"    multiplexing:  {options.multiplexing}")
+    logger.debug(f"    pwm_bits:  {options.pwm_bits}")
+    logger.debug(f"    brightness:  {options.brightness}")
+    logger.debug(f"    pwm_lsb_nanoseconds:  {options.pwm_lsb_nanoseconds}")
+    logger.debug(f"    led_rgb_sequence:  {options.led_rgb_sequence}")
+    logger.debug(f"    pixel_mapper_config:  {options.pixel_mapper_config}")
+    logger.debug(f"    panel_type:  {options.panel_type}")
+    logger.debug(f"    show_refresh_rate:  {options.show_refresh_rate}")
+    logger.debug(f"    gpio_slowdown:  {options.gpio_slowdown}")
+    logger.debug(f"    disable_hardware_pulsing:  {options.disable_hardware_pulsing}")
+    logger.debug(f"    drop_privileges:  {options.drop_privileges}")
 
     return options
