@@ -25,7 +25,7 @@ kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kir
 moving_kirby = MovingActor(kirby, name="Moving Kirby", movement_function=kirby_movement)
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
-words = Text(name='Text', text="Hello, world!", position=(5, 5),
+words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
              # the following are the fonts native point sizes to avoid blurring
              # font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 12),
              # font=ImageFont.truetype("fonts/gorgeous-pixel-font/GorgeousPixel-BWO85.ttf", 6), # not a good fit at all
