@@ -3,7 +3,7 @@ import curses
 import logging
 import math
 import time
-from lmae.core import Stage, StillImage, MovingActor, Text, parse_matrix_options_command_line
+from lmae.core import Stage, StillImage, MovingActor, Text, EmojiText, parse_matrix_options_command_line
 from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
@@ -37,10 +37,13 @@ words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
              # font=ImageFont.truetype("fonts/poh-pixels-font/PohPixelsRegular-ljXw.ttf", 16),
              # font=ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8),
              # font=ImageFont.truetype("fonts/sd-another-dimension-font/SdAnotherDimension-ljed.ttf", 9),
-             # font=ImageFont.truetype("fonts/sparkly-font/SparklyFontRegular-zyA3.ttf", 8),  # position is bottom left line
+             # font=ImageFont.truetype("fonts/sparkly-font/SparklyFontRegular-zyA3.ttf", 8),  # position is bottom left
              # font=ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5),
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-stage.actors.extend((trees, words, moving_kirby, grass))
+emoji_words = EmojiText(name='EmojiText', text="Hello,\nworld! 😎", position=(5, 5),
+                        font=ImageFont.truetype('arial.ttf', 6), color=(255, 255, 255, 255),
+                        stroke_color=(0, 0, 0, 255), stroke_width=1)
+stage.actors.extend((trees, emoji_words:, moving_kirby, grass))
 
 
 print("Press CTRL-C to stop render loop")

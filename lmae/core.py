@@ -183,7 +183,9 @@ class EmojiText(Actor):
                  text: str = None,
                  color: tuple[int, int, int] = (255, 255, 255, 255),
                  stroke_color: tuple[int, int, int] = (0, 0, 0, 255),
-                 stroke_width: int = 0):
+                 stroke_width: int = 0,
+                 emoji_scale_factor: float = 1.0,
+                 emoji_position_offset: tuple[int, int] = (0, 0)):
         name = name or _get_sequential_name("EmojiText")  # 'Text_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
         self.emoji_source = emoji_source
@@ -192,6 +194,8 @@ class EmojiText(Actor):
         self.color = color
         self.stroke_color = stroke_color
         self.stroke_width = stroke_width
+        self.emoji_scale_factor = emoji_scale_factor
+        self.emoji_position_offset = emoji_position_offset
 
     def set_text(self, text: str):
         if not text == self.text:
@@ -204,7 +208,10 @@ class EmojiText(Actor):
             #              f"font {self.font.getname()}: '{self.text}'")
 
             with Pilmoji(canvas.image) as pilmoji:
-                pilmoji.text(self.position, self.text, self.color, self.emoji_font)
+                pilmoji.text(self.position, self.text, self.color, self.emoji_font,
+                             stroke_width=self.stroke_width, stroke_fill=self.stroke_color,
+                             emoji_scale_factor=self.emoji_scale_factor,
+                             emoji_position_offset=self.emoji_position_offset)
         self.changes_since_last_render = False
 
 
