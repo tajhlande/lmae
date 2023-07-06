@@ -207,7 +207,7 @@ class EmojiText(Actor):
             # logger.debug(f"Drawing emoji text at {self.position} with color {self.color}, "
             #              f"font {self.font.getname()}: '{self.text}'")
 
-            with Pilmoji(canvas.image) as pilmoji:
+            with Pilmoji(canvas.image, source=self.emoji_source) as pilmoji:
                 pilmoji.text(self.position, self.text, self.color, self.text_font,
                              stroke_width=self.stroke_width, stroke_fill=self.stroke_color,
                              emoji_scale_factor=self.emoji_scale_factor,
