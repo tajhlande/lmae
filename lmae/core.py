@@ -196,7 +196,7 @@ class EmojiText(Actor):
         self.stroke_width = stroke_width
         self.emoji_scale_factor = emoji_scale_factor
         self.emoji_position_offset = emoji_position_offset
-        self.canvas = None
+        self.canvas = None  # we will prerender on this
         self.pre_render()
 
     def set_text(self, text: str):
@@ -221,7 +221,7 @@ class EmojiText(Actor):
             # logger.debug(f"Drawing pre-rendered emoji text at {self.position} with color {self.color}, "
             #              f"font {self.font.getname()}: '{self.text}'")
 
-            canvas.image.alpha_composite(self.image, dest=(0, 0))
+            canvas.image.alpha_composite(self.canvas.image, dest=(0, 0))
         self.changes_since_last_render = False
 
 
