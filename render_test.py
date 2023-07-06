@@ -44,7 +44,7 @@ emoji_words = EmojiText(name='EmojiText', text="☀️🌤️⛈️🌗", positi
                         text_font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 12),
                         color=(255, 255, 255, 255),
                         stroke_color=(0, 0, 0, 255), stroke_width=1)
-stage.actors.extend((trees, emoji_words, moving_kirby, grass))
+stage.actors.extend((emoji_words, moving_kirby, grass))
 
 
 print("Press CTRL-C to stop render loop")
