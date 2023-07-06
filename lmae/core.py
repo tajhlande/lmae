@@ -176,7 +176,7 @@ class EmojiText(Actor):
     """
 
     def __init__(self,
-                 emoji_font: ImageFont,
+                 text_font: ImageFont,
                  emoji_source: EmojiCDNSource = AppleEmojiSource,
                  name: str = None,
                  position: tuple[int, int] = (0, 0),
@@ -189,7 +189,7 @@ class EmojiText(Actor):
         name = name or _get_sequential_name("EmojiText")  # 'Text_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
         self.emoji_source = emoji_source
-        self.emoji_font = emoji_font
+        self.text_font = text_font
         self.text = text
         self.color = color
         self.stroke_color = stroke_color
@@ -208,7 +208,7 @@ class EmojiText(Actor):
             #              f"font {self.font.getname()}: '{self.text}'")
 
             with Pilmoji(canvas.image) as pilmoji:
-                pilmoji.text(self.position, self.text, self.color, self.emoji_font,
+                pilmoji.text(self.position, self.text, self.color, self.text_font,
                              stroke_width=self.stroke_width, stroke_fill=self.stroke_color,
                              emoji_scale_factor=self.emoji_scale_factor,
                              emoji_position_offset=self.emoji_position_offset)
