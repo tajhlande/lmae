@@ -1,10 +1,15 @@
 # Core classes for LED Matrix Animation Engine
 import argparse
 import logging
+import os
+import sys
 from typing import Callable
 from PIL import Image, ImageDraw, ImageFont
+from pilmoji import Pilmoji
+from pilmoji.source import AppleEmojiSource, EmojiCDNSource
+
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
-import pilmoji
 
 logger = logging.getLogger("lmae.core")
 logger.setLevel(logging.DEBUG)
@@ -161,6 +166,7 @@ class Text(Actor):
             #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
             draw.text(self.position, self.text, fill=self.color, font=self.font,
                       stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+
         self.changes_since_last_render = False
 
 
@@ -171,6 +177,7 @@ class EmojiText(Actor):
 
     def __init__(self,
                  emoji_font: ImageFont,
+                 emoji_source: EmojiCDNSource = AppleEmojiSource,
                  name: str = None,
                  position: tuple[int, int] = (0, 0),
                  text: str = None,
@@ -179,6 +186,7 @@ class EmojiText(Actor):
                  stroke_width: int = 0):
         name = name or _get_sequential_name("EmojiText")  # 'Text_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
+        self.emoji_source = emoji_source
         self.emoji_font = emoji_font
         self.text = text
         self.color = color
@@ -192,11 +200,11 @@ class EmojiText(Actor):
 
     def render(self, canvas: Canvas):
         if self.text:
-            draw = canvas.image_draw
-            # logger.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
-            #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
-            draw.text(self.position, self.text, fill=self.color, font=self.font,
-                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+            # logger.debug(f"Drawing emoji text at {self.position} with color {self.color}, "
+            #              f"font {self.font.getname()}: '{self.text}'")
+
+            with Pilmoji(canvas.image) as pilmoji:
+                pilmoji.text(self.position, self.text, self.color, self.emoji_font)
         self.changes_since_last_render = False
 
 
