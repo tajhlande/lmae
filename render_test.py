@@ -47,7 +47,7 @@ emoji_words = EmojiText(name='EmojiText', text="☀️🌤️⛈️🌗", positi
                         text_font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 20),
                         emoji_source=AppleEmojiSource,
                         color=(255, 255, 255, 255),
-                        stroke_color=(0, 0, 0, 255), stroke_width=1)
+                        stroke_color=(0, 0, 0, 255), stroke_width=0)
 stage.actors.extend((emoji_words, moving_kirby, grass))
 
 
