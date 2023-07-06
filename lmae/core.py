@@ -36,11 +36,11 @@ class Canvas(LMAEObject):
     """
     A Canvas is an object on which other objects render themselves
     """
-    def __init__(self, name: str = None, size: tuple[int, int] = (64, 32)):
+    def __init__(self, name: str = None, size: tuple[int, int] = (64, 32), background_fill: bool = True):
         name = name or _get_sequential_name("Canvas")  # 'Canvas_' + f'{randrange(65536):04X}'
         super().__init__(name=name)
         self.size = size
-        self.image = Image.new("RGBA", self.size, (0, 0, 0))
+        self.image = Image.new("RGBA", self.size, (0, 0, 0, 255 if background_fill else 0))
         self.image_draw = ImageDraw.Draw(self.image)
 
     def blank(self):
@@ -196,22 +196,32 @@ class EmojiText(Actor):
         self.stroke_width = stroke_width
         self.emoji_scale_factor = emoji_scale_factor
         self.emoji_position_offset = emoji_position_offset
+        self.canvas = None
+        self.pre_render()
 
     def set_text(self, text: str):
         if not text == self.text:
             self.changes_since_last_render = True
+            self.pre_render()
         self.text = text
 
-    def render(self, canvas: Canvas):
+    def pre_render(self):
+        # logger.debug(f"Pre-rendering emoji text at {self.position} with color {self.color}, "
+        #              f"font {self.font.getname()}: '{self.text}'")
+        self.canvas = Canvas()
         if self.text:
-            # logger.debug(f"Drawing emoji text at {self.position} with color {self.color}, "
-            #              f"font {self.font.getname()}: '{self.text}'")
-
-            with Pilmoji(canvas.image, source=self.emoji_source) as pilmoji:
+            with Pilmoji(self.canvas.image, source=self.emoji_source) as pilmoji:
                 pilmoji.text(self.position, self.text, self.color, self.text_font,
                              stroke_width=self.stroke_width, stroke_fill=self.stroke_color,
                              emoji_scale_factor=self.emoji_scale_factor,
                              emoji_position_offset=self.emoji_position_offset)
+
+    def render(self, canvas: Canvas):
+        if self.text:
+            # logger.debug(f"Drawing pre-rendered emoji text at {self.position} with color {self.color}, "
+            #              f"font {self.font.getname()}: '{self.text}'")
+
+            canvas.image.alpha_composite(self.image, dest=(0, 0))
         self.changes_since_last_render = False
 
 
