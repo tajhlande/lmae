@@ -4,6 +4,7 @@ import logging
 from typing import Callable
 from PIL import Image, ImageDraw, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
+import pilmoji
 
 logger = logging.getLogger("lmae.core")
 logger.setLevel(logging.DEBUG)
@@ -147,6 +148,47 @@ class Text(Actor):
         self.color = color
         self.stroke_color = stroke_color
         self.stroke_width = stroke_width
+
+    def set_text(self, text: str):
+        if not text == self.text:
+            self.changes_since_last_render = True
+        self.text = text
+
+    def render(self, canvas: Canvas):
+        if self.text:
+            draw = canvas.image_draw
+            # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
+            #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
+            draw.text(self.position, self.text, fill=self.color, font=self.font,
+                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+        self.changes_since_last_render = False
+
+
+class EmojiText(Actor):
+    """
+    Text that could contain emoji and that renders on a stage
+    """
+
+    def __init__(self,
+                 emoji_font: ImageFont,
+                 name: str = None,
+                 position: tuple[int, int] = (0, 0),
+                 text: str = None,
+                 color: tuple[int, int, int] = (255, 255, 255, 255),
+                 stroke_color: tuple[int, int, int] = (0, 0, 0, 255),
+                 stroke_width: int = 0):
+        name = name or _get_sequential_name("EmojiText")  # 'Text_' + f'{randrange(65536):04X}'
+        super().__init__(name=name, position=position)
+        self.emoji_font = emoji_font
+        self.text = text
+        self.color = color
+        self.stroke_color = stroke_color
+        self.stroke_width = stroke_width
+
+    def set_text(self, text: str):
+        if not text == self.text:
+            self.changes_since_last_render = True
+        self.text = text
 
     def render(self, canvas: Canvas):
         if self.text:
