@@ -208,7 +208,7 @@ class EmojiText(Actor):
     def pre_render(self):
         # logger.debug(f"Pre-rendering emoji text at {self.position} with color {self.color}, "
         #              f"font {self.font.getname()}: '{self.text}'")
-        self.canvas = Canvas()
+        self.canvas = Canvas(background_fill=False)
         if self.text:
             with Pilmoji(self.canvas.image, source=self.emoji_source) as pilmoji:
                 pilmoji.text(self.position, self.text, self.color, self.text_font,
