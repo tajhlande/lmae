@@ -48,7 +48,7 @@ emoji_words = EmojiText(name='EmojiText', text="☀️🌤️⛈️🌗", positi
                         emoji_source=AppleEmojiSource,
                         color=(255, 255, 255, 255),
                         stroke_color=(0, 0, 0, 255), stroke_width=0)
-stage.actors.extend((emoji_words, moving_kirby, grass))
+stage.actors.extend((trees, emoji_words, moving_kirby, grass))
 
 
 print("Press CTRL-C to stop render loop")
