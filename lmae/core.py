@@ -6,7 +6,7 @@ import sys
 from typing import Callable
 from PIL import Image, ImageDraw, ImageFont
 from pilmoji import Pilmoji
-from pilmoji.source import AppleEmojiSource, EmojiCDNSource
+from pilmoji.source import AppleEmojiSource, MicrosoftEmojiSource, GoogleEmojiSource, TwemojiEmojiSource, EmojiCDNSource
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -177,7 +177,7 @@ class EmojiText(Actor):
 
     def __init__(self,
                  text_font: ImageFont,
-                 emoji_source: EmojiCDNSource = AppleEmojiSource,
+                 emoji_source: EmojiCDNSource = MicrosoftEmojiSource,
                  name: str = None,
                  position: tuple[int, int] = (0, 0),
                  text: str = None,
