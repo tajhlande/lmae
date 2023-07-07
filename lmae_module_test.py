@@ -47,7 +47,7 @@ sample_app.add_actors(trees, words, moving_kirby, grass)
 
 
 def stop_app(app: AppModule):
-    logger.info("Press return to stop")
+    logger.info("***** Press return to stop the app *****")
     input()
     logger.debug("Return pressed")
     app.stop()
@@ -62,9 +62,11 @@ def run_app(app: AppModule):
     stopper_thread.start()
 
     logger.info("Running app")
-    app.run()
+    app_thread = Thread(target=app.run)
+    app_thread.start()
 
     stopper_thread.join()
+    app_thread.join()
 
     logger.debug("run_app() finished")
 
