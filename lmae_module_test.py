@@ -53,11 +53,11 @@ def run_app(app: AppModule):
     logger.debug("run_app() called")
     logger.debug("Starting run thread")
     run_thread = Thread(target=app.run)
-    run_thread.run()
+    run_thread.start()
 
     logger.debug("Starting stopper thread")
     stopper_thread = Thread(target=stop_app, args=[app])
-    stopper_thread.run()
+    stopper_thread.start()
 
     logger.debug("Waiting for the threads to stop")
     run_thread.join()
