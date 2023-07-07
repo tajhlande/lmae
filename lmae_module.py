@@ -2,6 +2,7 @@ import time
 from abc import ABCMeta, abstractmethod
 from lmae_core import Stage
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
+import asyncio
 import logging
 
 
@@ -88,7 +89,7 @@ class SingleStageRenderLoopAppModule(AppModule):
                 if elapsed_render_time < min_time_per_frame:
                     # while (time.time() - last_time) < min_time_per_frame:
                     #     pass
-                    time.sleep(min_time_per_frame - elapsed_render_time)
+                    await asyncio.sleep(min_time_per_frame - elapsed_render_time)
 
                 # mark the timestamp
                 last_time = time.time()
