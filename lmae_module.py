@@ -37,7 +37,7 @@ class AppModule(metaclass=ABCMeta):
     @abstractmethod
     def run(self):
         """
-        This method will be invoked async when the app should start running
+        This method will be invoked in a distinct thread when the app should start running
         :return:
         """
         pass
@@ -67,7 +67,7 @@ class SingleStageRenderLoopAppModule(AppModule):
     def prepare(self):
         pass
 
-    async def run(self):
+    def run(self):
         self.logger.debug("Run started")
         self.running = True
         max_frame_rate = 120
