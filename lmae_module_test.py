@@ -55,6 +55,7 @@ def stop_app(app: AppModule):
 
 def run_app(app: AppModule):
     logger.debug("run_app() called")
+    app.prepare()
     logger.info("Starting run thread")
     run_thread = Thread(target=app.run)
     run_thread.start()
