@@ -1,12 +1,10 @@
 import collections
-import curses
 import logging
-import math
 import time
 
-from pilmoji.source import TwemojiEmojiSource, GoogleEmojiSource, AppleEmojiSource
+from pilmoji.source import AppleEmojiSource
 
-from lmae.core import Stage, StillImage, MovingActor, Text, EmojiText, parse_matrix_options_command_line
+from lmae_core import Stage, StillImage, MovingActor, Text, EmojiText, parse_matrix_options_command_line
 from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
