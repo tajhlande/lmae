@@ -43,7 +43,7 @@ sample_app.add_actors(trees, words, moving_kirby, grass)
 
 
 def stop_app(app: AppModule):
-    logger.debug("Press return to stop")
+    logger.info("Press return to stop")
     input()
     logger.debug("Return pressed")
     app.stop()
