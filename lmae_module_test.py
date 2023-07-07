@@ -59,7 +59,7 @@ def run_app(app: AppModule):
 
     logger.info("Starting stopper thread")
     stopper_thread = Thread(target=stop_app, args=[app])
-    stopper_thread.start()
+    # stopper_thread.start()
 
     logger.info("Running app")
     app.run()
