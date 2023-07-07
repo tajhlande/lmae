@@ -59,15 +59,15 @@ class SingleStageRenderLoopAppModule(AppModule):
 
     def __init__(self):
         super().__init__()
-        self.stage = Stage()
         self.running = False
         self.lock = Lock()
+        self.stage = None
 
     def add_actors(self, *args):
         self.stage.actors.extend(args)
 
     def prepare(self):
-        pass
+        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
 
     def run(self):
         self.logger.debug("Run started")
