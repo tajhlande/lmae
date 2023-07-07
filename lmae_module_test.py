@@ -57,5 +57,5 @@ async def run_app(app: AppModule):
     logger.debug("run_app() finished")
 
 
-run_app(app)
+await run_app(app)
 
