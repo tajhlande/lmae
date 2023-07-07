@@ -89,7 +89,7 @@ class SingleStageRenderLoopAppModule(AppModule):
                 if elapsed_render_time < min_time_per_frame:
                     # while (time.time() - last_time) < min_time_per_frame:
                     #     pass
-                    await asyncio.sleep(min_time_per_frame - elapsed_render_time)
+                    await asyncio.sleep(max(min_time_per_frame - elapsed_render_time, 0.01))
 
                 # mark the timestamp
                 last_time = time.time()
