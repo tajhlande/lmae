@@ -2,7 +2,6 @@ import time
 from abc import ABCMeta, abstractmethod
 from lmae_core import Stage
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
-import asyncio
 import logging
 
 
@@ -36,7 +35,7 @@ class AppModule(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def run(self):
+    def run(self):
         """
         This method will be invoked async when the app should start running
         :return:
@@ -87,9 +86,7 @@ class SingleStageRenderLoopAppModule(AppModule):
                 # if we are rendering faster than max frame rate, slow down
                 elapsed_render_time = render_end_time - last_time
                 if elapsed_render_time < min_time_per_frame:
-                    # while (time.time() - last_time) < min_time_per_frame:
-                    #     pass
-                    await asyncio.sleep(max(min_time_per_frame - elapsed_render_time, 0.01))
+                    time.sleep(min_time_per_frame - elapsed_render_time)
 
                 # mark the timestamp
                 last_time = time.time()

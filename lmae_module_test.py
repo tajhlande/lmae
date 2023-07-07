@@ -1,8 +1,10 @@
+import threading
+
 from lmae_core import parse_matrix_options_command_line
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from lmae_module import AppModule, SingleStageRenderLoopAppModule
 
-import asyncio
+from threading import Thread
 import collections
 import logging
 import time
@@ -40,19 +42,28 @@ sample_app.set_matrix(matrix, options=options)
 sample_app.add_actors(trees, words, moving_kirby, grass)
 
 
-async def stop_app(app: AppModule):
+def stop_app(app: AppModule):
     logger.debug("Press return to stop")
-    await input()
+    input()
     logger.debug("Return pressed")
     app.stop()
 
 
-async def run_app(app: AppModule):
+def run_app(app: AppModule):
     logger.debug("run_app() called")
-    logger.debug("Awaiting tasks")
-    await asyncio.gather(stop_app(app), app.run())
+    logger.debug("Starting run thread")
+    run_thread = Thread(target=app.run)
+    run_thread.run()
+
+    logger.debug("Starting stopper thread")
+    stopper_thread = Thread(target=stop_app, args=[app])
+    stopper_thread.run()
+
+    logger.debug("Waiting for the threads to stop")
+    run_thread.join()
+    stopper_thread.join()
     logger.debug("run_app() finished")
 
 
-asyncio.run(run_app(sample_app))
+run_app(sample_app)
 
