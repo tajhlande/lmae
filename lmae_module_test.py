@@ -21,10 +21,14 @@ logger.setLevel(logging.DEBUG)
 print("LED Matrix Module Test")
 
 options: RGBMatrixOptions = parse_matrix_options_command_line()
+logger.info("Initializing matrix")
 matrix = RGBMatrix(options=options)
 
 
 # set up stage
+logger.debug("Setting up stage")
+
+
 def kirby_movement(frame_number: int) -> tuple[int, int]:
     return frame_number % 86 - 22, 12
 
@@ -51,17 +55,18 @@ def stop_app(app: AppModule):
 
 def run_app(app: AppModule):
     logger.debug("run_app() called")
-    logger.debug("Starting run thread")
+    logger.info("Starting run thread")
     run_thread = Thread(target=app.run)
     run_thread.start()
 
-    logger.debug("Starting stopper thread")
+    logger.info("Starting stopper thread")
     stopper_thread = Thread(target=stop_app, args=[app])
     stopper_thread.start()
 
     logger.debug("Waiting for the threads to stop")
-    run_thread.join()
     stopper_thread.join()
+    run_thread.join()
+
     logger.debug("run_app() finished")
 
 

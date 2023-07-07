@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from lmae_core import Stage
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 import logging
+from threading import Lock
 
 
 class AppModule(metaclass=ABCMeta):
@@ -60,6 +61,7 @@ class SingleStageRenderLoopAppModule(AppModule):
         super().__init__()
         self.stage = Stage()
         self.running = False
+        self.lock = Lock()
 
     def add_actors(self, *args):
         self.stage.actors.extend(args)
