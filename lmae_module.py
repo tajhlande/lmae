@@ -68,7 +68,7 @@ class SingleStageRenderLoopAppModule(AppModule):
         pass
 
     async def run(self):
-        self.logger("Run started")
+        self.logger.debug("Run started")
         self.running = True
         max_frame_rate = 120
         min_time_per_frame = 1.0 / max_frame_rate
@@ -93,10 +93,10 @@ class SingleStageRenderLoopAppModule(AppModule):
                 # mark the timestamp
                 last_time = time.time()
         finally:
-            self.logger("Run stopped")
+            self.logger.debug("Run stopped")
 
     def stop(self):
-        self.logger("Got command to stop")
+        self.logger.debug("Got command to stop")
         self.running = False
 
 
