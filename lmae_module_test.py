@@ -35,9 +35,9 @@ words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
              font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 6),  # good option for fitting a lot
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
 
-app = SingleStageRenderLoopAppModule()
-app.set_matrix(matrix, options=options)
-app.add_actors(trees, words, moving_kirby, grass)
+sample_app = SingleStageRenderLoopAppModule()
+sample_app.set_matrix(matrix, options=options)
+sample_app.add_actors(trees, words, moving_kirby, grass)
 
 
 async def stop_app(app: AppModule):
@@ -57,5 +57,5 @@ async def run_app(app: AppModule):
     logger.debug("run_app() finished")
 
 
-asyncio.run(run_app(app))
+asyncio.run(run_app(sample_app))
 
