@@ -49,10 +49,8 @@ async def stop_app(app: AppModule):
 
 async def run_app(app: AppModule):
     logger.debug("run_app() called")
-    app_run_task = asyncio.create_task(app.run())
-    app_stop_task = asyncio.create_task(stop_app(app))
     logger.debug("Awaiting tasks")
-    await asyncio.gather(app_run_task, app_stop_task)
+    await asyncio.gather(app.run(), stop_app(app))
     logger.debug("run_app() finished")
 
 
