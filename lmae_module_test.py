@@ -41,8 +41,9 @@ sample_app.add_actors(trees, words, moving_kirby, grass)
 
 
 async def stop_app(app: AppModule):
-    logger.debug("Stop app")
-    input("Press any key to stop app")
+    logger.debug("Press any key to stop")
+    input()
+    logger.debug("Key pressed")
     app.stop()
 
 
