@@ -241,7 +241,9 @@ class Stage(LMAEObject):
         self.size = size        # size in pixels
         self.actors = actors or list()
         self.canvas = Canvas(size=self.size)
-        self.matrix = matrix or RGBMatrix(options=matrix_options)
+        self.matrix = matrix or (RGBMatrix(options=matrix_options) if matrix_options else None)
+        if not self.matrix:
+            logger.warning("No matrix or matrix options were provided to the stage")
         self.double_buffer = self.matrix.CreateFrameCanvas()
         self.needs_render = True
 
