@@ -1,3 +1,43 @@
+# LMAE - LED Matrix animation engine for RPi and Python
+
+A library for building little applications
+that can display themselves on a LED matrix.
+The matrix I have is from Adafruit and it is
+64 x 32, 3mm pitch.
+
+## Core library stuff
+
+The core stuff is basic elements you might find in a game engine:
+there is a stage and there are actors. To display a scene,
+you create a stage, attach a matrix object to it, and
+tell it to render a frame.
+
+Frames are numbered, and actors can decide how to render
+themselves on the stage. Some basic actors are provided
+for still images, moving images, and text rendering.
+
+`render_test.py` is an example program that test the basics of the core
+library. You should create a virtual enviroment using `venv`:
+
+    python -m venv venv
+
+and then you can run the example:
+
+    sudo venv/bin/python render_test.py
+
+The `sudo` is necessary to allow the LED matrix code to run with
+the elevated privileges necessary to achieve best timing performance.
+And because `sudo` doesn't use the user's path, the usual means to activating
+the virtual environment doesn't work.
+
+## Weather stuff
+
+
+### Visual crossings bookmarks
+* [Weather data API Documentation](https://www.visualcrossing.com/resources/documentation/weather-api/timeline-weather-api/)
+* [ Weather Data Services and URL Builder](https://www.visualcrossing.com/weather/weather-data-services)
+* [Weather Condition Translations and ID list](https://docs.google.com/spreadsheets/d/1cc-jQIap7ZToVaEgiXEk_Aa6YVYjSObLV9PMe4oHrFg/edit#gid=1769797687)
+
 Python bindings for RGB Matrix library
 ======================================
 
