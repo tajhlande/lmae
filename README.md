@@ -1,4 +1,4 @@
-# LMAE - LED Matrix animation engine for RPi and Python
+# LMAE - LED Matrix Animation Engine for RPi and Python
 
 A library for building little applications
 that can display themselves on a LED matrix.
@@ -17,7 +17,7 @@ themselves on the stage. Some basic actors are provided
 for still images, moving images, and text rendering.
 
 `render_test.py` is an example program that test the basics of the core
-library. You should create a virtual enviroment using `venv`:
+library. You should create a virtual environment using `venv`:
 
     python -m venv venv
 
