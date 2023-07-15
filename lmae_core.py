@@ -124,13 +124,16 @@ class SpriteImage(Actor):
         self.sheet = sheet
         self.spec = spec
         self.selected = None
+        self.size = (0, 0)
         self.set_sprite(selected)
 
     def set_sprite(self, selected: str):
         logger.debug(f"Setting sprite to {selected}")
         self.selected = selected
-        if self.selected in self.sheet:
+        if self.sheet and self.selected and self.selected in self.sheet:
             self.size = tuple(self.sheet[self.selected].size)
+        else:
+            self.size = (0, 0)
 
     def set_from_file(self, image_filename, spec_filename):
         logger.debug(f"Loading sprite sheet image from {image_filename}")
