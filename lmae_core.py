@@ -150,14 +150,9 @@ class SpriteImage(Actor):
             size = tuple(entry['size'])
             bounds = (sheet_position[0], sheet_position[1],
                       sheet_position[0] + size[0], sheet_position[1] + size[1])
-            try:
-                canvas.image.alpha_composite(self.sheet, dest=self.position, source=bounds)
-            except ValueError:
-                logger.debug(f"Canvas image mode: {canvas.image.mode}")
-                logger.debug(f"Sprite sheet image mode: {self.sheet.mode}")
-                raise ValueError("Contained")
+            logger.debug(f"Rendering sprite at {self.position} from sheet at {sheet_position} and size {size}")
+            canvas.image.alpha_composite(self.sheet, dest=self.position, source=bounds)
         self.changes_since_last_render = False
-
 
 
 class MovingActor(Actor):
