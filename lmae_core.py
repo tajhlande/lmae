@@ -131,7 +131,7 @@ class SpriteImage(Actor):
         logger.debug(f"Setting sprite to {selected}")
         self.selected = selected
         if self.sheet and self.selected and self.selected in self.sheet:
-            self.size = tuple(self.sheet[self.selected].size)
+            self.size = tuple(self.spec[self.selected].size)
         else:
             self.size = (0, 0)
 
