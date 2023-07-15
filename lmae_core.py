@@ -131,7 +131,7 @@ class SpriteImage(Actor):
         logger.debug(f"Setting sprite to {selected}")
         self.selected = selected
         if self.sheet and self.selected and self.selected in self.sheet:
-            self.size = tuple(self.spec[self.selected].size)
+            self.size = tuple(self.spec[self.selected]['size'])
         else:
             self.size = (0, 0)
 
@@ -148,10 +148,10 @@ class SpriteImage(Actor):
     def render(self, canvas: Canvas):
         if self.sheet and self.selected in self.spec:
             entry = self.spec[self.selected]
-            sheet_position = tuple(entry.position)
-            size = tuple(entry.size)
-            bounds = (entry.position[0], entry.position[1],
-                      entry.position[0] + entry.size[0], entry.position[1] + entry.size[1])
+            sheet_position = tuple(entry['position'])
+            size = tuple(entry['size'])
+            bounds = (sheet_position[0], sheet_position[1],
+                      sheet_position[0] + size[0], sheet_position[1] + size[1])
             canvas.image.alpha_composite(self.sheet, dest=self.position, source=bounds)
         self.changes_since_last_render = False
 
