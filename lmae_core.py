@@ -143,7 +143,7 @@ class SpriteImage(Actor):
 
         logger.debug(f"Loading spec file from {spec_filename}")
         with open(spec_filename) as spec_file:
-            self.spec = json.loads(spec_file)
+            self.spec = json.load(spec_file)
 
     def render(self, canvas: Canvas):
         if self.sheet and self.selected in self.spec:
