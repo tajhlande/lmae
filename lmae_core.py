@@ -137,9 +137,7 @@ class SpriteImage(Actor):
 
     def set_from_file(self, image_filename, spec_filename):
         logger.debug(f"Loading sprite sheet image from {image_filename}")
-        self.sheet = Image.open(image_filename)
-        if not self.sheet.mode == 'RGBA':
-            self.sheet = self.sheet.convert('RGBA')
+        self.sheet = Image.open(image_filename).convert('RGBA')
 
         logger.debug(f"Loading spec file from {spec_filename}")
         with open(spec_filename) as spec_file:
