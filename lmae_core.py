@@ -131,7 +131,7 @@ class SpriteImage(Actor):
         # logger.debug(f"Setting sprite to {selected}")
         self.selected = selected
         if self.sheet and self.selected and self.selected in self.spec:
-            self.size = tuple(self.spec[self.selected]['size'])
+            self.size = tuple(int(i) for i in self.spec[self.selected]['size'])
         else:
             self.size = (0, 0)
         self.changes_since_last_render = True
@@ -147,8 +147,8 @@ class SpriteImage(Actor):
     def render(self, canvas: Canvas):
         if self.sheet and self.selected in self.spec:
             entry = self.spec[self.selected]
-            sheet_position = tuple(entry['position'])
-            size = tuple(entry['size'])
+            sheet_position = tuple(int(i) for i in entry['position'])
+            size = tuple(int(i) for i in entry['size'])  # may be superfluous if size has already been stored correctly
             bounds = (sheet_position[0], sheet_position[1],
                       sheet_position[0] + size[0], sheet_position[1] + size[1])
             # logger.debug(f"Rendering sprite at {self.position} from sheet at {sheet_position} and size {size}")
