@@ -41,7 +41,7 @@ weather_sprite.set_sprite("sunny")
 def set_weather_sprite_frame(frame: int):
     frame_offset = frame % 1600
     frame_index = frame_offset / 100
-    weather_sprite.set_sprite(weather_sprite.spec.keys[frame_index])
+    weather_sprite.set_sprite(list(weather_sprite.spec.keys())[frame_index])
 
 
 sample_app = SingleStageRenderLoopAppModule()
