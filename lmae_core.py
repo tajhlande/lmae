@@ -134,6 +134,7 @@ class SpriteImage(Actor):
             self.size = tuple(self.spec[self.selected]['size'])
         else:
             self.size = (0, 0)
+        self.changes_since_last_render = True
 
     def set_from_file(self, image_filename, spec_filename):
         logger.debug(f"Loading sprite sheet image from {image_filename}")
