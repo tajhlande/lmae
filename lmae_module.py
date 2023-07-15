@@ -4,6 +4,7 @@ from lmae_core import Stage
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 import logging
 from threading import Lock
+from typing import Callable
 
 
 class AppModule(metaclass=ABCMeta):
@@ -63,9 +64,18 @@ class SingleStageRenderLoopAppModule(AppModule):
         self.lock = Lock()
         self.stage = None
         self.actors = list()
+        self.pre_render_callback = None
 
     def add_actors(self, *args):
         self.actors.extend(args)
+
+    def set_pre_render_callback(self, pre_render_callback: Callable[[int], None]):
+        """
+        Set a function to be called before each render frame. This can be used to
+        update actors. It should be fast!
+        :param pre_render_callback: Reference to a function that accepts the frame number as an argument
+        """
+        self.pre_render_callback = pre_render_callback
 
     def prepare(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
@@ -80,6 +90,10 @@ class SingleStageRenderLoopAppModule(AppModule):
         last_time = time.time()
         try:
             while self.running:
+                # call pre-render callback
+                if self.pre_render_callback:
+                    self.pre_render_callback(i)
+
                 # render the frame
                 self.stage.render_frame(i)
                 i += 1

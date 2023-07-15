@@ -1,5 +1,6 @@
 # Core classes for LED Matrix Animation Engine
 import argparse
+import json
 import logging
 import os
 import sys
@@ -99,6 +100,58 @@ class StillImage(Actor):
         if self.image:
             canvas.image.alpha_composite(self.image, dest=self.position)
         self.changes_since_last_render = False
+
+
+class SpriteImage(Actor):
+    """
+    An image that is drawn from a sprite sheet impage
+    """
+    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0),
+                 sheet: Image = None, spec=None,
+                 selected: str = None):
+        """
+        Initialize a sprite image actor
+        :param name: The name of this actor
+        :param position: The initial position of this sprite on the stage
+        :param sheet: The sprite sheet image
+        :param spec: The sprite specification: a dict of objects with position and size info
+        :param selected: Which sprite to display first, by name in the spec
+        """
+        if spec is None:
+            spec = dict()
+        name = name or _get_sequential_name("SpriteImage")  # 'SpriteImage_' + f'{randrange(65536):04X}'
+        super().__init__(name=name, position=position)
+        self.sheet = sheet
+        self.spec = spec
+        self.selected = None
+        self.set_sprite(selected)
+
+    def set_sprite(self, selected: str):
+        logger.debug(f"Setting sprite to {selected}")
+        self.selected = selected
+        if self.selected in self.sheet:
+            self.size = tuple(self.sheet[self.selected].size)
+
+    def set_from_file(self, image_filename, spec_filename):
+        logger.debug(f"Loading sprite sheet image from {image_filename}")
+        self.sheet = Image.open(image_filename)
+        if not self.sheet.mode == 'RGBA':
+            self.sheet = self.sheet.convert('RGBA')
+
+        logger.debug(f"Loading spec file from {spec_filename}")
+        with open(spec_filename) as spec_file:
+            self.spec = json.loads(spec_file)
+
+    def render(self, canvas: Canvas):
+        if self.sheet and self.selected in self.spec:
+            entry = self.spec[self.selected]
+            sheet_position = tuple(entry.position)
+            size = tuple(entry.size)
+            bounds = (entry.position[0], entry.position[1],
+                      entry.position[0] + entry.size[0], entry.position[1] + entry.size[1])
+            canvas.image.alpha_composite(self.sheet, dest=self.position, source=bounds)
+        self.changes_since_last_render = False
+
 
 
 class MovingActor(Actor):
