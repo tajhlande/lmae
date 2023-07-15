@@ -33,7 +33,7 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
     return frame_number % 86 - 22, 12
 
 
-weather_sprite = SpriteImage(name='Weather Condition', position=((64-17)/2, (32-17)/2))
+weather_sprite = SpriteImage(name='Weather Condition', position=(int((64-17)/2), int((32-17)/2)))
 weather_sprite.set_from_file("images/weather-sprites.png", "images/weather-sprites.json")
 weather_sprite.set_sprite("sunny")
 
