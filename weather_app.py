@@ -26,6 +26,7 @@ class WeatherApp(AppModule):
         self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
         self.temperature_label = None
         self.timer_line = None
+        self.refresh_time = 60  # seconds
 
     # noinspection PyBroadException
     def get_current_conditions(self):
@@ -58,7 +59,8 @@ class WeatherApp(AppModule):
         # self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
         old_size = self.timer_line.size
-        self.timer_line.set_size((int(round(max(round(900 - elapsed_time), 0) * 64.0 / 900.0)), 1))
+        self.timer_line.set_size((int(round(max(round(self.refresh_time - elapsed_time), 0)
+                                            * 64.0 / self.refresh_time)), 1))
         if old_size[0] != self.timer_line.size[0]:
             self.logger.debug(f"Timer line size is now {self.timer_line.size}")
 
@@ -84,7 +86,7 @@ class WeatherApp(AppModule):
                 # wait 15 minutes
                 waiting = True
                 wait_start = time.time()
-                self.logger.debug("Waiting 15 minutes to refresh weather data")
+                self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh weather data")
                 while waiting and self.running:
                     time.sleep(1)
                     current_time = time.time()
@@ -93,7 +95,7 @@ class WeatherApp(AppModule):
                     self.stage.needs_render = True # have to force this for some reason
                     self.stage.render_frame(frame_number)
                     frame_number += 1
-                    waiting = elapsed_time < (15 * 60)
+                    waiting = elapsed_time < self.refresh_time
 
         finally:
             self.logger.debug("Run stopped")
