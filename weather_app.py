@@ -55,7 +55,7 @@ class WeatherApp(AppModule):
 
     def update_view(self, elapsed_time):
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
-        self.logger.debug(f"Current temperature: f{temperature}")
+        self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
         self.timer_line.size = max(round((15*60) - elapsed_time), 0) * 64, 1
 
