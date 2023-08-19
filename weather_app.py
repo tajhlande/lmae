@@ -98,9 +98,11 @@ class WeatherApp(AppModule):
                 condition_sprite = 'cloudy'
             elif condition_str == 'rainy':
                 condition_sprite = 'cloudy'
+            self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
 
         else:
+            self.logger.debug("Not showing current conditions")
             self.daytime_image.hide()
 
         # moon phase
