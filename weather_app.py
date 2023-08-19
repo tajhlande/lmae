@@ -58,7 +58,7 @@ class WeatherApp(AppModule):
         # self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
         old_size = self.timer_line.size
-        self.timer_line.set_size(int(round(max(round(900 - elapsed_time), 0) * 64.0 / 900.0/2)), 1)
+        self.timer_line.set_size(int(round(max(round(900 - elapsed_time), 0) * 64.0 / 900.0)), 1)
         if old_size[0] != self.timer_line.size[0]:
             self.logger.debug(f"Timer line size is now {self.timer_line.size}")
 
