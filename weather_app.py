@@ -58,7 +58,7 @@ class WeatherApp(AppModule):
         # self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
         self.timer_line.size = int(round(max(round((15*60) - elapsed_time), 0) * 64 / (15*60))), 1
-        self.logger.debug(f"Timer line size is now {self.timer_line.size}")
+        # self.logger.debug(f"Timer line size is now {self.timer_line.size}")
 
     def prepare(self):
         self.compose_view()
@@ -86,6 +86,7 @@ class WeatherApp(AppModule):
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time)
+                    self.stage.render_frame(1)
                     waiting = elapsed_time < (15 * 60)
 
         finally:
