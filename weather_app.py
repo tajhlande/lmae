@@ -90,6 +90,7 @@ class WeatherApp(AppModule):
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time)
+                    self.stage.needs_render = True # have to force this for some reason
                     self.stage.render_frame(frame_number)
                     frame_number += 1
                     waiting = elapsed_time < (15 * 60)
