@@ -53,14 +53,14 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.temperature_label)
         self.stage.actors.append(self.timer_line)
 
-    def update_view(self, elapsed_time):
+    def update_view(self, elapsed_time: int):
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
         self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
         self.timer_line.size = max(round((15*60) - elapsed_time), 0) * 64, 1
 
     def prepare(self):
-        self.compose_view()
+        self.update_view()
 
     def run(self):
         self.logger.debug("Run started")
