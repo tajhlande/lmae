@@ -2,7 +2,7 @@ from lmae_module import AppModule
 import time
 from threading import Lock
 from vx_wx.vx_client import get_current_conditions_by_zipcode
-from lmae_core import Stage, Text
+from lmae_core import Stage, Text, Rectangle
 from PIL import ImageFont
 
 
@@ -13,7 +13,6 @@ class WeatherApp(AppModule):
 
     def __init__(self, api_key: str, zipcode: str):
         super().__init__()
-        self.temperature_label = None
         self.api_key = api_key
         self.zipcode = zipcode
         self.logger.info(f"Checking weather for ZIP code {self.zipcode}")
@@ -25,6 +24,8 @@ class WeatherApp(AppModule):
         self.current_conditions = None
         self.call_status = "ok"
         self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
+        self.temperature_label = None
+        self.timer_line = None
 
     # noinspection PyBroadException
     def get_current_conditions(self):
@@ -47,12 +48,16 @@ class WeatherApp(AppModule):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
         self.temperature_label = Text(name='temperature', position=(5, 5), font=self.temperature_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        self.timer_line = Rectangle(name='timer-line', position=(0, 31), size=(64, 1),
+                                    color=(255, 0, 0), outline_color=(255, 0, 0), outline_width=0)
         self.stage.actors.append(self.temperature_label)
+        self.stage.actors.append(self.timer_line)
 
-    def update_view(self):
+    def update_view(self, elapsed_time):
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
         self.logger.debug(f"Current temperature: f{temperature}")
         self.temperature_label.text = str(temperature)
+        self.timer_line.size = max(round((15*60) - elapsed_time), 0) * 64, 1
 
     def prepare(self):
         self.compose_view()
@@ -77,7 +82,9 @@ class WeatherApp(AppModule):
                 while waiting and self.running:
                     time.sleep(1)
                     current_time = time.time()
-                    waiting = (current_time - wait_start) < (15 * 60)
+                    elapsed_time = current_time - wait_start
+                    self.update_view(elapsed_time=elapsed_time)
+                    waiting = elapsed_time < (15 * 60)
 
         finally:
             self.logger.debug("Run stopped")

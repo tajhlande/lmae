@@ -280,6 +280,57 @@ class EmojiText(Actor):
         self.changes_since_last_render = False
 
 
+class Rectangle(Actor):
+    """
+    A rectangle that draws itself on a stage
+    """
+
+    def __init__(self,
+                 name: str = None,
+                 position: tuple[int, int] = (0, 0),
+                 size: tuple[int, int] = (0, 0),
+                 color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255),
+                 outline_color: tuple[int, int, int] or tuple[int, int, int, int] = (0, 0, 0, 255),
+                 outline_width: int = 0):
+        name = name or _get_sequential_name("Rectangle")  # 'Text_' + f'{randrange(65536):04X}'
+        super().__init__(name=name, position=position)
+        self.size = size
+        self.color = color
+        self.outline_color = outline_color
+        self.outline_width = outline_width
+
+    def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
+        self.color = color
+        self.changes_since_last_render = True
+
+    def set_outline_color(self, outline_color: tuple[int, int, int] or tuple[int, int, int, int]):
+        self.outline_color = outline_color
+        self.changes_since_last_render = True
+
+    def set_position(self, position: tuple[int, int]):
+        self.position = position
+        self.changes_since_last_render = True
+
+    def set_size(self, size: tuple[int, int]):
+        self.size = size
+        self.changes_since_last_render = True
+
+    def set_outline_width(self, outline_width: int):
+        self.outline_width = outline_width
+        self.changes_since_last_render = True
+
+    def render(self, canvas: Canvas):
+        draw = canvas.image_draw
+        opposite_corner = tuple(map(lambda i, j: i + j, self.position, self.size))
+        # logging.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
+        #               f"outline_color {self.outline_color} and outline_width {self.outline_width}: '{self.text}'")
+        draw.rectangle([self.position, opposite_corner], fill=self.color, outline=self.outline_color,
+                       width=self.outline_width)
+
+
+        self.changes_since_last_render = False
+
+
 class Stage(LMAEObject):
     """
     An environment with a set of actors who appear in a certain order, all of whom can
