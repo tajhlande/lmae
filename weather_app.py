@@ -24,7 +24,8 @@ class WeatherApp(AppModule):
         self.pre_render_callback = None
         self.current_conditions = None
         self.call_status = "ok"
-        self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
+        # self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
+        self.temperature_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 18)
         self.temperature_label : Text = None
         self.daytime_image : SpriteImage = None
         self.moon_phase_image: SpriteImage = None
