@@ -69,6 +69,7 @@ class WeatherApp(AppModule):
         self.logger.debug("Run started")
         self.running = True
         self.compose_view()
+        frame_number = 0
 
         try:
             while self.running:
@@ -77,7 +78,8 @@ class WeatherApp(AppModule):
 
                 # update the view
                 self.update_view(0)
-                self.stage.render_frame(1)    # frame numbers don't matter here
+                self.stage.render_frame(frame_number)
+                frame_number += 1
 
                 # wait 15 minutes
                 waiting = True
@@ -88,7 +90,8 @@ class WeatherApp(AppModule):
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time)
-                    self.stage.render_frame(1)
+                    self.stage.render_frame(frame_number)
+                    frame_number += 1
                     waiting = elapsed_time < (15 * 60)
 
         finally:
