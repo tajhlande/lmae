@@ -26,6 +26,7 @@ class WeatherApp(AppModule):
         self.call_status = "ok"
         self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
 
+    # noinspection PyBroadException
     def get_current_conditions(self):
         try:
             self.logger.debug(f"Fetching current conditions for ZIP code {self.zipcode}")
@@ -38,7 +39,8 @@ class WeatherApp(AppModule):
                 self.logger.error("Call to get conditions did not return any conditions")
                 self.call_status = "error"
                 # old conditions remain available
-        finally:
+
+        except:
             self.logger.error("Call to get weather status failed")
 
     def compose_view(self):
@@ -48,7 +50,8 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.temperature_label)
 
     def update_view(self):
-        temperature = round(self.current_conditions['currentConditions']['temp'])
+        temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
+        self.logger.debug(f"Current temperature: f{temperature}")
         self.temperature_label.text = str(temperature)
 
     def prepare(self):
@@ -71,7 +74,7 @@ class WeatherApp(AppModule):
                 # wait 15 minutes
                 waiting = True
                 wait_start = time.time()
-                while waiting:
+                while waiting and self.running:
                     time.sleep(1)
                     current_time = time.time()
                     waiting = (current_time - wait_start) < (15 * 60)
@@ -82,5 +85,3 @@ class WeatherApp(AppModule):
     def stop(self):
         self.logger.debug("Got command to stop")
         self.running = False
-
-
