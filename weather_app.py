@@ -120,7 +120,8 @@ class WeatherApp(AppModule):
         relative_length = int(round(max(round(self.refresh_time - elapsed_time), 0)
                                     * 64.0 / self.refresh_time))
         self.timer_line.set_position((64-relative_length, 0))
-        self.timer_line.set_size(relative_length, 1)
+        self.timer_line.set_size((relative_length, 1))
+
         if old_size[0] != self.timer_line.size[0]:
             self.logger.debug(f"Timer line position and size is now {self.timer_line.position}:{self.timer_line.size}")
 
