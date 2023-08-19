@@ -91,6 +91,7 @@ class WeatherApp(AppModule):
             self.daytime_image.show()
             condition_sprite = None
             condition_str = self.current_conditions['currentConditions']['conditions']
+            self.logger.debug(f'Current conditions from wx: {condition_str}')
             if condition_str in ['clear', 'type_43']:
                 condition_sprite = 'sunny'
             elif condition_str == 'overcast':
