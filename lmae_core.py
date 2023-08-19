@@ -60,11 +60,23 @@ class Actor(LMAEObject):
         self.size = 0, 0
         self.changes_since_last_render = True # since we've not been rendered yet
         self.frame_number = 0
+        self.visible = True
 
     def set_position(self, position: tuple[int, int]):
         if not (position == self.position):
             self.position = position
             self.changes_since_last_render = True
+
+    def set_visible(self, visible: bool):
+        if self.visible != visible:
+            self.visible = visible
+            self.changes_since_last_render = True
+
+    def show(self):
+        self.set_visible(True)
+
+    def hide(self):
+        self.set_visible(False)
 
     def update(self, frame_number: int):
         self.frame_number = frame_number
@@ -323,8 +335,8 @@ class Rectangle(Actor):
         draw = canvas.image_draw
         opposite_corner = tuple(map(lambda i, j: i + j, self.position, self.size))
         logging.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
-                       f"outline_color {self.outline_color} and outline_width {self.outline_width}")
-        draw.rectangle([self.position, opposite_corner], fill=self.color, outline=self.outline_color,
+                      f"outline_color {self.outline_color} and outline_width {self.outline_width}")
+        draw.rectangle(self.position + opposite_corner, fill=self.color, outline=self.outline_color,
                        width=self.outline_width)
 
         self.changes_since_last_render = False
@@ -375,7 +387,8 @@ class Stage(LMAEObject):
         :return:
         """
         for actor in self.actors:
-            actor.render(self.canvas)
+            if actor.visible:
+                actor.render(self.canvas)
 
     def display_frame(self):
         """

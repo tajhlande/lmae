@@ -1,9 +1,10 @@
 from lmae_module import AppModule
 import time
+import json
 from threading import Lock
 from vx_wx.vx_client import get_current_conditions_by_zipcode
-from lmae_core import Stage, Text, Rectangle
-from PIL import ImageFont
+from lmae_core import Stage, Text, Rectangle, SpriteImage
+from PIL import Image, ImageFont
 
 
 class WeatherApp(AppModule):
@@ -24,9 +25,11 @@ class WeatherApp(AppModule):
         self.current_conditions = None
         self.call_status = "ok"
         self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
-        self.temperature_label = None
-        self.timer_line = None
-        self.refresh_time = 900  # seconds
+        self.temperature_label : Text = None
+        self.daytime_image : SpriteImage = None
+        self.moon_phase_image: SpriteImage = None
+        self.timer_line : Rectangle = None
+        self.refresh_time = 900  # 900 seconds = 15 minutes
 
     # noinspection PyBroadException
     def get_current_conditions(self):
@@ -47,17 +50,66 @@ class WeatherApp(AppModule):
 
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
+
+        # temperature actor
         self.temperature_label = Text(name='temperature', position=(5, 5), font=self.temperature_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.timer_line = Rectangle(name='timer-line', position=(0, 31), size=(32, 1),
-                                    color=(255, 0, 0), outline_color=(255, 0, 0), outline_width=0)
         self.stage.actors.append(self.temperature_label)
+
+        # conditions image actor
+        sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
+        with open("images/weather-sprites.json") as spec_file:
+            sprite_spec = json.load(spec_file)
+        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
+
+        # moon phase actor
+        self.moon_phase_image = SpriteImage(name='moon-phase', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
+
+        # timer actor
+        self.timer_line = Rectangle(name='timer-line', position=(0, 31), size=(64, 1),
+                                    color=(255, 255, 0, 128), outline_color=(255, 255, 0, 128), outline_width=0)
         self.stage.actors.append(self.timer_line)
 
     def update_view(self, elapsed_time: float):
+        # temperature
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
         # self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
+
+        # figure out whether it is day or night
+        time_of_day = time.strftime("%H:%M:%S", time.localtime())
+        sunrise = self.current_conditions['currentConditions']['sunrise']
+        sunset = self.current_conditions['currentConditions']['sunset']
+        is_daytime = sunrise < time_of_day or time_of_day < sunset
+
+        # conditions
+        # sprite names for conditions we can show
+        # "sunny"  "cloudy" "rainy"  "lightning"  "snowflake-large" "snowflake-small"
+        #   "foggy" "windy"
+
+        if is_daytime:
+            self.daytime_image.show()
+            condition_sprite = None
+            match self.current_conditions['currentConditions']['conditions']:
+                case 'clear':
+                    condition_sprite = 'sunny'
+                case 'overcast':
+                    condition_sprite = 'cloudy'
+                case 'rainallday':
+                    condition_sprite = 'rainy'
+            self.daytime_image.set_sprite(condition_sprite)
+
+        else:
+            self.daytime_image.hide()
+
+        # moon phase
+        self.moon_phase_image.hide()
+        if not is_daytime:
+            pass
+        else:
+            pass
+
+        # timer
         old_size = self.timer_line.size
         self.timer_line.set_size((int(round(max(round(self.refresh_time - elapsed_time), 0)
                                             * 64.0 / self.refresh_time)), 1))
