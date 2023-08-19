@@ -57,7 +57,8 @@ class WeatherApp(AppModule):
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
         # self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
-        self.timer_line.size = max(round((15*60) - elapsed_time), 0) * 64, 1
+        self.timer_line.size = int(round(max(round((15*60) - elapsed_time), 0) * 64 / (15*60))), 1
+        self.log.debug(f"Timer line size is now {self.timer_line.size}")
 
     def prepare(self):
         self.compose_view()
@@ -79,6 +80,7 @@ class WeatherApp(AppModule):
                 # wait 15 minutes
                 waiting = True
                 wait_start = time.time()
+                self.logger.debug("Waiting 15 minutes to refresh weather data")
                 while waiting and self.running:
                     time.sleep(1)
                     current_time = time.time()
