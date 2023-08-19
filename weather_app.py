@@ -73,7 +73,7 @@ class WeatherApp(AppModule):
                 self.get_current_conditions()
 
                 # update the view
-                self.update_view()
+                self.update_view(0)
                 self.stage.render_frame(1)    # frame numbers don't matter here
 
                 # wait 15 minutes
