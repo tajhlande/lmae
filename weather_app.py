@@ -61,9 +61,11 @@ class WeatherApp(AppModule):
         with open("images/weather-sprites.json") as spec_file:
             sprite_spec = json.load(spec_file)
         self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
+        self.stage.actors.append(self.daytime_image)
 
         # moon phase actor
         self.moon_phase_image = SpriteImage(name='moon-phase', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
+        self.stage.actors.append(self.moon_phase_image)
 
         # timer actor
         self.timer_line = Rectangle(name='timer-line', position=(0, 31), size=(64, 1),
