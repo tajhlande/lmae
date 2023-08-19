@@ -26,7 +26,7 @@ class WeatherApp(AppModule):
         self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
         self.temperature_label = None
         self.timer_line = None
-        self.refresh_time = 60  # seconds
+        self.refresh_time = 900  # seconds
 
     # noinspection PyBroadException
     def get_current_conditions(self):
