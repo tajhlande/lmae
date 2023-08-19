@@ -60,7 +60,7 @@ class WeatherApp(AppModule):
         self.timer_line.size = max(round((15*60) - elapsed_time), 0) * 64, 1
 
     def prepare(self):
-        self.update_view()
+        self.compose_view()
 
     def run(self):
         self.logger.debug("Run started")
