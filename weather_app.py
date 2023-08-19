@@ -48,7 +48,7 @@ class WeatherApp(AppModule):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
         self.temperature_label = Text(name='temperature', position=(5, 5), font=self.temperature_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.timer_line = Rectangle(name='timer-line', position=(0, 31), size=(64, 1),
+        self.timer_line = Rectangle(name='timer-line', position=(0, 31), size=(32, 1),
                                     color=(255, 0, 0), outline_color=(255, 0, 0), outline_width=0)
         self.stage.actors.append(self.temperature_label)
         self.stage.actors.append(self.timer_line)
