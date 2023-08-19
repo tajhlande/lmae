@@ -90,13 +90,13 @@ class WeatherApp(AppModule):
         if is_daytime:
             self.daytime_image.show()
             condition_sprite = None
-            match self.current_conditions['currentConditions']['conditions']:
-                case 'clear':
-                    condition_sprite = 'sunny'
-                case 'overcast':
-                    condition_sprite = 'cloudy'
-                case 'rainallday':
-                    condition_sprite = 'rainy'
+            condition_str = self.current_conditions['currentConditions']['conditions']
+            if condition_str in ['clear', 'type_43']:
+                condition_sprite = 'sunny'
+            elif condition_str == 'overcast':
+                condition_sprite = 'cloudy'
+            elif condition_str == 'rainy':
+                condition_sprite = 'cloudy'
             self.daytime_image.set_sprite(condition_sprite)
 
         else:
