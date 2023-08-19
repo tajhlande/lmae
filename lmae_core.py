@@ -327,7 +327,6 @@ class Rectangle(Actor):
         draw.rectangle([self.position, opposite_corner], fill=self.color, outline=self.outline_color,
                        width=self.outline_width)
 
-
         self.changes_since_last_render = False
 
 
