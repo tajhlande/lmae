@@ -50,4 +50,5 @@ if not api_key:
     api_key = config['visual.crossing']['vx_api_key']
 
 wx_app = WeatherApp(zipcode='20895', api_key=api_key)
+wx_app.set_matrix(matrix, options=options)
 run_app(wx_app)
