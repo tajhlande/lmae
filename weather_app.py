@@ -53,7 +53,7 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.temperature_label)
         self.stage.actors.append(self.timer_line)
 
-    def update_view(self, elapsed_time: int):
+    def update_view(self, elapsed_time: float):
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
         self.logger.debug(f"Current temperature: {temperature}")
         self.temperature_label.text = str(temperature)
@@ -83,7 +83,7 @@ class WeatherApp(AppModule):
                     time.sleep(1)
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
-                    self.update_view(elapsed_time=elapsed_time)
+                    self.update_view(elapsed_time)
                     waiting = elapsed_time < (15 * 60)
 
         finally:
