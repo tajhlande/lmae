@@ -3,7 +3,7 @@ import time
 import json
 from threading import Lock
 from vx_wx.vx_client import get_current_conditions_by_zipcode
-from lmae_core import Stage, Text, Rectangle, SpriteImage
+from lmae_core import Stage, Text, Line, SpriteImage
 from PIL import Image, ImageFont
 
 
@@ -19,7 +19,7 @@ class WeatherApp(AppModule):
         self.logger.info(f"Checking weather for ZIP code {self.zipcode}")
         self.running = False
         self.lock = Lock()
-        self.stage = None
+        self.stage : Stage = None
         self.actors = list()
         self.pre_render_callback = None
         self.current_conditions = None
@@ -29,7 +29,7 @@ class WeatherApp(AppModule):
         self.temperature_label : Text = None
         self.daytime_image : SpriteImage = None
         self.moon_phase_image: SpriteImage = None
-        self.timer_line : Rectangle = None
+        self.timer_line : Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
 
     # noinspection PyBroadException
@@ -69,8 +69,7 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.moon_phase_image)
 
         # timer actor
-        self.timer_line = Rectangle(name='timer-line', position=(0, 31), size=(64, 1),
-                                    color=(255, 255, 0, 128), outline_color=(255, 255, 0, 128), outline_width=0)
+        self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
         self.stage.actors.append(self.timer_line)
 
     def update_view(self, elapsed_time: float):
@@ -84,8 +83,8 @@ class WeatherApp(AppModule):
         sunrise = self.current_conditions['currentConditions']['sunrise']
         sunset = self.current_conditions['currentConditions']['sunset']
         is_daytime = sunrise < time_of_day or time_of_day < sunset
-        self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, time of day: {time_of_day}")
-        self.logger.debug(f"Is is daytime? {is_daytime}")
+        # self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, time of day: {time_of_day}")
+        # self.logger.debug(f"Is is daytime? {is_daytime}")
 
         # conditions
         # sprite names for conditions we can show
@@ -105,9 +104,8 @@ class WeatherApp(AppModule):
                 condition_sprite = 'cloudy'
             #self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
-
         else:
-            self.logger.debug("Not showing current conditions")
+            # self.logger.debug("Not showing current conditions")
             self.daytime_image.hide()
 
         # moon phase
@@ -138,15 +136,13 @@ class WeatherApp(AppModule):
         else:
             self.moon_phase_image.hide()
 
-        # timer line
+        # timer line, shows remaining time until next call to refresh weather data
         old_size = self.timer_line.size
-        relative_length = int(round(max(round(self.refresh_time - elapsed_time), 0)
-                                    * 64.0 / self.refresh_time))
-        self.timer_line.set_position((64-relative_length, 31))
-        self.timer_line.set_size((relative_length, 1))
+        relative_length = int(round(max(round(self.refresh_time - elapsed_time), 0) * 64.0 / self.refresh_time))
+        self.timer_line.set_start((64-relative_length, 31))
 
         if old_size[0] != self.timer_line.size[0]:
-            self.logger.debug(f"Timer line position and size is now {self.timer_line.position}:{self.timer_line.size}")
+            self.logger.debug(f"Timer line length is now {relative_length}")
 
     def prepare(self):
         self.compose_view()
