@@ -342,6 +342,49 @@ class Rectangle(Actor):
         self.changes_since_last_render = False
 
 
+class Line(Actor):
+    """
+    A line that draws itself on a stage
+    """
+
+    def __init__(self,
+                 name: str = None,
+                 start: tuple[int, int] = (0, 0),
+                 end: tuple[int, int] = (0, 0),
+                 color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255)):
+        name = name or _get_sequential_name("Line")  # 'Text_' + f'{randrange(65536):04X}'
+        # TODO account for start and end being in any order
+        super().__init__(name=name, position=start)
+        self.start = start
+        self.end = end
+        self.calc_size()
+        self.color = color
+
+    def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
+        self.color = color
+        self.changes_since_last_render = True
+
+    def set_start(self, start: tuple[int, int]):
+        self.start = start
+        self.calc_size()
+        self.changes_since_last_render = True
+
+    def set_end(self, end: tuple[int, int]):
+        self.end = end
+        self.calc_size()
+        self.changes_since_last_render = True
+
+    def calc_size(self):
+        self.size = abs(self.start[0] - self.end[0]), abs(self.start[1] - self.end[1])
+
+    def render(self, canvas: Canvas):
+        draw = canvas.image_draw
+        logging.debug(f"Drawing line from {self.start} to{self.end} with color {self.color}")
+        draw.line((self.start, self.end), fill=self.color, width=1)
+
+        self.changes_since_last_render = False
+
+
 class Stage(LMAEObject):
     """
     An environment with a set of actors who appear in a certain order, all of whom can

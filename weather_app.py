@@ -84,6 +84,8 @@ class WeatherApp(AppModule):
         sunrise = self.current_conditions['currentConditions']['sunrise']
         sunset = self.current_conditions['currentConditions']['sunset']
         is_daytime = sunrise < time_of_day or time_of_day < sunset
+        self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, time of day: {time_of_day}")
+        self.logger.debug(f"Is is daytime? {is_daytime}")
 
         # conditions
         # sprite names for conditions we can show
@@ -109,11 +111,32 @@ class WeatherApp(AppModule):
             self.daytime_image.hide()
 
         # moon phase
-        self.moon_phase_image.hide()
         if not is_daytime:
-            pass
+            moon_phase_num = self.current_conditions['currentConditions']['moonphase']
+            moon_phase_name = None
+            if moon_phase_num > 0.9375:
+                moon_phase_name = "moon-new"
+            elif moon_phase_num > 0.8125:
+                moon_phase_name = "moon-waning-crescent"
+            elif moon_phase_num > 0.6875:
+                moon_phase_name = "moon-waning-half"
+            elif moon_phase_num > 0.5625:
+                moon_phase_name = "moon-waning-gibbous"
+            elif moon_phase_num > 0.4375:
+                moon_phase_name = "moon-full"
+            elif moon_phase_num > 0.3125:
+                moon_phase_name = "moon-waxing-gibbous"
+            elif moon_phase_num > 0.1875:
+                moon_phase_name = "moon-waxing-half"
+            elif moon_phase_num > 0.0625:
+                moon_phase_name = "moon-waxing-crescent"
+            else:
+                moon_phase_name = "moon-new"
+
+            self.moon_phase_image.show()
+            self.moon_phase_image.set_sprite(moon_phase_name)
         else:
-            pass
+            self.moon_phase_image.hide()
 
         # timer line
         old_size = self.timer_line.size
