@@ -14,6 +14,7 @@ class WeatherApp(AppModule):
 
     def __init__(self, api_key: str, zipcode: str):
         super().__init__()
+        self.fresh_weather_data = False
         self.api_key = api_key
         self.zipcode = zipcode
         self.logger.info(f"Checking weather for ZIP code {self.zipcode}")
@@ -41,6 +42,7 @@ class WeatherApp(AppModule):
                 self.logger.debug("Call to get conditions succeeded")
                 self.current_conditions = current_conditions
                 self.call_status = "ok"
+                self.fresh_weather_data = True
             else:
                 self.logger.error("Call to get conditions did not return any conditions")
                 self.call_status = "error"
@@ -95,17 +97,17 @@ class WeatherApp(AppModule):
             self.daytime_image.show()
             condition_sprite = None
             condition_str = self.current_conditions['currentConditions']['conditions']
-            #self.logger.debug(f'Current conditions from wx: {condition_str}')
+            if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {condition_str}')
             if condition_str in ['clear', 'type_43']:
                 condition_sprite = 'sunny'
             elif condition_str == 'overcast':
                 condition_sprite = 'cloudy'
             elif condition_str == 'rainy':
                 condition_sprite = 'cloudy'
-            #self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
+            if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
         else:
-            # self.logger.debug("Not showing current conditions")
+            if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
             self.daytime_image.hide()
 
         # moon phase
@@ -131,9 +133,11 @@ class WeatherApp(AppModule):
             else:
                 moon_phase_name = "moon-new"
 
+            if self.fresh_weather_data: self.logger.debug(f"Showing moon phase {moon_phase_num} as {moon_phase_name}")
             self.moon_phase_image.show()
             self.moon_phase_image.set_sprite(moon_phase_name)
         else:
+            if self.fresh_weather_data: self.logger.debug(f"Not showing moon phase")
             self.moon_phase_image.hide()
 
         # timer line, shows remaining time until next call to refresh weather data
@@ -143,6 +147,8 @@ class WeatherApp(AppModule):
 
         if old_size[0] != self.timer_line.size[0]:
             self.logger.debug(f"Timer line length is now {relative_length}")
+
+        self.fresh_weather_data = False
 
     def prepare(self):
         self.compose_view()
