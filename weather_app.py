@@ -28,8 +28,8 @@ class WeatherApp(AppModule):
         # self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
         self.temperature_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
         self.temperature_label : Text = None
-        self.dewpoint_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
-        # font=ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8),
+        self.dewpoint_label_font = ImageFont.truetype("fonts/Roboto/Roboto-Black.ttf", 4)
+        self.dewpoint_value_font = ImageFont.truetype("fonts/Roboto/Roboto-Medium.ttf", 8)
         self.dewpoint_dp_label : Text = None
         self.dewpoint_value_label : Text = None
 
@@ -65,9 +65,9 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.temperature_label)
 
         # dewpoint actors
-        self.dewpoint_dp_label = Text(name='dewpoint-dp', text="D\nP", position=(5, 21), font=self.dewpoint_font,
+        self.dewpoint_dp_label = Text(name='dewpoint-dp', text="D\nP", position=(5, 21), font=self.dewpoint_label_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.dewpoint_value_label = Text(name='dewpoint-value', position=(10, 21), font=self.dewpoint_font,
+        self.dewpoint_value_label = Text(name='dewpoint-value', position=(10, 21), font=self.dewpoint_value_font,
                                    color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.dewpoint_dp_label)
         self.stage.actors.append(self.dewpoint_value_label)
