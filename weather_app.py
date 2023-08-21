@@ -29,9 +29,8 @@ class WeatherApp(AppModule):
         self.temperature_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
         self.temperature_label : Text = None
         self.dewpoint_label_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
-        self.dewpoint_value_font = ImageFont.truetype("fonts/Roboto/Roboto-Medium.ttf", 8)
-        self.dewpoint_dp_label : Text = None
-        self.dewpoint_value_label : Text = None
+        # self.dewpoint_value_font = ImageFont.truetype("fonts/Roboto/Roboto-Medium.ttf", 8)
+        self.dewpoint_label : Text = None
 
         self.daytime_image : SpriteImage = None
         self.moon_phase_image: SpriteImage = None
@@ -65,12 +64,9 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.temperature_label)
 
         # dewpoint actors
-        self.dewpoint_dp_label = Text(name='dewpoint-dp', text="D\nP", position=(5, 21), font=self.dewpoint_label_font,
-                                      color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.dewpoint_value_label = Text(name='dewpoint-value', position=(10, 21), font=self.dewpoint_value_font,
+        self.dewpoint_label = Text(name='dewpoint', position=(5, 22), font=self.dewpoint_label_font,
                                    color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.stage.actors.append(self.dewpoint_dp_label)
-        self.stage.actors.append(self.dewpoint_value_label)
+        self.stage.actors.append(self.dewpoint_label)
 
         # conditions image actor
         sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
@@ -94,8 +90,8 @@ class WeatherApp(AppModule):
         self.temperature_label.text = temperature
 
         # dewpoint
-        dewpoint = f"{round(self.current_conditions['currentConditions']['dew'])}º"
-        self.dewpoint_value_label.text = dewpoint
+        dewpoint = f"DP {round(self.current_conditions['currentConditions']['dew'])}º"
+        self.dewpoint_label.text = dewpoint
 
         # figure out whether it is day or night
         time_of_day = time.strftime("%H:%M:%S", time.localtime())
