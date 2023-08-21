@@ -84,7 +84,7 @@ class WeatherApp(AppModule):
         time_of_day = time.strftime("%H:%M:%S", time.localtime())
         sunrise = self.current_conditions['currentConditions']['sunrise']
         sunset = self.current_conditions['currentConditions']['sunset']
-        is_daytime = sunrise < time_of_day or time_of_day < sunset
+        is_daytime = sunrise < time_of_day < sunset
         if self.fresh_weather_data: self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, time of day: {time_of_day}")
         if self.fresh_weather_data: self.logger.debug(f"Is is daytime? {is_daytime}")
 
