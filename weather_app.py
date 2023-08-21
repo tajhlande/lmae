@@ -28,7 +28,7 @@ class WeatherApp(AppModule):
         # self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
         self.temperature_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
         self.temperature_label : Text = None
-        self.dewpoint_label_font = ImageFont.truetype("fonts/Roboto/Roboto-Black.ttf", 4)
+        self.dewpoint_label_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
         self.dewpoint_value_font = ImageFont.truetype("fonts/Roboto/Roboto-Medium.ttf", 8)
         self.dewpoint_dp_label : Text = None
         self.dewpoint_value_label : Text = None
