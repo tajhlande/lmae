@@ -148,6 +148,8 @@ class WeatherApp(AppModule):
         if old_size[0] != self.timer_line.size[0]:
             self.logger.debug(f"Timer line length is now {relative_length}")
 
+        self.timer_line.set_color((255, 255, 0, 128) if is_daytime else (0, 0, 255, 128))
+
         self.fresh_weather_data = False
 
     def prepare(self):
