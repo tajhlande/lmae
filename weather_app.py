@@ -65,7 +65,7 @@ class WeatherApp(AppModule):
 
         # dewpoint actors
         self.dewpoint_label = Text(name='dewpoint', position=(5, 22), font=self.dewpoint_label_font,
-                                   color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.dewpoint_label)
 
         # conditions image actor
