@@ -111,7 +111,7 @@ class WeatherApp(AppModule):
             if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {condition_str}')
             if condition_str in ['clear', 'type_43']:
                 condition_sprite = 'sunny'
-            elif condition_str in ['overcast', 'type_42']:
+            elif condition_str in ['overcast', 'type_41', 'type_42']:
                 condition_sprite = 'cloudy'
             elif condition_str in ['rainy', 'type_2', 'type_3', 'type_4', 'type_5', 'type_6', 'type_9', 'type_10',
                                    'type_11', 'type_13', 'type_14', 'type_20', 'type_21', 'type_22', 'type_23',
