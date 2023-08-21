@@ -158,8 +158,8 @@ class WeatherApp(AppModule):
         relative_length = int(round(max(round(self.refresh_time - elapsed_time), 0) * 64.0 / self.refresh_time))
         self.timer_line.set_start((64-relative_length, 31))
 
-        if old_size[0] != self.timer_line.size[0]:
-            self.logger.debug(f"Timer line length is now {relative_length}")
+        # if old_size[0] != self.timer_line.size[0]:
+        #     self.logger.debug(f"Timer line length is now {relative_length}")
 
         self.timer_line.set_color((255, 255, 0, 128) if is_daytime else (0, 0, 255, 128))
 
