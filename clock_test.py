@@ -10,4 +10,4 @@ def measure_clock():
     return t0, t1, t1-t0
 
 
-reduce(lambda a, b: a+b, [measure_clock()[2] for i in range(1000000)])/1000000.0
+print(f"{reduce(lambda a, b: a+b, [measure_clock()[2] for i in range(1000000)])/1000000.0}")
