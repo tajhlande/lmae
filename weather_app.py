@@ -20,21 +20,19 @@ class WeatherApp(AppModule):
         self.logger.info(f"Checking weather for ZIP code {self.zipcode}")
         self.running = False
         self.lock = Lock()
-        self.stage : Stage = None
+        self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
         self.current_conditions = None
         self.call_status = "ok"
-        # self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
-        self.temperature_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
-        self.temperature_label : Text = None
-        self.dewpoint_label_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
-        # self.dewpoint_value_font = ImageFont.truetype("fonts/Roboto/Roboto-Medium.ttf", 8)
-        self.dewpoint_label : Text = None
+        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
+        self.temperature_label: Text = None
+        self.secondary_text_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
+        self.dewpoint_label: Text = None
 
-        self.daytime_image : SpriteImage = None
+        self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
-        self.timer_line : Line = None
+        self.timer_line: Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
 
     # noinspection PyBroadException
@@ -59,12 +57,12 @@ class WeatherApp(AppModule):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
 
         # temperature actor
-        self.temperature_label = Text(name='temperature', position=(5, 5), font=self.temperature_font,
+        self.temperature_label = Text(name='temperature', position=(5, 5), font=self.primary_text_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
         # dewpoint actors
-        self.dewpoint_label = Text(name='dewpoint', position=(5, 22), font=self.dewpoint_label_font,
+        self.dewpoint_label = Text(name='dewpoint', position=(5, 23), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.dewpoint_label)
 
@@ -113,10 +111,12 @@ class WeatherApp(AppModule):
             if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {condition_str}')
             if condition_str in ['clear', 'type_43']:
                 condition_sprite = 'sunny'
-            elif condition_str == 'overcast':
+            elif condition_str in ['overcast', 'type_42']:
                 condition_sprite = 'cloudy'
-            elif condition_str == 'rainy':
-                condition_sprite = 'cloudy'
+            elif condition_str in ['rainy', 'type_2', 'type_3', 'type_4', 'type_5', 'type_6', 'type_9', 'type_10',
+                                   'type_11', 'type_13', 'type_14', 'type_20', 'type_21', 'type_22', 'type_23',
+                                   'type_24', 'type_25', 'type_26', 'type_32', 'type_36', 'type_37', 'type_38']:
+                condition_sprite = 'rainy'
             if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
         else:

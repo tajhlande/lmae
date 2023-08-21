@@ -7,7 +7,7 @@ from lmae_core import parse_matrix_options_command_line
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from weather_app import WeatherApp
 
-logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
 logger = logging.getLogger("app_runner")
 logger.setLevel(logging.DEBUG)
 print("App Runner")
