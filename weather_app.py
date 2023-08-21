@@ -26,8 +26,10 @@ class WeatherApp(AppModule):
         self.current_conditions = None
         self.call_status = "ok"
         # self.temperature_font = ImageFont.truetype("fonts/press-start-2p-font/PressStart2P-vaV7.ttf", 8)
-        self.temperature_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 18)
+        self.temperature_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
         self.temperature_label : Text = None
+        self.dewpoint_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 8)
+        self.dewpoint_label : Text = None
         self.daytime_image : SpriteImage = None
         self.moon_phase_image: SpriteImage = None
         self.timer_line : Line = None
@@ -59,6 +61,11 @@ class WeatherApp(AppModule):
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
+        # dewpoint actor
+        self.dewpoint_label = Text(name='dewpoint', position=(5, 24), font=self.dewpoint_font,
+                                   color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        self.stage.actors.append(self.dewpoint_label)
+
         # conditions image actor
         sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
@@ -78,7 +85,11 @@ class WeatherApp(AppModule):
         # temperature
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
         # self.logger.debug(f"Current temperature: {temperature}")
-        self.temperature_label.text = str(temperature)
+        self.temperature_label.text = temperature
+
+        # dewpoint
+        dewpoint = f"{round(self.current_conditions['currentConditions']['dew'])}º"
+        self.dewpoint_label.text = dewpoint
 
         # figure out whether it is day or night
         time_of_day = time.strftime("%H:%M:%S", time.localtime())
