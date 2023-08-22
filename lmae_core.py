@@ -58,7 +58,7 @@ class Actor(LMAEObject):
         super().__init__(name=name)
         self.position = position
         self.size = 0, 0
-        self.changes_since_last_render = True # since we've not been rendered yet
+        self.changes_since_last_render = True  # since we've not been rendered yet
         self.frame_number = 0
         self.visible = True
 
@@ -432,6 +432,7 @@ class Stage(LMAEObject):
         for actor in self.actors:
             if actor.visible:
                 actor.render(self.canvas)
+            actor.changes_since_last_render = False
 
     def display_frame(self):
         """

@@ -87,7 +87,7 @@ class SingleStageRenderLoopAppModule(AppModule):
         max_frame_rate = 120
         min_time_per_frame = 1.0 / max_frame_rate
         i = 0
-        last_time = time.time()
+        last_time = time.perf_counter()
         try:
             while self.running:
                 # call pre-render callback
@@ -99,7 +99,7 @@ class SingleStageRenderLoopAppModule(AppModule):
                 i += 1
 
                 # calculate the frame rate and render that
-                render_end_time = time.time()
+                render_end_time = time.perf_counter()
 
                 # if we are rendering faster than max frame rate, slow down
                 elapsed_render_time = render_end_time - last_time
@@ -107,7 +107,7 @@ class SingleStageRenderLoopAppModule(AppModule):
                     time.sleep(min_time_per_frame - elapsed_render_time)
 
                 # mark the timestamp
-                last_time = time.time()
+                last_time = time.perf_counter()
         finally:
             self.logger.debug("Run stopped")
 
