@@ -1,7 +1,7 @@
 from lmae_module import AppModule
+import asyncio
 import time
 import json
-from threading import Lock
 from vx_wx.vx_client import get_current_conditions_by_zipcode
 from lmae_core import Stage, Text, Line, SpriteImage
 from PIL import Image, ImageFont
@@ -12,14 +12,14 @@ class WeatherApp(AppModule):
     Display the current weather
     """
 
+    # noinspection PyTypeChecker
     def __init__(self, api_key: str, zipcode: str):
         super().__init__()
         self.fresh_weather_data = False
         self.api_key = api_key
         self.zipcode = zipcode
         self.logger.info(f"Checking weather for ZIP code {self.zipcode}")
-        self.running = False
-        self.lock = Lock()
+        self.lock = asyncio.Lock()
         self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
@@ -70,7 +70,8 @@ class WeatherApp(AppModule):
         sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
             sprite_spec = json.load(spec_file)
-        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
+        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 7), sheet=sprite_sheet,
+                                         spec=sprite_spec)
         self.stage.actors.append(self.daytime_image)
 
         # moon phase actor
@@ -96,7 +97,8 @@ class WeatherApp(AppModule):
         sunrise = self.current_conditions['currentConditions']['sunrise']
         sunset = self.current_conditions['currentConditions']['sunset']
         is_daytime = sunrise < time_of_day < sunset
-        if self.fresh_weather_data: self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, time of day: {time_of_day}")
+        if self.fresh_weather_data: self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, "
+                                                      f"time of day: {time_of_day}")
         if self.fresh_weather_data: self.logger.debug(f"Is is daytime? {is_daytime}")
 
         # conditions
@@ -126,7 +128,7 @@ class WeatherApp(AppModule):
         # moon phase
         if not is_daytime:
             moon_phase_num = self.current_conditions['currentConditions']['moonphase']
-            moon_phase_name = None
+            # moon_phase_name = None
             if moon_phase_num > 0.9375:
                 moon_phase_name = "moon-new"
             elif moon_phase_num > 0.8125:
@@ -154,7 +156,7 @@ class WeatherApp(AppModule):
             self.moon_phase_image.hide()
 
         # timer line, shows remaining time until next call to refresh weather data
-        old_size = self.timer_line.size
+        # old_size = self.timer_line.size
         relative_length = int(round(max(round(self.refresh_time - elapsed_time), 0) * 64.0 / self.refresh_time))
         self.timer_line.set_start((64-relative_length, 31))
 
@@ -168,9 +170,9 @@ class WeatherApp(AppModule):
     def prepare(self):
         self.compose_view()
 
-    def run(self):
+    async def run(self):
+        await super().run()
         self.logger.debug("Run started")
-        self.running = True
         self.compose_view()
         frame_number = 0
 
@@ -189,18 +191,14 @@ class WeatherApp(AppModule):
                 wait_start = time.time()
                 self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh weather data")
                 while waiting and self.running:
-                    time.sleep(1)
+                    await asyncio.sleep(1)
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time)
-                    self.stage.needs_render = True # have to force this for some reason
+                    self.stage.needs_render = True  # have to force this for some reason
                     self.stage.render_frame(frame_number)
                     frame_number += 1
                     waiting = elapsed_time < self.refresh_time
 
         finally:
             self.logger.debug("Run stopped")
-
-    def stop(self):
-        self.logger.debug("Got command to stop")
-        self.running = False

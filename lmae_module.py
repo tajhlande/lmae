@@ -1,3 +1,4 @@
+import asyncio
 import time
 from abc import ABCMeta, abstractmethod
 from lmae_core import Stage
@@ -18,6 +19,7 @@ class AppModule(metaclass=ABCMeta):
         self.matrix_options = None
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.setLevel(logging.DEBUG)
+        self.running = False
 
     def set_matrix(self, matrix: RGBMatrix, options: RGBMatrixOptions):
         """
@@ -28,7 +30,6 @@ class AppModule(metaclass=ABCMeta):
         self.matrix = matrix
         self.matrix_options = options
 
-    @abstractmethod
     def prepare(self):
         """
         Apps can implement this method to prepare themselves before rendering.
@@ -37,20 +38,24 @@ class AppModule(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def run(self):
+    async def run(self):
         """
-        This method will be invoked in a distinct thread when the app should start running
+        This method will be invoked in a distinct thread when the app should start running.
+        It should be async friendly and should yield on reasonable occasion.
+        It should occasionally check for `self.running`'s value, and when that value is no longer
+        true, it should exit.
         :return:
         """
-        pass
+        self.logger.debug("Got command to start running")
+        self.running = True
 
-    @abstractmethod
     def stop(self):
         """
         Apps should stop running when this method is called.
         :return:
         """
-        pass
+        self.logger.debug("Got command to stop")
+        self.running = False
 
 
 class SingleStageRenderLoopAppModule(AppModule):
@@ -60,7 +65,6 @@ class SingleStageRenderLoopAppModule(AppModule):
 
     def __init__(self):
         super().__init__()
-        self.running = False
         self.lock = Lock()
         self.stage = None
         self.actors = list()
@@ -81,7 +85,8 @@ class SingleStageRenderLoopAppModule(AppModule):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
         self.stage.actors.extend(self.actors)
 
-    def run(self):
+    async def run(self):
+        await super().run()
         self.logger.debug("Run started")
         self.running = True
         max_frame_rate = 120
@@ -104,7 +109,7 @@ class SingleStageRenderLoopAppModule(AppModule):
                 # if we are rendering faster than max frame rate, slow down
                 elapsed_render_time = render_end_time - last_time
                 if elapsed_render_time < min_time_per_frame:
-                    time.sleep(min_time_per_frame - elapsed_render_time)
+                    await asyncio.sleep(min_time_per_frame - elapsed_render_time)
 
                 # mark the timestamp
                 last_time = time.perf_counter()
@@ -114,5 +119,3 @@ class SingleStageRenderLoopAppModule(AppModule):
     def stop(self):
         self.logger.debug("Got command to stop")
         self.running = False
-
-

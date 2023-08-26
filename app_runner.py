@@ -1,5 +1,5 @@
 from lmae_module import AppModule
-from threading import Thread
+import asyncio
 import logging
 import os
 import configparser
@@ -17,7 +17,7 @@ logger.info("Initializing matrix")
 matrix = RGBMatrix(options=options)
 
 
-def stop_app(app: AppModule):
+async def stop_app(app: AppModule):
     logger.info("***** Press return to stop the app *****")
     input()
     logger.debug("Return pressed")
@@ -28,16 +28,13 @@ def run_app(app: AppModule):
     logger.debug("run_app() called")
     app.prepare()
 
-    logger.info("Starting stopper thread")
-    stopper_thread = Thread(target=stop_app, args=[app])
-    stopper_thread.start()
+    logger.info("Creating stopper task")
+    stopper_task = asyncio.create_task(stop_app(app))
 
-    logger.info("Running app")
-    app_thread = Thread(target=app.run)
-    app_thread.start()
+    logger.info("Creating app runner task")
+    app_runner_task = asyncio.create_task(app.run())
 
-    stopper_thread.join()
-    app_thread.join()
+    await stopper_task, app_runner_task
 
     logger.debug("run_app() finished")
 
