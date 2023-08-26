@@ -1,3 +1,5 @@
+import sys
+
 from lmae_module import AppModule
 import asyncio
 import logging
@@ -17,9 +19,16 @@ logger.info("Initializing matrix")
 matrix = RGBMatrix(options=options)
 
 
+# borrowed from StackOverflow:
+# https://stackoverflow.com/questions/58454190/python-async-waiting-for-stdin-input-while-doing-other-stuff
+async def async_input(string: str) -> str:
+    await asyncio.to_thread(sys.stdout.write, f'{string} ')
+    return (await asyncio.to_thread(sys.stdin.readline)).rstrip('\n')
+
+
 async def stop_app(app: AppModule):
     logger.info("***** Press return to stop the app *****")
-    input()
+    await async_input('>')
     logger.debug("Return pressed")
     app.stop()
 
@@ -34,7 +43,7 @@ async def run_app(app: AppModule):
     logger.info("Creating app runner task")
     app_runner_task = asyncio.create_task(app.run())
 
-    await stopper_task, app_runner_task
+    await asyncio.gather(stopper_task, app_runner_task)
 
     logger.debug("run_app() finished")
 
