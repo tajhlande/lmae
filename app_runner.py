@@ -24,7 +24,7 @@ async def stop_app(app: AppModule):
     app.stop()
 
 
-def run_app(app: AppModule):
+async def run_app(app: AppModule):
     logger.debug("run_app() called")
     app.prepare()
 
