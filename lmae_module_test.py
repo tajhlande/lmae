@@ -30,6 +30,7 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
 
 kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
 kirby_move_dist = 64 - kirby.size[0]
+logger.debug(f"Kirby move distance is {kirby_move_dist}")
 kirby_go_right = LinearMove(name='Kirby go right', actor=kirby,
                             distance=(64 - kirby_move_dist, 0), duration=2.0)
 kirby_go_left = LinearMove(name='Kirby go left', actor=kirby,
