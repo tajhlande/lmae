@@ -214,6 +214,7 @@ class Stage(LMAEObject):
         Let all the actors update themselves, including applying animations
         """
         current_time = time.perf_counter()
+        self.logger.debug(f"Current time: {current_time}")
 
         # run all the animations
         for anim in self.animations:
