@@ -230,6 +230,7 @@ class Stage(LMAEObject):
         for actor in self.actors:
             actor.update()
             self.needs_render = self.needs_render or actor.changes_since_last_render
+            self.logger.debug(f"Needs render after {actor.name}: {self.needs_render}")
 
     def render_actors(self):
         """
@@ -264,10 +265,12 @@ class Stage(LMAEObject):
         self.logger.debug("Rendering the frame")
         self.update_actors()
         if self.needs_render:
+            self.logger.debug("Render update needed")
             self.prepare_frame()
             self.render_actors()
             self.display_frame()
         else:
+            self.logger.debug("Render update not needed")
             pass  # no update needed
         self.post_render()
 

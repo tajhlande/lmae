@@ -56,6 +56,7 @@ class LinearMove(Animation):
 
         # finally
         if net_d_x != 0 or net_d_y != 0:
+            self.logger.debug(f"Setting actor {self.actor.name} changes_since_last_render to True")
             self.actor.changes_since_last_render = True
         self.set_update_time(current_time)
 
