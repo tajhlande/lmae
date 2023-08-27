@@ -97,36 +97,38 @@ class Animation(LMAEObject, metaclass=ABCMeta):
         self.actor = actor
         self.repeat: bool = repeat
         self.duration = duration
+        self.started = False
         self.start_time: float = 0.0
         self.last_update_time: float = 0.0
         self.end_time: float = 0.0
 
     def reset(self):
+        self.started = False
         self.start_time = 0.0
         self.last_update_time = 0.0
         self.end_time = 0.0
 
     def start(self, current_time: float):
         self.logger.debug(f"Starting at {current_time}")
+        self.started = True
         self.start_time = current_time
 
     def is_started(self):
-        return self.start_time == 0
+        return self.started
 
     def should_repeat(self):
         return self.repeat
 
     def get_elapsed_time(self, current_time: float) -> float:
-        if self.start_time == 0:
+        if not self.started:
             return 0.0
         return current_time - self.start_time
 
     def get_simulated_time(self):
-        if self.start_time == 0:
+        if not self.started:
             return 0
-        if self.end_time == 0:
-            return self.last_update_time - self.start_time
-
+        if self.last_update_time == 0:
+            return 0
         return self.last_update_time - self.start_time
 
     def set_update_time(self, update_time):
