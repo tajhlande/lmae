@@ -1,13 +1,11 @@
 # Core classes for LED Matrix Animation Engine
 import argparse
-import json
 import logging
 import os
 import sys
-from typing import Callable
-from PIL import Image, ImageDraw, ImageFont
-from pilmoji import Pilmoji
-from pilmoji.source import AppleEmojiSource, MicrosoftEmojiSource, GoogleEmojiSource, TwemojiEmojiSource, EmojiCDNSource
+import time
+from abc import ABCMeta, abstractmethod
+from PIL import Image, ImageDraw
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -59,7 +57,6 @@ class Actor(LMAEObject):
         self.position = position
         self.size = 0, 0
         self.changes_since_last_render = True  # since we've not been rendered yet
-        self.frame_number = 0
         self.visible = True
 
     def set_position(self, position: tuple[int, int]):
@@ -78,311 +75,89 @@ class Actor(LMAEObject):
     def hide(self):
         self.set_visible(False)
 
-    def update(self, frame_number: int):
-        self.frame_number = frame_number
+    def update(self):
+        pass
 
     def render(self, canvas: Canvas):
         self.changes_since_last_render = False
         pass
 
 
-class StillImage(Actor):
+class Animation(LMAEObject, metaclass=ABCMeta):
     """
-    An unchanging image that can position itself on a stage
-    """
-    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), image: Image = None):
-        """
-        Initialize a still image actor
-        :param name: The name of this image actor
-        :param position:The initial position of this still image actor
-        :param image: The PIL image for this image actor
-        """
-        name = name or _get_sequential_name("StillImage")  # 'StillImage_' + f'{randrange(65536):04X}'
-        super().__init__(name=name, position=position)
-        self.image = image
-        self.size = self.image.size if self.image else (0, 0)
-
-    def set_from_file(self, filename):
-        self.image = Image.open(filename)
-        if not self.image.mode == 'RGBA':
-            self.image = self.image.convert('RGBA')
-        self.size = self.image.size
-
-    def render(self, canvas: Canvas):
-        if self.image:
-            canvas.image.alpha_composite(self.image, dest=self.position)
-        self.changes_since_last_render = False
-
-
-class SpriteImage(Actor):
-    """
-    An image that is drawn from a sprite sheet impage
-    """
-    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0),
-                 sheet: Image = None, spec=None,
-                 selected: str = None):
-        """
-        Initialize a sprite image actor
-        :param name: The name of this actor
-        :param position: The initial position of this sprite on the stage
-        :param sheet: The sprite sheet image
-        :param spec: The sprite specification: a dict of objects with position and size info
-        :param selected: Which sprite to display first, by name in the spec
-        """
-        if spec is None:
-            spec = dict()
-        name = name or _get_sequential_name("SpriteImage")  # 'SpriteImage_' + f'{randrange(65536):04X}'
-        super().__init__(name=name, position=position)
-        self.sheet = sheet
-        self.spec = spec
-        self.selected = None
-        self.size = (0, 0)
-        self.set_sprite(selected)
-
-    def set_sprite(self, selected: str):
-        # logger.debug(f"Setting sprite to {selected}")
-        self.selected = selected
-        if self.sheet and self.selected and self.selected in self.spec:
-            self.size = tuple(int(i) for i in self.spec[self.selected]['size'])
-        else:
-            self.size = (0, 0)
-        self.changes_since_last_render = True
-
-    def set_from_file(self, image_filename, spec_filename):
-        logger.debug(f"Loading sprite sheet image from {image_filename}")
-        self.sheet = Image.open(image_filename).convert('RGBA')
-
-        logger.debug(f"Loading spec file from {spec_filename}")
-        with open(spec_filename) as spec_file:
-            self.spec = json.load(spec_file)
-
-    def render(self, canvas: Canvas):
-        if self.sheet and self.selected in self.spec:
-            entry = self.spec[self.selected]
-            sheet_position = tuple(int(i) for i in entry['position'])
-            size = tuple(int(i) for i in entry['size'])  # may be superfluous if size has already been stored correctly
-            bounds = (sheet_position[0], sheet_position[1],
-                      sheet_position[0] + size[0], sheet_position[1] + size[1])
-            # logger.debug(f"Rendering sprite at {self.position} from sheet at {sheet_position} and size {size}")
-            canvas.image.alpha_composite(self.sheet, dest=self.position, source=bounds)
-        self.changes_since_last_render = False
-
-
-class MovingActor(Actor):
-    """
-    A container for an actor that moves the actor around
+    A clock-based way to update an actor based on elapsed real time.
+    This base class should be extended to provide specific animation types.
     """
 
-    def __init__(self,
-                 actor: Actor,
-                 movement_function: Callable[[int], tuple[int, int]],
-                 name: str = None):
-        """
-        Initialize the moving actor
-        :param actor: The actor to move around
-        :param movement_function: A function that takes the frame number as input and returns a position
-        :param name: The name of this moving actor
-        :return:
-        """
-        name = name or _get_sequential_name("MovingActor")  # 'MovingActor_' + f'{randrange(65536):04X}'
+    def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False):
+        name = name or _get_sequential_name("Animation")  # 'Canvas_' + f'{randrange(65536):04X}'
         super().__init__(name=name)
         self.actor = actor
-        self.movement_function = movement_function
+        self.start_time: float = 0
+        self.last_update_time: float = 0
+        self.end_time: float = 0
+        self.frame_count: int = 0
+        self.repeat: bool = repeat
 
-    def update(self, frame_number: int):
-        self.position = self.movement_function(frame_number)
-        self.actor.set_position(self.position)
-        self.actor.update(frame_number)
-        self.changes_since_last_render = self.actor.changes_since_last_render
+    def reset(self):
+        self.start_time = 0
+        self.last_update_time = 0
+        self.end_time = 0
+        self.frame_count = 0
 
-    def render(self, canvas: Canvas):
-        self.actor.render(canvas)
-        self.changes_since_last_render = False
+    def start(self, current_time: float):
+        self.start_time = current_time
+
+    def is_started(self):
+        return self.start_time == 0
+
+    def should_repeat(self):
+        return self.repeat
+
+    def elapsed(self) -> float:
+        if self.start_time == 0:
+            return 0
+        if self.end_time == 0:
+            return self.last_update_time - self.start_time
+
+        return self.end_time - self.start_time
+
+    @abstractmethod
+    def is_finished(self) -> bool:
+        """
+        Override this to indicate when an animation is done.
+        This should usually be based on the current time in the last call to `update_actor(current_time)`
+        :return: `True` if this animation is finished, `False` otherwise
+        """
+        pass
+
+    @abstractmethod
+    def update_actor(self, current_time: float):
+        """
+        Override this to update this animation's actor based on the current time.
+
+        Implementors must call this superclass method.
+
+        Actors must correctly reflect their state of needing to be rendered after being updated.
+        If updating would cause any changes in the way an actor is rendered, then
+        `actor.changes_since_last_render` must be `True`. If updating did not cause any changes in the way
+        an actor is rendered, then `actor.changes_since_last_render` must be unchanged.
+
+        :param current_time: the current time that this frame is being rendered
+        """
+        self.last_update_time = current_time
 
 
-class Text(Actor):
+def _retain_animation(anim: Animation) -> bool:
     """
-    Text that renders on a stage
+    Determine whether this animation should be kept in the list or not,
+    based on ... is it done?  should it repeat?
+    :param anim: the animation
+    :return: `True` if we retain it, `False` otherwise
     """
-
-    def __init__(self,
-                 font: ImageFont,
-                 name: str = None,
-                 position: tuple[int, int] = (0, 0),
-                 text: str = None,
-                 color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255),
-                 stroke_color: tuple[int, int, int] or tuple[int, int, int, int] = (0, 0, 0, 255),
-                 stroke_width: int = 0):
-        name = name or _get_sequential_name("Text")  # 'Text_' + f'{randrange(65536):04X}'
-        super().__init__(name=name, position=position)
-        self.font = font
-        self.text = text
-        self.color = color
-        self.stroke_color = stroke_color
-        self.stroke_width = stroke_width
-
-    def set_text(self, text: str):
-        if not text == self.text:
-            self.changes_since_last_render = True
-        self.text = text
-
-    def render(self, canvas: Canvas):
-        if self.text:
-            draw = canvas.image_draw
-            # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
-            #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
-            draw.text(self.position, self.text, fill=self.color, font=self.font,
-                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
-
-        self.changes_since_last_render = False
-
-
-class EmojiText(Actor):
-    """
-    Text that could contain emoji and that renders on a stage
-    """
-
-    def __init__(self,
-                 text_font: ImageFont,
-                 emoji_source: EmojiCDNSource = MicrosoftEmojiSource,
-                 name: str = None,
-                 position: tuple[int, int] = (0, 0),
-                 text: str = None,
-                 color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255),
-                 stroke_color: tuple[int, int, int] or tuple[int, int, int, int] = (0, 0, 0, 255),
-                 stroke_width: int = 0,
-                 emoji_scale_factor: float = 1.0,
-                 emoji_position_offset: tuple[int, int] = (0, 0)):
-        name = name or _get_sequential_name("EmojiText")  # 'Text_' + f'{randrange(65536):04X}'
-        super().__init__(name=name, position=position)
-        self.emoji_source = emoji_source
-        self.text_font = text_font
-        self.text = text
-        self.color = color
-        self.stroke_color = stroke_color
-        self.stroke_width = stroke_width
-        self.emoji_scale_factor = emoji_scale_factor
-        self.emoji_position_offset = emoji_position_offset
-        self.canvas = None  # we will prerender on this
-        self.pre_render()
-
-    def set_text(self, text: str):
-        if not text == self.text:
-            self.changes_since_last_render = True
-            self.pre_render()
-        self.text = text
-
-    def pre_render(self):
-        # logger.debug(f"Pre-rendering emoji text at {self.position} with color {self.color}, "
-        #              f"font {self.font.getname()}: '{self.text}'")
-        self.canvas = Canvas(background_fill=False)
-        if self.text:
-            with Pilmoji(self.canvas.image, source=self.emoji_source) as pilmoji:
-                pilmoji.text(self.position, self.text, self.color, self.text_font,
-                             stroke_width=self.stroke_width, stroke_fill=self.stroke_color,
-                             emoji_scale_factor=self.emoji_scale_factor,
-                             emoji_position_offset=self.emoji_position_offset)
-
-    def render(self, canvas: Canvas):
-        if self.text:
-            # logger.debug(f"Drawing pre-rendered emoji text at {self.position} with color {self.color}, "
-            #              f"font {self.font.getname()}: '{self.text}'")
-
-            canvas.image.alpha_composite(self.canvas.image, dest=(0, 0))
-        self.changes_since_last_render = False
-
-
-class Rectangle(Actor):
-    """
-    A rectangle that draws itself on a stage
-    """
-
-    def __init__(self,
-                 name: str = None,
-                 position: tuple[int, int] = (0, 0),
-                 size: tuple[int, int] = (0, 0),
-                 color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255),
-                 outline_color: tuple[int, int, int] or tuple[int, int, int, int] = (0, 0, 0, 255),
-                 outline_width: int = 0):
-        name = name or _get_sequential_name("Rectangle")  # 'Text_' + f'{randrange(65536):04X}'
-        super().__init__(name=name, position=position)
-        self.size = size
-        self.color = color
-        self.outline_color = outline_color
-        self.outline_width = outline_width
-
-    def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
-        self.color = color
-        self.changes_since_last_render = True
-
-    def set_outline_color(self, outline_color: tuple[int, int, int] or tuple[int, int, int, int]):
-        self.outline_color = outline_color
-        self.changes_since_last_render = True
-
-    def set_position(self, position: tuple[int, int]):
-        self.position = position
-        self.changes_since_last_render = True
-
-    def set_size(self, size: tuple[int, int]):
-        self.size = size
-        self.changes_since_last_render = True
-
-    def set_outline_width(self, outline_width: int):
-        self.outline_width = outline_width
-        self.changes_since_last_render = True
-
-    def render(self, canvas: Canvas):
-        draw = canvas.image_draw
-        opposite_corner = tuple(map(lambda i, j: i + j, self.position, self.size))
-        logging.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
-                      f"outline_color {self.outline_color} and outline_width {self.outline_width}")
-        draw.rectangle(self.position + opposite_corner, fill=self.color, outline=self.outline_color,
-                       width=self.outline_width)
-
-        self.changes_since_last_render = False
-
-
-class Line(Actor):
-    """
-    A line that draws itself on a stage
-    """
-
-    def __init__(self,
-                 name: str = None,
-                 start: tuple[int, int] = (0, 0),
-                 end: tuple[int, int] = (0, 0),
-                 color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255)):
-        name = name or _get_sequential_name("Line")  # 'Text_' + f'{randrange(65536):04X}'
-        # TODO account for start and end being in any order
-        super().__init__(name=name, position=start)
-        self.start = start
-        self.end = end
-        self.calc_size()
-        self.color = color
-
-    def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
-        self.color = color
-        self.changes_since_last_render = True
-
-    def set_start(self, start: tuple[int, int]):
-        self.start = start
-        self.calc_size()
-        self.changes_since_last_render = True
-
-    def set_end(self, end: tuple[int, int]):
-        self.end = end
-        self.calc_size()
-        self.changes_since_last_render = True
-
-    def calc_size(self):
-        self.size = abs(self.start[0] - self.end[0]), abs(self.start[1] - self.end[1])
-
-    def render(self, canvas: Canvas):
-        draw = canvas.image_draw
-        logging.debug(f"Drawing line from {self.start} to{self.end} with color {self.color}")
-        draw.line((self.start, self.end), fill=self.color, width=1)
-
-        self.changes_since_last_render = False
+    if anim.is_finished() and anim.should_repeat():
+        anim.reset()
+    return anim.is_finished() and not anim.should_repeat()
 
 
 class Stage(LMAEObject):
@@ -394,18 +169,28 @@ class Stage(LMAEObject):
     Rendering to the canvas is double-buffered, to avoid seeing intermediate renders on
     the LED matrix.
     """
-    def __init__(self, name=None, size: tuple[int, int] = (64, 32), actors: list = None, matrix: RGBMatrix = None,
+    def __init__(self, name=None, size: tuple[int, int] = (64, 32), actors: list[Actor] = None,
+                 animations: list[Animation] = None,
+                 matrix: RGBMatrix = None,
                  matrix_options: RGBMatrixOptions = None):
         name = name or _get_sequential_name("Stage")  # 'Stage_' + f'{randrange(65536):04X}'
         super().__init__(name)
         self.size = size        # size in pixels
         self.actors = actors or list()
+        self.animations = animations or list()
         self.canvas = Canvas(size=self.size)
         self.matrix = matrix or (RGBMatrix(options=matrix_options) if matrix_options else None)
         if not self.matrix:
             logger.warning("No matrix or matrix options were provided to the stage")
         self.double_buffer = self.matrix.CreateFrameCanvas()
         self.needs_render = True
+
+    def add_animation(self, animation: Animation):
+        """
+        Add an animation to this stage
+        :param animation: the animation to add
+        """
+        self.animations.append(animation)
 
     def prepare_frame(self):
         """
@@ -414,14 +199,26 @@ class Stage(LMAEObject):
         """
         self.canvas.blank()
 
-    def update_actors(self, frame_number: int):
+    def update_actors(self):
         """
-        Let all the actors update themselves
-        :return:
+        Let all the actors update themselves, including applying animations
         """
+        current_time = time.perf_counter()
+
+        # run all the animations
+        for anim in self.animations:
+            # see if we need to start them
+            if not anim.is_started():
+                anim.start(current_time)
+
+            # update each animation
+            anim.update_actor(current_time)
+            anim.last_render_time = current_time
+
+        # update the actors
         self.needs_render = False
         for actor in self.actors:
-            actor.update(frame_number)
+            actor.update()
             self.needs_render = self.needs_render or actor.changes_since_last_render
 
     def render_actors(self):
@@ -434,6 +231,13 @@ class Stage(LMAEObject):
                 actor.render(self.canvas)
             actor.changes_since_last_render = False
 
+    def post_render(self):
+        """
+        Perform post-render activities.
+        """
+        # clean up finished animations
+        self.animations[:] = [anim for anim in self.animations if _retain_animation(anim)]
+
     def display_frame(self):
         """
         Swap out the rendered frame on a vertical sync
@@ -442,18 +246,19 @@ class Stage(LMAEObject):
         self.double_buffer.SetImage(self.canvas.image.convert("RGB"), 0, 0)
         self.double_buffer = self.matrix.SwapOnVSync(self.double_buffer)
 
-    def render_frame(self, frame_number: int = 0):
+    def render_frame(self):
         """
         Do all steps to render and display a frame update
         :return:
         """
-        self.update_actors(frame_number)
+        self.update_actors()
         if self.needs_render:
             self.prepare_frame()
             self.render_actors()
             self.display_frame()
         else:
             pass  # no update needed
+        self.post_render()
 
 
 def parse_matrix_options_command_line():

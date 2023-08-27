@@ -11,7 +11,8 @@ import time
 
 from pilmoji.source import AppleEmojiSource
 
-from lmae_core import Stage, StillImage, MovingActor, Text, EmojiText, parse_matrix_options_command_line
+from lmae_core import Stage, parse_matrix_options_command_line
+from lmae_actor import StillImage, MovingActor, Text, EmojiText
 from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 

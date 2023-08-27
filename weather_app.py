@@ -1,9 +1,10 @@
-from lmae_module import AppModule
 import asyncio
 import time
 import json
 from vx_wx.vx_client import get_current_conditions_by_zipcode
-from lmae_core import Stage, Text, Line, SpriteImage
+from lmae_core import Stage
+from lmae_module import AppModule
+from lmae_actor import SpriteImage, Text, Line
 from PIL import Image, ImageFont
 
 
@@ -174,7 +175,6 @@ class WeatherApp(AppModule):
         await super().run()
         self.logger.debug("Run started")
         self.compose_view()
-        frame_number = 0
 
         try:
             while self.running:
@@ -183,8 +183,7 @@ class WeatherApp(AppModule):
 
                 # update the view
                 self.update_view(0)
-                self.stage.render_frame(frame_number)
-                frame_number += 1
+                self.stage.render_frame()
 
                 # wait 15 minutes
                 waiting = True
@@ -196,8 +195,7 @@ class WeatherApp(AppModule):
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time)
                     self.stage.needs_render = True  # have to force this for some reason
-                    self.stage.render_frame(frame_number)
-                    frame_number += 1
+                    self.stage.render_frame()
                     waiting = elapsed_time < self.refresh_time
 
         finally:
