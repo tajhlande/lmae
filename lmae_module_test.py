@@ -38,7 +38,7 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
 
 kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
 kirby_move_dist = 64 - kirby.size[0]
-kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=true,
+kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=True,
                       animations=[LinearMove(name='Kirby go right', movement=[0, 64 - kirby_move_dist], duration=2.0),
                                   LinearMove(name='Kirby go left', movement=[0, -64 + kirby_move_dist], duration=2.0)])
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
