@@ -167,7 +167,7 @@ def _retain_animation(anim: Animation) -> bool:
     :param anim: the animation
     :return: `True` if we retain it, `False` otherwise
     """
-    logger.debug(f"Retain animation {anim.name}? finished: {anim.is_finished()}, repeat: {anim.should_repeat()}")
+    # logger.debug(f"Retain animation {anim.name}? finished: {anim.is_finished()}, repeat: {anim.should_repeat()}")
     if anim.is_finished() and anim.should_repeat():
         anim.reset()
     return not anim.is_finished() or anim.should_repeat()
@@ -217,7 +217,7 @@ class Stage(LMAEObject):
         Let all the actors update themselves, including applying animations
         """
         current_time = time.perf_counter()
-        self.logger.debug(f"Current time: {current_time}")
+        # self.logger.debug(f"Current time: {current_time}")
 
         # run all the animations
         for anim in self.animations:
@@ -255,7 +255,7 @@ class Stage(LMAEObject):
         """
         # clean up finished animations
         self.animations = [anim for anim in self.animations if _retain_animation(anim)]
-        self.logger.debug(f"After post-render, animations list is now {len(self.animations)} long")
+        # self.logger.debug(f"After post-render, animations list is now {len(self.animations)} long")
 
     def display_frame(self):
         """
@@ -273,12 +273,12 @@ class Stage(LMAEObject):
         # self.logger.debug("Rendering the frame")
         self.update_actors()
         if self.needs_render:
-            self.logger.debug("Render update needed")
+            # self.logger.debug("Render update needed")
             self.prepare_frame()
             self.render_actors()
             self.display_frame()
         else:
-            self.logger.debug("Render update not needed")
+            # self.logger.debug("Render update not needed")
             pass  # no update needed
         self.post_render()
 

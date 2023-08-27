@@ -30,9 +30,9 @@ class LinearMove(Animation):
         if elapsed_time > self.duration:
             action_time = self.duration
         action_fraction = 0.0 if self.duration == 0 else action_time / self.duration
-        self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time}. "
-                          f"simulated: {simulated_time}s, elapsed: {elapsed_time}s, "
-                          f"fraction: {action_fraction}")
+        self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
+                          f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
+                          f"fraction: {action_fraction:.3f}")
 
         # interpolate movement
         d_x = round(self.distance[0] * action_fraction)
