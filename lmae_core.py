@@ -91,20 +91,20 @@ class Animation(LMAEObject, metaclass=ABCMeta):
     This base class should be extended to provide specific animation behaviors.
     """
 
-    def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False, duration: float = 1):
+    def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False, duration: float = 1.0):
         name = name or _get_sequential_name("Animation")
         super().__init__(name=name)
         self.actor = actor
         self.repeat: bool = repeat
         self.duration = duration
-        self.start_time: float = 0
-        self.last_update_time: float = 0
-        self.end_time: float = 0
+        self.start_time: float = 0.0
+        self.last_update_time: float = 0.0
+        self.end_time: float = 0.0
 
     def reset(self):
-        self.start_time = 0
-        self.last_update_time = 0
-        self.end_time = 0
+        self.start_time = 0.0
+        self.last_update_time = 0.0
+        self.end_time = 0.0
 
     def start(self, current_time: float):
         self.start_time = current_time
@@ -115,9 +115,9 @@ class Animation(LMAEObject, metaclass=ABCMeta):
     def should_repeat(self):
         return self.repeat
 
-    def get_elapsed_time(self, current_time) -> float:
+    def get_elapsed_time(self, current_time: float) -> float:
         if self.start_time == 0:
-            return 0
+            return 0.0
         return current_time - self.start_time
 
     def get_simulated_time(self):
