@@ -47,7 +47,7 @@ class LinearMove(Animation):
         y = self.actor.position[1] + net_d_y
         self.actor.position = (x, y)
         self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
-                          f"net mvmt: {(net_d_x, net_d_y)}")
+                          f"net mvmt: {(net_d_x, net_d_y)}, actor at {self.actor.position}")
 
         # account for movement
         self.accumulated_movement = (self.accumulated_movement[0] + net_d_x, self.accumulated_movement[1] + net_d_y)
