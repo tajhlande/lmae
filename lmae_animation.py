@@ -108,7 +108,7 @@ class Sequence(Animation):
             self.logger.debug(f"Animation {self.seq_index} finished, looking for next")
             self.seq_index += 1
             if self.seq_index >= len(self.animations):
-                self.logger("All animations finished")
+                self.logger.debug("All animations finished")
                 return  # nothing to do, we're done
             current_anim = self.animations[self.seq_index]
 
