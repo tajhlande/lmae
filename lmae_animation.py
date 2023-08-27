@@ -14,7 +14,6 @@ class LinearMove(Animation):
         name = name or _get_sequential_name("LinearMove")
         super().__init__(name=name, actor=actor, repeat=repeat, duration=duration)
         self.distance = distance or (0, 0)
-        self.start_position = self.actor.position
         self.accumulated_movement = (0, 0)
 
     def is_finished(self) -> bool:
@@ -22,7 +21,6 @@ class LinearMove(Animation):
 
     def start(self, current_time: float):
         super().start(current_time)
-        self.start_position: tuple[int, int] = self.actor.position
 
     def update_actor(self, current_time: float):
         #  all times relative to start
@@ -33,8 +31,8 @@ class LinearMove(Animation):
             action_time = self.duration
         action_fraction = 0.0 if self.duration == 0 else action_time / self.duration
         self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name}. "
-                          f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
-                          f"fraction: {action_fraction:.3f}")
+                          f"simulated: {simulated_time}s, elapsed: {elapsed_time}s, "
+                          f"fraction: {action_fraction}")
 
         # interpolate movement
         d_x = round(self.distance[0] * action_fraction)
