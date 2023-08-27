@@ -1,7 +1,7 @@
 import asyncio
 import time
 from abc import ABCMeta, abstractmethod
-from lmae_core import Stage
+from lmae_core import Stage, Actor, Animation
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 import logging
 from threading import Lock
@@ -68,10 +68,14 @@ class SingleStageRenderLoopAppModule(AppModule):
         self.lock = Lock()
         self.stage = None
         self.actors = list()
+        self.animations = list()
         self.pre_render_callback = None
 
-    def add_actors(self, *args):
+    def add_actors(self, *args: Actor):
         self.actors.extend(args)
+
+    def add_animations(self, *args: Animation):
+        self.animations.extend(args)
 
     def set_pre_render_callback(self, pre_render_callback: Callable[[int], None]):
         """
@@ -82,8 +86,8 @@ class SingleStageRenderLoopAppModule(AppModule):
         self.pre_render_callback = pre_render_callback
 
     def prepare(self):
-        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
-        self.stage.actors.extend(self.actors)
+        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options,
+                           actors=self.actors, animations=self.animations)
 
     async def run(self):
         await super().run()

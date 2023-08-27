@@ -2,6 +2,7 @@ import threading
 
 from lmae_core import parse_matrix_options_command_line
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from lmae_animation import LinearMove, Sequence
 from lmae_module import AppModule, SingleStageRenderLoopAppModule
 
 from threading import Thread
@@ -12,7 +13,8 @@ import time
 from pilmoji.source import AppleEmojiSource
 
 from lmae_core import Stage, parse_matrix_options_command_line
-from lmae_actor import StillImage, MovingActor, Text, EmojiText
+from lmae_actor import StillImage, Text, EmojiText
+from lmae_animation import LinearMove
 from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
@@ -35,7 +37,10 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
 
 
 kirby = StillImage(name='Kirby', position=(20, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
-moving_kirby = MovingActor(kirby, name="Moving Kirby", movement_function=kirby_movement)
+kirby_move_dist = 64 - kirby.size[0]
+kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=true,
+                      animations=[LinearMove(name='Kirby go right', movement=[0, 64 - kirby_move_dist], duration=2.0),
+                                  LinearMove(name='Kirby go left', movement=[0, -64 + kirby_move_dist], duration=2.0)])
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
@@ -44,7 +49,8 @@ words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
 
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(matrix, options=options)
-sample_app.add_actors(trees, words, moving_kirby, grass)
+sample_app.add_actors(trees, words, kirby, grass)
+sample_app.add_animations(kirby_anim)
 
 
 def stop_app(app: AppModule):

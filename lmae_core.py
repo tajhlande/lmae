@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
-logger = logging.getLogger("lmae.core")
+logger = logging.getLogger("lmae_core")
 logger.setLevel(logging.DEBUG)
 
 _current_sequence = dict()
@@ -86,24 +86,23 @@ class Actor(LMAEObject):
 class Animation(LMAEObject, metaclass=ABCMeta):
     """
     A clock-based way to update an actor based on elapsed real time.
-    This base class should be extended to provide specific animation types.
+    This base class should be extended to provide specific animation behaviors.
     """
 
-    def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False):
-        name = name or _get_sequential_name("Animation")  # 'Canvas_' + f'{randrange(65536):04X}'
+    def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False, duration: float = 1):
+        name = name or _get_sequential_name("Animation")
         super().__init__(name=name)
         self.actor = actor
+        self.repeat: bool = repeat
+        self.duration = duration
         self.start_time: float = 0
         self.last_update_time: float = 0
         self.end_time: float = 0
-        self.frame_count: int = 0
-        self.repeat: bool = repeat
 
     def reset(self):
         self.start_time = 0
         self.last_update_time = 0
         self.end_time = 0
-        self.frame_count = 0
 
     def start(self, current_time: float):
         self.start_time = current_time
@@ -114,13 +113,21 @@ class Animation(LMAEObject, metaclass=ABCMeta):
     def should_repeat(self):
         return self.repeat
 
-    def elapsed(self) -> float:
+    def get_elapsed_time(self, current_time) -> float:
+        if self.start_time == 0:
+            return 0
+        return current_time - self.start_time
+
+    def get_simulated_time(self):
         if self.start_time == 0:
             return 0
         if self.end_time == 0:
             return self.last_update_time - self.start_time
 
-        return self.end_time - self.start_time
+        return self.last_update_time - self.start_time
+
+    def set_update_time(self, update_time):
+        self.last_update_time = update_time
 
     @abstractmethod
     def is_finished(self) -> bool:
@@ -136,7 +143,7 @@ class Animation(LMAEObject, metaclass=ABCMeta):
         """
         Override this to update this animation's actor based on the current time.
 
-        Implementors must call this superclass method.
+        Implementors must call `this.set_updated_time(time)`, usually at the end of their implementation.
 
         Actors must correctly reflect their state of needing to be rendered after being updated.
         If updating would cause any changes in the way an actor is rendered, then
