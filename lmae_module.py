@@ -77,11 +77,11 @@ class SingleStageRenderLoopAppModule(AppModule):
     def add_animations(self, *args: Animation):
         self.animations.extend(args)
 
-    def set_pre_render_callback(self, pre_render_callback: Callable[[int], None]):
+    def set_pre_render_callback(self, pre_render_callback: Callable):
         """
         Set a function to be called before each render frame. This can be used to
         update actors. It should be fast!
-        :param pre_render_callback: Reference to a function that accepts the frame number as an argument
+        :param pre_render_callback: Reference to a function with no arguments
         """
         self.pre_render_callback = pre_render_callback
 
@@ -101,11 +101,10 @@ class SingleStageRenderLoopAppModule(AppModule):
             while self.running:
                 # call pre-render callback
                 if self.pre_render_callback:
-                    self.pre_render_callback(i)
+                    self.pre_render_callback()
 
                 # render the frame
-                self.stage.render_frame(i)
-                i += 1
+                self.stage.render_frame()
 
                 # calculate the frame rate and render that
                 render_end_time = time.perf_counter()
