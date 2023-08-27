@@ -113,7 +113,7 @@ class SingleStageRenderLoopAppModule(AppModule):
                 elapsed_render_time = render_end_time - last_time
                 if elapsed_render_time < min_time_per_frame:
                     sleep_time = min_time_per_frame - elapsed_render_time
-                    self.logger.debug(f"Sleeping for {sleep_time}")
+                    # self.logger.debug(f"Sleeping for {sleep_time}")
                     await asyncio.sleep(sleep_time)
 
                 # mark the timestamp

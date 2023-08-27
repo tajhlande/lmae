@@ -34,9 +34,9 @@ class LinearMove(Animation):
         if elapsed_time > self.duration:
             action_time = self.duration
         action_fraction = 0.0 if self.duration == 0 else action_time / self.duration
-        self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
-                          f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
-                          f"fraction: {action_fraction:.3f}")
+        # self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
+        #                   f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
+        #                   f"fraction: {action_fraction:.3f}")
 
         # interpolate movement
         d_x = round(self.distance[0] * action_fraction)
@@ -50,15 +50,15 @@ class LinearMove(Animation):
         x = self.actor.position[0] + net_d_x
         y = self.actor.position[1] + net_d_y
         self.actor.position = (x, y)
-        self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
-                          f"net mvmt: {(net_d_x, net_d_y)}, actor at {self.actor.position}")
+        # self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
+        #                   f"net mvmt: {(net_d_x, net_d_y)}, actor at {self.actor.position}")
 
         # account for movement
         self.accumulated_movement = (self.accumulated_movement[0] + net_d_x, self.accumulated_movement[1] + net_d_y)
 
         # finally
         if net_d_x != 0 or net_d_y != 0:
-            self.logger.debug(f"Setting actor {self.actor.name} changes_since_last_render to True")
+            # self.logger.debug(f"Setting actor {self.actor.name} changes_since_last_render to True")
             self.actor.changes_since_last_render = True
         self.set_update_time(current_time)
 
