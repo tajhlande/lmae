@@ -14,7 +14,7 @@ class LinearMove(Animation):
         name = name or _get_sequential_name("LinearMove")
         super().__init__(name=name, actor=actor, repeat=repeat, duration=duration)
         self.distance = distance or (0, 0)
-        self.start_position = actor.position
+        self.start_position = self.actor.position
         self.accumulated_movement = (0, 0)
         self.logger = logging.getLogger("name")
 
