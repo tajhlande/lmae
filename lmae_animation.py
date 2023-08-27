@@ -63,6 +63,7 @@ class Sequence(Animation):
 
     def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False, animations: list[Animation] = None):
         name = name or _get_sequential_name("Sequence")
+        print(f"Sequence name is '{name}")
         super().__init__(name=name, actor=actor, repeat=repeat)
         self.animations = animations or list()
         self.seq_index = -1
