@@ -249,7 +249,8 @@ class Stage(LMAEObject):
         Perform post-render activities.
         """
         # clean up finished animations
-        self.animations[:] = [anim for anim in self.animations if _retain_animation(anim)]
+        self.animations = [anim for anim in self.animations if _retain_animation(anim)]
+        self.logger.debug(f"After post-render, animations list is now {len(self.animations)} long")
 
     def display_frame(self):
         """
