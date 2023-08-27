@@ -1,5 +1,4 @@
 import json
-import logging
 
 from PIL import Image, ImageFont
 from pilmoji import Pilmoji
@@ -224,7 +223,7 @@ class Rectangle(Actor):
     def render(self, canvas: Canvas):
         draw = canvas.image_draw
         opposite_corner = tuple(map(lambda i, j: i + j, self.position, self.size))
-        logging.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
+        self.logger.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
                       f"outline_color {self.outline_color} and outline_width {self.outline_width}")
         draw.rectangle(self.position + opposite_corner, fill=self.color, outline=self.outline_color,
                        width=self.outline_width)
@@ -269,7 +268,7 @@ class Line(Actor):
 
     def render(self, canvas: Canvas):
         draw = canvas.image_draw
-        logging.debug(f"Drawing line from {self.start} to{self.end} with color {self.color}")
+        self.logger.debug(f"Drawing line from {self.start} to{self.end} with color {self.color}")
         draw.line((self.start, self.end), fill=self.color, width=1)
 
         self.changes_since_last_render = False

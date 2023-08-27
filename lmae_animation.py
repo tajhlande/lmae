@@ -16,7 +16,6 @@ class LinearMove(Animation):
         self.distance = distance or (0, 0)
         self.start_position = self.actor.position
         self.accumulated_movement = (0, 0)
-        self.logger = logging.getLogger(self.name)
 
     def is_finished(self) -> bool:
         return self.get_simulated_time() > self.duration
@@ -63,13 +62,12 @@ class Sequence(Animation):
 
     def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False, animations: list[Animation] = None):
         name = name or _get_sequential_name("Sequence")
-        print(f"Sequence name is '{name}")
+        print(f"Sequence name is '{name}'")
         super().__init__(name=name, actor=actor, repeat=repeat)
         self.animations = animations or list()
         self.seq_index = -1
         self.seq_start_time = 0
         self._compute_duration()
-        self.logger = logging.getLogger(self.name)
 
     def add_animations(self, *args: Animation):
         self.animations.extend(args)
