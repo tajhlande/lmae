@@ -113,7 +113,7 @@ class Sequence(Animation):
             current_anim = self.animations[self.seq_index]
 
         if not current_anim.is_started():
-            self.logger(f"Starting animation {self.seq_index}")
+            self.logger.debug(f"Starting animation {self.seq_index}")
             current_anim.start(current_time)
             self.seq_start_time = current_time
 
