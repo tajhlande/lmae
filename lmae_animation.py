@@ -86,7 +86,7 @@ class Sequence(Animation):
         self.logger.debug(f"computed duration is {self.duration}")
 
     def reset(self):
-        self.logger.debug("reset")
+        # self.logger.debug("reset")
         super().reset()
         for anim in self.animations:
             anim.reset()
@@ -94,7 +94,7 @@ class Sequence(Animation):
         self.seq_start_time = 0
 
     def start(self, current_time: float):
-        self.logger.debug("start")
+        # self.logger.debug("start")
         super().start(current_time)
         self.seq_index = 0
         self.seq_start_time = current_time

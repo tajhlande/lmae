@@ -109,7 +109,7 @@ class Animation(LMAEObject, metaclass=ABCMeta):
         self.end_time = 0.0
 
     def start(self, current_time: float):
-        self.logger.debug(f"Starting at {current_time}")
+        # self.logger.debug(f"Starting at {current_time}")
         self.started = True
         self.start_time = current_time
 
