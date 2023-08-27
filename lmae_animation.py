@@ -16,6 +16,10 @@ class LinearMove(Animation):
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
 
+    def reset(self):
+        super().reset()
+        self.accumulated_movement = (0, 0)
+
     def is_finished(self) -> bool:
         return self.get_simulated_time() > self.duration
 
