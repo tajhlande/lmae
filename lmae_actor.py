@@ -268,7 +268,7 @@ class Line(Actor):
 
     def render(self, canvas: Canvas):
         draw = canvas.image_draw
-        self.logger.debug(f"Drawing line from {self.start} to{self.end} with color {self.color}")
+        # self.logger.debug(f"Drawing line from {self.start} to {self.end} with color {self.color}")
         draw.line((self.start, self.end), fill=self.color, width=1)
 
         self.changes_since_last_render = False
