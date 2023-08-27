@@ -30,7 +30,7 @@ class LinearMove(Animation):
         if elapsed_time > self.duration:
             action_time = self.duration
         action_fraction = 0.0 if self.duration == 0 else action_time / self.duration
-        self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name}. "
+        self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time}. "
                           f"simulated: {simulated_time}s, elapsed: {elapsed_time}s, "
                           f"fraction: {action_fraction}")
 
