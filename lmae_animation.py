@@ -16,7 +16,7 @@ class LinearMove(Animation):
         self.distance = distance or (0, 0)
         self.start_position = self.actor.position
         self.accumulated_movement = (0, 0)
-        self.logger = logging.getLogger("name")
+        self.logger = logging.getLogger(self.name)
 
     def is_finished(self) -> bool:
         return self.get_simulated_time() > self.duration
