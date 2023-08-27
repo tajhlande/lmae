@@ -241,12 +241,11 @@ class Line(Actor):
                  start: tuple[int, int] = (0, 0),
                  end: tuple[int, int] = (0, 0),
                  color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255)):
-        name = name or _get_sequential_name("Line")  # 'Text_' + f'{randrange(65536):04X}'
-        # TODO account for start and end being in any order
+        name = name or _get_sequential_name("Line")
         super().__init__(name=name, position=start)
         self.start = start
         self.end = end
-        self.calc_size()
+        self.calc_size_and_position()
         self.color = color
 
     def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
@@ -255,16 +254,17 @@ class Line(Actor):
 
     def set_start(self, start: tuple[int, int]):
         self.start = start
-        self.calc_size()
+        self.calc_size_and_position()
         self.changes_since_last_render = True
 
     def set_end(self, end: tuple[int, int]):
         self.end = end
-        self.calc_size()
+        self.calc_size_and_position()
         self.changes_since_last_render = True
 
-    def calc_size(self):
+    def calc_size_and_position(self):
         self.size = abs(self.start[0] - self.end[0]), abs(self.start[1] - self.end[1])
+        self.set_position((min(self.start[0], self.end[0]), min(self.start[1], self.end[1])))
 
     def render(self, canvas: Canvas):
         draw = canvas.image_draw
