@@ -164,6 +164,7 @@ def _retain_animation(anim: Animation) -> bool:
     :param anim: the animation
     :return: `True` if we retain it, `False` otherwise
     """
+    logger.debug(f"Retain animation {anim.name}? finished: {anim.is_finished()}, repeat: {anim.should_repeat()}")
     if anim.is_finished() and anim.should_repeat():
         anim.reset()
     return anim.is_finished() and not anim.should_repeat()
@@ -218,6 +219,7 @@ class Stage(LMAEObject):
         for anim in self.animations:
             # see if we need to start them
             if not anim.is_started():
+                self.logger.debug(f"Animation {anim.name} is starting")
                 anim.start(current_time)
 
             # update each animation
