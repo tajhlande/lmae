@@ -55,6 +55,8 @@ class LinearMove(Animation):
         self.accumulated_movement = (self.accumulated_movement[0] + net_d_x, self.accumulated_movement[1] + net_d_y)
 
         # finally
+        if net_d_x != 0 or net_d_y != 0:
+            self.actor.changes_since_last_render = True
         self.set_update_time(current_time)
 
 

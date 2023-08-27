@@ -112,7 +112,9 @@ class SingleStageRenderLoopAppModule(AppModule):
                 # if we are rendering faster than max frame rate, slow down
                 elapsed_render_time = render_end_time - last_time
                 if elapsed_render_time < min_time_per_frame:
-                    await asyncio.sleep(min_time_per_frame - elapsed_render_time)
+                    sleep_time = min_time_per_frame - elapsed_render_time
+                    self.logger.debug(f"Sleeping for {sleep_time}")
+                    await asyncio.sleep(sleep_time)
 
                 # mark the timestamp
                 last_time = time.perf_counter()
