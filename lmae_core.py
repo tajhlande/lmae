@@ -30,6 +30,7 @@ class LMAEObject:
     def __init__(self, name: str = None):
         self.name = name or _get_sequential_name("Object")  # 'Object_' + f'{randrange(65536):04X}'
         self.logger = logging.getLogger(self.name)
+        self.logger.setLevel(logging.DEBUG)
 
 
 class Canvas(LMAEObject):
