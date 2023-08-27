@@ -221,7 +221,7 @@ class Stage(LMAEObject):
 
         # run all the animations
         for anim in self.animations:
-            self.logger.debug(f"Running animation {anim.name}")
+            # self.logger.debug(f"Running animation {anim.name}")
             # see if we need to start them
             if not anim.is_started():
                 self.logger.debug(f"Animation {anim.name} is starting")
