@@ -1,22 +1,14 @@
-import threading
-
-from lmae_core import parse_matrix_options_command_line
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
-from lmae_animation import LinearMove, Sequence
-from lmae_module import AppModule, SingleStageRenderLoopAppModule
-
-from threading import Thread
-import collections
+import asyncio
 import logging
-import time
+import sys
 
-from pilmoji.source import AppleEmojiSource
-
-from lmae_core import Stage, parse_matrix_options_command_line
-from lmae_actor import StillImage, Text, EmojiText
-from lmae_animation import LinearMove
 from PIL import Image, ImageFont
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
+
+from lmae_core import parse_matrix_options_command_line
+from lmae_actor import StillImage, Text
+from lmae_animation import LinearMove, Sequence
+from lmae_module import AppModule, SingleStageRenderLoopAppModule
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
 logger = logging.getLogger("app_module_test")
@@ -55,30 +47,33 @@ sample_app.add_actors(trees, words, kirby, grass)
 sample_app.add_animations(kirby_anim)
 
 
-def stop_app(app: AppModule):
+# borrowed from StackOverflow:
+# https://stackoverflow.com/questions/58454190/python-async-waiting-for-stdin-input-while-doing-other-stuff
+async def async_input(string: str) -> str:
+    await asyncio.to_thread(sys.stdout.write, f'{string} ')
+    return (await asyncio.to_thread(sys.stdin.readline)).rstrip('\n')
+
+
+async def stop_app(app: AppModule):
     logger.info("***** Press return to stop the app *****")
-    input()
+    await async_input('>')
     logger.debug("Return pressed")
     app.stop()
 
 
-def run_app(app: AppModule):
+async def run_app(app: AppModule):
     logger.debug("run_app() called")
     app.prepare()
 
-    logger.info("Starting stopper thread")
-    stopper_thread = Thread(target=stop_app, args=[app])
-    stopper_thread.start()
+    logger.info("Creating stopper task")
+    stopper_task = asyncio.create_task(stop_app(app))
 
-    logger.info("Running app")
-    app_thread = Thread(target=app.run)
-    app_thread.start()
+    logger.info("Creating app runner task")
+    app_runner_task = asyncio.create_task(app.run())
 
-    stopper_thread.join()
-    app_thread.join()
+    await asyncio.gather(stopper_task, app_runner_task)
 
     logger.debug("run_app() finished")
 
-
-run_app(sample_app)
+asyncio.run(run_app(sample_app))
 
