@@ -13,9 +13,9 @@ class LinearMove(Animation):
                  distance: tuple[int, int] = None, duration: float = 1.0):
         name = name or _get_sequential_name("LinearMove")
         super().__init__(name=name, actor=actor, repeat=repeat, duration=duration)
-        self.distance = distance or [0, 0]
+        self.distance = distance or (0, 0)
         self.start_position = actor.position
-        self.accumulated_movement = [0, 0]
+        self.accumulated_movement = (0, 0)
         self.logger = logging.getLogger("name")
 
     def is_finished(self) -> bool:
@@ -48,12 +48,12 @@ class LinearMove(Animation):
         # apply movement
         x = self.actor.position[0] + net_d_x
         y = self.actor.position[1] + net_d_y
-        self.actor.position = [x, y]
-        self.logger.debug(f"gross interp mvmt: {[d_x, d_y]}, accum mvmt: {self.accumulated_movement}, "
-                          f"net mvmt: {[net_d_x, net_d_y]}")
+        self.actor.position = (x, y)
+        self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
+                          f"net mvmt: {(net_d_x, net_d_y)}")
 
         # account for movement
-        self.accumulated_movement = [self.accumulated_movement[0] + net_d_x, self.accumulated_movement[1] + net_d_y]
+        self.accumulated_movement = (self.accumulated_movement[0] + net_d_x, self.accumulated_movement[1] + net_d_y)
 
         # finally
         self.set_update_time(current_time)
