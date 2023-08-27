@@ -167,7 +167,7 @@ def _retain_animation(anim: Animation) -> bool:
     logger.debug(f"Retain animation {anim.name}? finished: {anim.is_finished()}, repeat: {anim.should_repeat()}")
     if anim.is_finished() and anim.should_repeat():
         anim.reset()
-    return anim.is_finished() and not anim.should_repeat()
+    return not anim.is_finished() or anim.should_repeat()
 
 
 class Stage(LMAEObject):
