@@ -41,12 +41,14 @@ class Canvas(LMAEObject):
         name = name or _get_sequential_name("Canvas")  # 'Canvas_' + f'{randrange(65536):04X}'
         super().__init__(name=name)
         self.size = size
+        self.background_fill = background_fill
         self.image = Image.new("RGBA", self.size, (0, 0, 0, 255 if background_fill else 0))
         self.image_draw = ImageDraw.Draw(self.image)
 
     def blank(self):
         draw = ImageDraw.Draw(self.image)
-        draw.rectangle(((0, 0), (self.size[0] - 1, self.size[1] - 1)), fill='black', width=0)
+        draw.rectangle(((0, 0), (self.size[0] - 1, self.size[1] - 1)),
+                       fill=(0, 0, 0, 255 if self.background_fill else 0), width=0)
 
 
 class Actor(LMAEObject):
@@ -54,7 +56,7 @@ class Actor(LMAEObject):
     An object that appears on a stage and knows how to render itself
     """
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0)):
-        name = name or _get_sequential_name("Actor")  # 'Actor_' + f'{randrange(65536):04X}'
+        name = name or _get_sequential_name("Actor")
         super().__init__(name=name)
         self.position = position
         self.size = 0, 0
@@ -83,6 +85,16 @@ class Actor(LMAEObject):
     def render(self, canvas: Canvas):
         self.changes_since_last_render = False
         pass
+
+
+class CompositeActor(Actor, metaclass=ABCMeta):
+    """
+    Parent class for actors that are meant to modify the drawing behavior of other actors
+    """
+    def __init__(self, name: str = None, child: Actor = None, position: tuple[int, int] = (0, 0)):
+        name = name or _get_sequential_name("CompositeActor")
+        super().__init__(name=name, position=position)
+        self.child = child
 
 
 class Animation(LMAEObject, metaclass=ABCMeta):

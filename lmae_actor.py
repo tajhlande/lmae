@@ -4,7 +4,7 @@ from PIL import Image, ImageFont
 from pilmoji import Pilmoji
 from pilmoji.source import EmojiCDNSource, MicrosoftEmojiSource
 
-from lmae_core import Actor, _get_sequential_name, Canvas, logger
+from lmae_core import Actor, _get_sequential_name, Canvas, CompositeActor, logger
 
 
 class StillImage(Actor):
@@ -271,4 +271,70 @@ class Line(Actor):
         # self.logger.debug(f"Drawing line from {self.start} to {self.end} with color {self.color}")
         draw.line((self.start, self.end), fill=self.color, width=1)
 
+        self.changes_since_last_render = False
+
+
+class CropMask(CompositeActor):
+    """
+    Composite actor that will crop another actor's rendering to a defined rectangle.
+    Crop area is inclusive of those pixels.
+    Position and size here are for the entire croppable area, and crop_area is the part
+    you wish to be visible.
+    Default crop area is a central 1/4 of the total image.
+    """
+    def __init__(self, name: str = None, child: Actor = None,
+                 position: tuple[int, int] = (0, 0), size: tuple[int, int] = (64, 32),
+                 crop_area: tuple[int, int, int, int] = (16, 8, 47, 23)):
+        name = name or _get_sequential_name("CropMask")
+        super().__init__(name, child=child, position=position)
+        self.size = size
+        self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=False, size=size)
+        self.crop_rect_1 = (0, 0, 0, 0)
+        self.crop_rect_2 = (0, 0, 0, 0)
+        self.crop_rect_3 = (0, 0, 0, 0)
+        self.crop_rect_4 = (0, 0, 0, 0)
+        self.crop_area = (16, 8, 47, 23)
+        self.set_crop_area(crop_area)
+
+    def set_crop_area(self, crop_area: tuple[int, int, int, int]):
+        if self.crop_area != crop_area:
+            self.changes_since_last_render = True
+        self.crop_area = crop_area
+
+        """
+        Blanking out cropped out areas with black + alpha 0 by drawing 4 rectangles as follows:
+
+        1111111111111111
+        2222C+++++++3333
+        2222+++++++D3333
+        4444444444444444
+
+        where the area with +,C, & D represents the child's retained drawing area, and 1-4 represent the four
+        rectangles around the crop area that we will draw.
+        C = the first two coordinates of the crop area
+        D = the second two coordinates of the crop area
+        """
+        self.crop_rect_1 = (self.position[0], self.position[1], self.size[0] - 1, self.crop_area[1] - 1)
+        self.crop_rect_2 = (self.position[0], self.crop_area[1], self.crop_area[0] - 1, self.crop_area[3])
+        self.crop_rect_3 = (self.crop_area[2] + 1, self.crop_area[1], self.size[0] - 1, self.crop_area[3])
+        self.crop_rect_4 = (self.position[0], self.crop_area[3] + 1, self.size[0] - 1, self.size[1] - 1)
+
+    def render(self, canvas: Canvas):
+        # clear the crop canvas
+        self.crop_canvas.blank()
+
+        # ask the child to render into the crop canvas
+        self.child.render(self.crop_canvas)
+
+        # apply the crop by blanking out the relevant parts
+        crop_black = (0, 0, 0, 0)
+        draw = self.crop_canvas.image_draw
+        for rect in [self.crop_rect_1, self.crop_rect_2, self.crop_rect_3, self.crop_rect_4]:
+            width = rect[2] - rect[0]
+            height = rect[3] - rect[1]
+            if width >= 0 and height >= 0:  # 0 actually means draw a single pixel width/height
+                draw.rectangle(rect, fill=crop_black, width=1)
+
+        # composite downwards
+        canvas.image.alpha_composite(self.crop_canvas.image, dest=self.position)
         self.changes_since_last_render = False
