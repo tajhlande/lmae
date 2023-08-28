@@ -1,4 +1,5 @@
 import json
+import logging
 
 from PIL import Image, ImageFont
 from pilmoji import Pilmoji
@@ -288,13 +289,14 @@ class CropMask(CompositeActor):
         name = name or _get_sequential_name("CropMask")
         super().__init__(name, child=child, position=position)
         self.size = size
-        self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=size)
+        self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=False, size=size)
         self.crop_rect_1 = (0, 0, 0, 0)
         self.crop_rect_2 = (0, 0, 0, 0)
         self.crop_rect_3 = (0, 0, 0, 0)
         self.crop_rect_4 = (0, 0, 0, 0)
         self.crop_area = (16, 8, 47, 23)
         self.set_crop_area(crop_area)
+        self.logger = logging.getLogger(name)
 
     def set_crop_area(self, crop_area: tuple[int, int, int, int]):
         if self.crop_area != crop_area:
@@ -321,8 +323,9 @@ class CropMask(CompositeActor):
 
     def render(self, canvas: Canvas):
         if self.child:
-            # clear the crop canvas
-            self.crop_canvas.blank()
+            self.logger.debug("Rendering crop")
+            # set up the crop canvas
+            self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=self.size)
 
             # ask the child to render into the crop canvas
             self.child.render(self.crop_canvas)
@@ -334,9 +337,13 @@ class CropMask(CompositeActor):
                 width = rect[2] - rect[0]
                 height = rect[3] - rect[1]
                 if width >= 0 and height >= 0:  # 0 actually means draw a single pixel width/height
-                    draw.rectangle(rect, fill=crop_black, width=1)
+                    self.logger.debug(f"Drawing crop rect ({rect})")
+                    draw.rectangle(rect, fill=crop_black, width=0)
+                else:
+                    self.logger.debug(f"Not drawing crop rect ({rect}) because it has negative width or height")
 
-            # composite downwards
+            # composite the crop canvas into the parameter canvas
             canvas.image.alpha_composite(self.crop_canvas.image, dest=self.position)
-
+        else:
+            self.logger.warning("No child to render")
         self.changes_since_last_render = False
