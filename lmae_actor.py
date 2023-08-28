@@ -338,7 +338,7 @@ class CropMask(CompositeActor):
                 height = rect[3] - rect[1]
                 if width >= 0 and height >= 0:  # 0 actually means draw a single pixel width/height
                     self.logger.debug(f"Drawing crop rect ({rect})")
-                    draw.rectangle(rect, fill=crop_black, width=0)
+                    draw.rectangle(rect, fill=crop_black, width=1)
                 else:
                     self.logger.debug(f"Not drawing crop rect ({rect}) because it has negative width or height")
 
