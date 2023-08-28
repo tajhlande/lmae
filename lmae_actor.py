@@ -288,7 +288,7 @@ class CropMask(CompositeActor):
         name = name or _get_sequential_name("CropMask")
         super().__init__(name, child=child, position=position)
         self.size = size
-        self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=False, size=size)
+        self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=size)
         self.crop_rect_1 = (0, 0, 0, 0)
         self.crop_rect_2 = (0, 0, 0, 0)
         self.crop_rect_3 = (0, 0, 0, 0)
@@ -320,21 +320,23 @@ class CropMask(CompositeActor):
         self.crop_rect_4 = (self.position[0], self.crop_area[3] + 1, self.size[0] - 1, self.size[1] - 1)
 
     def render(self, canvas: Canvas):
-        # clear the crop canvas
-        self.crop_canvas.blank()
+        if self.child:
+            # clear the crop canvas
+            self.crop_canvas.blank()
 
-        # ask the child to render into the crop canvas
-        self.child.render(self.crop_canvas)
+            # ask the child to render into the crop canvas
+            self.child.render(self.crop_canvas)
 
-        # apply the crop by blanking out the relevant parts
-        crop_black = (0, 0, 0, 0)
-        draw = self.crop_canvas.image_draw
-        for rect in [self.crop_rect_1, self.crop_rect_2, self.crop_rect_3, self.crop_rect_4]:
-            width = rect[2] - rect[0]
-            height = rect[3] - rect[1]
-            if width >= 0 and height >= 0:  # 0 actually means draw a single pixel width/height
-                draw.rectangle(rect, fill=crop_black, width=1)
+            # apply the crop by blanking out the relevant parts
+            crop_black = (0, 0, 0, 0)
+            draw = self.crop_canvas.image_draw
+            for rect in [self.crop_rect_1, self.crop_rect_2, self.crop_rect_3, self.crop_rect_4]:
+                width = rect[2] - rect[0]
+                height = rect[3] - rect[1]
+                if width >= 0 and height >= 0:  # 0 actually means draw a single pixel width/height
+                    draw.rectangle(rect, fill=crop_black, width=1)
 
-        # composite downwards
-        canvas.image.alpha_composite(self.crop_canvas.image, dest=self.position)
+            # composite downwards
+            canvas.image.alpha_composite(self.crop_canvas.image, dest=self.position)
+
         self.changes_since_last_render = False
