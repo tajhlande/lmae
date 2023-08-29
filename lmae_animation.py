@@ -1,16 +1,16 @@
 import logging
-from enum import Enum
+from enum import StrEnum
 from lmae_core import Actor, Animation, _get_sequential_name
 
 
-class Easing(Enum):
+class Easing(StrEnum):
     """
     Easing function variations
     """
-    LINEAR = 1
-    QUADRATIC = 2
-    BEZIER = 3
-    PARAMETRIC = 4
+    LINEAR = "linear"
+    QUADRATIC = "quadratic"
+    BEZIER = "bezier"
+    PARAMETRIC = "parametric"
 
 
 class StraightMove(Animation):
@@ -31,6 +31,8 @@ class StraightMove(Animation):
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
         self.easing = easing
+        self.logger = logging.getLogger(name)
+        self.logger.debug(f"Easing function is {self.easing}")
 
     def reset(self):
         super().reset()
@@ -66,9 +68,6 @@ class StraightMove(Animation):
         if elapsed_time > self.duration:
             action_time = self.duration
         duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
-        # self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
-        #                   f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
-        #                   f"fraction: {action_fraction:.3f}")
 
         if self.easing == Easing.QUADRATIC:
             easing_fraction = self._quadratic_easing(duration_fraction)
@@ -79,9 +78,13 @@ class StraightMove(Animation):
         else:
             easing_fraction = duration_fraction
 
+        # self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
+        #                   f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
+        #                   f"duration fraction: {duration_fraction:.3f}, easing fraction: {easing_fraction:.3f}")
+
         # interpolate movement
-        d_x = round(self.distance[0] * duration_fraction)
-        d_y = round(self.distance[1] * duration_fraction)
+        d_x = round(self.distance[0] * easing_fraction)
+        d_y = round(self.distance[1] * easing_fraction)
 
         # subtract accumulated movement
         net_d_x = d_x - self.accumulated_movement[0]
