@@ -51,7 +51,7 @@ class Canvas(LMAEObject):
                        fill=(0, 0, 0, 255 if self.background_fill else 0), width=1)
 
 
-class Actor(LMAEObject, meta=ABCMeta):
+class Actor(LMAEObject, metaclass=ABCMeta):
     """
     An object that appears on a stage and knows how to render itself
     """
