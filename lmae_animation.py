@@ -1,5 +1,5 @@
 import logging
-from enum import Enum
+from enum import auto, Enum
 from lmae_core import Actor, Animation, _get_sequential_name
 
 
@@ -7,10 +7,11 @@ class Easing(Enum):
     """
     Easing function variations
     """
-    LINEAR = "linear"
-    QUADRATIC = "quadratic"
-    BEZIER = "bezier"
-    PARAMETRIC = "parametric"
+    LINEAR = auto()
+    QUADRATIC = auto()
+    BEZIER = auto()
+    PARAMETRIC = auto()
+    BACK = auto()
 
 
 class StraightMove(Animation):
@@ -57,6 +58,19 @@ class StraightMove(Animation):
     def _parametric_easing(t: float):
         square_t = t * t
         return square_t / (2.0 * (square_t - t) + 1.0)
+
+    # constants for back easing
+    _eb_c1 = 1.70158
+    _eb_c2 = _eb_c1 * 1.525
+
+    @staticmethod
+    def _back_easing(t: float):
+        # c1 = StraightMove._eb_c1
+        c2 = StraightMove._eb_c2
+        if t < 0.5:
+            return (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
+        else:
+            return (pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2
 
     def update_actor(self, current_time: float):
         #  all times relative to start
