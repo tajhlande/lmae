@@ -33,22 +33,26 @@ class StraightMove(Animation):
         self.accumulated_movement = (0, 0)
         self.easing = None
         self.set_easing(easing)
-        self.easing_function = lambda t: t  # default linear
         self.logger = logging.getLogger(name)
 
     def set_easing(self, easing: Easing):
         self.easing = easing
         self.logger.debug(f"Easing: {easing}")
         if self.easing == Easing.QUADRATIC:
+            self.logger.debug("Setting quadratic easing function")
             self.easing_function = self._quadratic_easing
         elif self.easing == Easing.BEZIER:
+            self.logger.debug("Setting Bézier easing function")
             self.easing_function = self._bezier_easing
         elif self.easing == Easing.PARAMETRIC:
+            self.logger.debug("Setting parametric easing function")
             self.easing_function = self._parametric_easing
         elif self.easing == Easing.BACK:
+            self.logger.debug("Setting back easing function")
             self.easing_function = self._back_easing
         else:
-            self.easing_function = lambda t: t  # default linear
+            self.logger.debug("Setting linear easing function")
+            self.easing_function = self._linear_easing
 
     def reset(self):
         super().reset()
@@ -59,6 +63,10 @@ class StraightMove(Animation):
 
     def start(self, current_time: float):
         super().start(current_time)
+
+    @staticmethod
+    def _linear_easing(t: float):
+        return t
 
     @staticmethod
     def _quadratic_easing(t: float):
