@@ -27,7 +27,7 @@ def make_cubic_bezier(p0: float, p1: float, p2: float, p3: float) -> Callable[[f
     :param p3: Bézier parameter P3
     :return: A lambda that applies the cubic Bézier function with the given parameters
     """
-    return lambda t: (1-t)**3 * p0 + t*p1*(3*(1-t)**2) + p2*(3*(1-t)*t**2) + p3*t**3
+    return lambda t: ((1-t)**3) * p0 + t*p1*(3*((1-t)**2)) + p2*(3*(1-t)*(t**2)) + p3*(t**3)
 
 
 def _linear_easing(t: float):
