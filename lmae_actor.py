@@ -326,7 +326,7 @@ class CropMask(CompositeActor):
 
     def render(self, canvas: Canvas):
         if self.child:
-            self.logger.debug("Rendering crop")
+            # self.logger.debug("Rendering crop")
             # set up the crop canvas
             self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=self.size)
 
@@ -340,13 +340,15 @@ class CropMask(CompositeActor):
                 width = rect[2] - rect[0]
                 height = rect[3] - rect[1]
                 if width >= 0 and height >= 0:  # 0 actually means draw a single pixel width/height
-                    self.logger.debug(f"Drawing crop rect ({rect})")
+                    # self.logger.debug(f"Drawing crop rect ({rect})")
                     draw.rectangle(rect, fill=crop_black, width=1)
                 else:
-                    self.logger.debug(f"Not drawing crop rect ({rect}) because it has negative width or height")
+                    # self.logger.debug(f"Not drawing crop rect ({rect}) because it has negative width or height")
+                    pass
 
             # composite the crop canvas into the parameter canvas
             canvas.image.alpha_composite(self.crop_canvas.image, dest=self.position)
         else:
-            self.logger.warning("No child to render")
+            # self.logger.warning("No child to render")
+            pass
         self.changes_since_last_render = False
