@@ -48,10 +48,10 @@ class Canvas(LMAEObject):
     def blank(self):
         draw = ImageDraw.Draw(self.image)
         draw.rectangle(((0, 0), (self.size[0] - 1, self.size[1] - 1)),
-                       fill=(0, 0, 0, 255 if self.background_fill else 0), width=0)
+                       fill=(0, 0, 0, 255 if self.background_fill else 0), width=1)
 
 
-class Actor(LMAEObject):
+class Actor(LMAEObject, meta=ABCMeta):
     """
     An object that appears on a stage and knows how to render itself
     """
@@ -82,6 +82,10 @@ class Actor(LMAEObject):
     def update(self):
         pass
 
+    def needs_render(self):
+        return self.changes_since_last_render
+
+    @abstractmethod
     def render(self, canvas: Canvas):
         self.changes_since_last_render = False
         pass
@@ -95,6 +99,10 @@ class CompositeActor(Actor, metaclass=ABCMeta):
         name = name or _get_sequential_name("CompositeActor")
         super().__init__(name=name, position=position)
         self.child = child
+
+    def needs_render(self):
+        return self.changes_since_last_render or (self.child.needs_render() if self.child else False)
+
 
 
 class Animation(LMAEObject, metaclass=ABCMeta):
@@ -248,7 +256,7 @@ class Stage(LMAEObject):
         self.needs_render = False
         for actor in self.actors:
             actor.update()
-            self.needs_render = self.needs_render or actor.changes_since_last_render
+            self.needs_render = self.needs_render or actor.needs_render()
             # self.logger.debug(f"Needs render after {actor.name}: {self.needs_render}")
 
     def render_actors(self):

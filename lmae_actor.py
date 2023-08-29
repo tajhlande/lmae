@@ -24,11 +24,14 @@ class StillImage(Actor):
         self.image = image
         self.size = self.image.size if self.image else (0, 0)
 
-    def set_from_file(self, filename):
-        self.image = Image.open(filename)
+    def set_from_image(self, image: Image):
+        self.image = image
         if not self.image.mode == 'RGBA':
             self.image = self.image.convert('RGBA')
         self.size = self.image.size
+
+    def set_from_file(self, filename: str):
+        self.set_from_image(Image.open(filename))
 
     def render(self, canvas: Canvas):
         if self.image:
@@ -330,7 +333,7 @@ class CropMask(CompositeActor):
             # ask the child to render into the crop canvas
             self.child.render(self.crop_canvas)
 
-            # apply the crop by blanking out the relevant parts
+            # apply the crop by blanking out the relevant parts with full alpha
             crop_black = (0, 0, 0, 0)
             draw = self.crop_canvas.image_draw
             for rect in [self.crop_rect_1, self.crop_rect_2, self.crop_rect_3, self.crop_rect_4]:
