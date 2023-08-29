@@ -1,9 +1,9 @@
 import logging
-from enum import StrEnum
+from enum import Enum
 from lmae_core import Actor, Animation, _get_sequential_name
 
 
-class Easing(StrEnum):
+class Easing(Enum):
     """
     Easing function variations
     """
