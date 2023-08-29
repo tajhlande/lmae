@@ -7,7 +7,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 from lmae_core import parse_matrix_options_command_line
 from lmae_actor import StillImage, Text, CropMask
-from lmae_animation import LinearMove, Sequence
+from lmae_animation import StraightMove, Sequence, Easing
 from lmae_module import AppModule, SingleStageRenderLoopAppModule
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
@@ -31,19 +31,21 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
 kirby = StillImage(name='Kirby', position=(0, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
 kirby_move_dist = 64 - kirby.size[0]
 logger.debug(f"Kirby move distance is {kirby_move_dist}")
-kirby_go_right = LinearMove(name='Kirby go right', actor=kirby, distance=(kirby_move_dist, 0), duration=2.0)
-kirby_go_left = LinearMove(name='Kirby go left', actor=kirby, distance=(-kirby_move_dist, 0), duration=2.0)
+kirby_go_right = StraightMove(name='Kirby go right', actor=kirby, distance=(kirby_move_dist, 0),
+                              duration=2.0, easing=Easing.QUADRATIC)
+kirby_go_left = StraightMove(name='Kirby go left', actor=kirby, distance=(-kirby_move_dist, 0),
+                             duration=2.0, easing=Easing.PARAMETRIC)
 kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=True, animations=[kirby_go_right, kirby_go_left])
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
              font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 6),  # good option for fitting a lot
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-trees_cropped = CropMask(name='Trees Crop', child=trees, crop_area=(16, 8, 47, 24))
+# trees_cropped = CropMask(name='Trees Crop', child=trees, crop_area=(16, 8, 47, 24))
 
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(matrix, options=options)
-sample_app.add_actors(trees_cropped, words, kirby, grass)
+sample_app.add_actors(trees, words, kirby, grass)
 sample_app.add_animations(kirby_anim)
 
 

@@ -1,20 +1,36 @@
 import logging
+from enum import Enum
 from lmae_core import Actor, Animation, _get_sequential_name
 
 
-class LinearMove(Animation):
+class Easing(Enum):
     """
-    This moves an actor a certain distance in a particular direction at a constant rate
-    over a period of time.  It is designed to function as additive movement
+    Easing function variations
+    """
+    LINEAR = 1
+    QUADRATIC = 2
+    BEZIER = 3
+    PARAMETRIC = 4
+
+
+class StraightMove(Animation):
+    """
+    This moves an actor a certain distance straight in a particular direction
+    at a certain rate over a period of time.  It is designed to function as additive movement
     when combined with other animations.
+    The rate can be linear, quadratic, Bézier, or parametric.
+    Thanks to  https://stackoverflow.com/questions/13462001/ease-in-and-ease-out-animation-formula for the formulas.
+    More easing formulas can be found here: https://gizma.com/easing/
     """
 
     def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False,
-                 distance: tuple[int, int] = None, duration: float = 1.0):
+                 distance: tuple[int, int] = None, duration: float = 1.0,
+                 easing: Easing = Easing.LINEAR):
         name = name or _get_sequential_name("LinearMove")
         super().__init__(name=name, actor=actor, repeat=repeat, duration=duration)
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
+        self.easing = easing
 
     def reset(self):
         super().reset()
@@ -26,6 +42,22 @@ class LinearMove(Animation):
     def start(self, current_time: float):
         super().start(current_time)
 
+    @staticmethod
+    def _quadratic_easing(t: float):
+        if t <= 0.5:
+            return 2.0 * t * t
+        t -= 0.5
+        return 2.0 * t * (1.0 - t) + 0.5
+
+    @staticmethod
+    def _bezier_easing(t: float):
+        return t * t * (3.0 - 2.0 * t)
+
+    @staticmethod
+    def _parametric_easing(t: float):
+        square_t = t * t
+        return square_t / (2.0 * (square_t - t) + 1.0)
+
     def update_actor(self, current_time: float):
         #  all times relative to start
         elapsed_time = self.get_elapsed_time(current_time)
@@ -33,14 +65,23 @@ class LinearMove(Animation):
         action_time = elapsed_time
         if elapsed_time > self.duration:
             action_time = self.duration
-        action_fraction = 0.0 if self.duration == 0 else action_time / self.duration
+        duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
         # self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
         #                   f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
         #                   f"fraction: {action_fraction:.3f}")
 
+        if self.easing == Easing.QUADRATIC:
+            easing_fraction = self._quadratic_easing(duration_fraction)
+        elif self.easing == Easing.BEZIER:
+            easing_fraction = self._bezier_easing(duration_fraction)
+        elif self.easing == Easing.PARAMETRIC:
+            easing_fraction = self._parametric_easing(duration_fraction)
+        else:
+            easing_fraction = duration_fraction
+
         # interpolate movement
-        d_x = round(self.distance[0] * action_fraction)
-        d_y = round(self.distance[1] * action_fraction)
+        d_x = round(self.distance[0] * duration_fraction)
+        d_y = round(self.distance[1] * duration_fraction)
 
         # subtract accumulated movement
         net_d_x = d_x - self.accumulated_movement[0]
