@@ -1,5 +1,7 @@
 import logging
 from enum import auto, Enum
+from typing import Callable
+
 from lmae_core import Actor, Animation, _get_sequential_name
 
 
@@ -12,6 +14,7 @@ class Easing(Enum):
     BEZIER = auto()
     PARAMETRIC = auto()
     BACK = auto()
+    CUSTOM = auto()
 
 
 class StraightMove(Animation):
@@ -38,22 +41,26 @@ class StraightMove(Animation):
 
     def set_easing(self, easing: Easing):
         self.easing = easing
-        self.logger.debug(f"Easing: {easing}")
         if self.easing == Easing.QUADRATIC:
-            self.logger.debug("Setting quadratic easing function")
-            self.easing_function = self._quadratic_easing
+            self.set_easing_function(self._quadratic_easing, easing=easing)
         elif self.easing == Easing.BEZIER:
-            self.logger.debug("Setting Bézier easing function")
-            self.easing_function = self._bezier_easing
+            self.set_easing_function(self._bezier_easing, easing=easing)
         elif self.easing == Easing.PARAMETRIC:
-            self.logger.debug("Setting parametric easing function")
-            self.easing_function = self._parametric_easing
+            self.set_easing_function(self._parametric_easing, easing=easing)
         elif self.easing == Easing.BACK:
-            self.logger.debug("Setting back easing function")
-            self.easing_function = self._back_easing
+            self.set_easing_function(self._back_easing, easing=easing)
         else:
-            self.logger.debug("Setting linear easing function")
-            self.easing_function = self._linear_easing
+            self.set_easing_function(self._linear_easing, easing=easing)
+
+    def set_easing_function(self, easing_function: Callable[[float], float], easing: Easing = Easing.CUSTOM):
+        """
+        To set a custom function for easing
+        :param easing_function: A function that takes a float t: 0 <= t <= 1 and returns a float t: 0 <= t <= 1
+        :param easing: If setting a built-in easing function, set this to the matching enum value
+        """
+        self.logger.debug(f"Setting easing to {easing.value}")
+        self.easing_function = easing_function
+        self.easing = easing
 
     def reset(self):
         super().reset()
