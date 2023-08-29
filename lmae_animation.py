@@ -58,7 +58,7 @@ class StraightMove(Animation):
         :param easing_function: A function that takes a float t: 0 <= t <= 1 and returns a float t: 0 <= t <= 1
         :param easing: If setting a built-in easing function, set this to the matching enum value
         """
-        self.logger.debug(f"Setting easing to {easing.value}")
+        self.logger.debug(f"Setting easing to {easing.name}")
         self.easing_function = easing_function
         self.easing = easing
 
