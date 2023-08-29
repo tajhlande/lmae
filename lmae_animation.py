@@ -94,7 +94,7 @@ class StraightMove(Animation):
         """
         To set a custom function for easing
         :param easing_function: A function that takes a float t: 0 <= t <= 1 and returns a float t: 0 <= t <= 1
-        :param easing: If setting a built-in easing function, set this to the matching enum value
+        :param easing: If setting a provided easing function, set this to the matching enum value
         """
         self.logger.debug(f"Setting easing to {easing.name}")
         self.easing_function = easing_function
@@ -113,7 +113,7 @@ class StraightMove(Animation):
     def update_actor(self, current_time: float):
         #  all times relative to start
         elapsed_time = self.get_elapsed_time(current_time)
-        simulated_time = self.get_simulated_time()
+        # simulated_time = self.get_simulated_time()
         action_time = elapsed_time
         if elapsed_time > self.duration:
             action_time = self.duration
