@@ -17,6 +17,54 @@ class Easing(Enum):
     CUSTOM = auto()
 
 
+def make_cubic_bezier(p0: float, p1: float, p2: float, p3: float) -> Callable[[float], float]:
+    """
+    Use this method to create a custom cubic Bézier function that can be used for easing.
+    Thanks to https://blog.maximeheckel.com/posts/cubic-bezier-from-math-to-motion/
+    :param p0: Bézier parameter P0
+    :param p1: Bézier parameter P1
+    :param p2: Bézier parameter P2
+    :param p3: Bézier parameter P3
+    :return: A lambda that applies the cubic Bézier function with the given parameters
+    """
+    return lambda t: (1-t)**3 * p0 + t*p1*(3*(1-t)**2) + p2*(3*(1-t)*t**2) + p3*t**3
+
+
+def _linear_easing(t: float):
+    return t
+
+
+def _quadratic_easing(t: float):
+    if t <= 0.5:
+        return 2.0 * t * t
+    t -= 0.5
+    return 2.0 * t * (1.0 - t) + 0.5
+
+
+def _bezier_easing(t: float):
+    return t * t * (3.0 - 2.0 * t)
+
+
+def _parametric_easing(t: float):
+    square_t = t * t
+    return square_t / (2.0 * (square_t - t) + 1.0)
+
+
+_back_easing = make_cubic_bezier(0.68, -0.6, 0.32, 1.6)
+
+# constants for back easing
+# eb_c1 = 1.70158
+# _eb_c2 = _eb_c1 * 1.525
+
+# def _back_easing(t: float):
+#     # c1 = StraightMove._eb_c1
+#     c2 = StraightMove._eb_c2
+#     if t < 0.5:
+#         return (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
+#     else:
+#         return (pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2
+
+
 class StraightMove(Animation):
     """
     This moves an actor a certain distance straight in a particular direction
@@ -40,17 +88,21 @@ class StraightMove(Animation):
         self.logger = logging.getLogger(name)
 
     def set_easing(self, easing: Easing):
+        """
+        Set the easing method for this motion.
+        :param easing: The easing enum value
+        """
         self.easing = easing
         if self.easing == Easing.QUADRATIC:
-            self.set_easing_function(self._quadratic_easing, easing=easing)
+            self.set_easing_function(_quadratic_easing, easing=easing)
         elif self.easing == Easing.BEZIER:
-            self.set_easing_function(self._bezier_easing, easing=easing)
+            self.set_easing_function(_bezier_easing, easing=easing)
         elif self.easing == Easing.PARAMETRIC:
-            self.set_easing_function(self._parametric_easing, easing=easing)
+            self.set_easing_function(_parametric_easing, easing=easing)
         elif self.easing == Easing.BACK:
-            self.set_easing_function(self._back_easing, easing=easing)
+            self.set_easing_function(_back_easing, easing=easing)
         else:
-            self.set_easing_function(self._linear_easing, easing=easing)
+            self.set_easing_function(_linear_easing, easing=easing)
 
     def set_easing_function(self, easing_function: Callable[[float], float], easing: Easing = Easing.CUSTOM):
         """
@@ -71,54 +123,6 @@ class StraightMove(Animation):
 
     def start(self, current_time: float):
         super().start(current_time)
-
-
-    @staticmethod
-    def make_cubic_bezier(p0: float, p1: float, p2: float, p3: float):
-        """
-        Use this method to create a custom cubic Bézier function that can be used for easing.
-        Thanks to https://blog.maximeheckel.com/posts/cubic-bezier-from-math-to-motion/
-        :param p0: Bézier parameter P0
-        :param p1: Bézier parameter P1
-        :param p2: Bézier parameter P2
-        :param p3: Bézier parameter P3
-        :return: A lambda function that accepts t and returns the applied cubic bezier
-        """
-        return lambda t: (1-t)**3 * p0 + t*p1*(3*(1-t)**2) + p2*(3*(1-t)*t**2) + p3*t**3
-
-    @staticmethod
-    def _linear_easing(t: float):
-        return t
-
-    @staticmethod
-    def _quadratic_easing(t: float):
-        if t <= 0.5:
-            return 2.0 * t * t
-        t -= 0.5
-        return 2.0 * t * (1.0 - t) + 0.5
-
-    @staticmethod
-    def _bezier_easing(t: float):
-        return t * t * (3.0 - 2.0 * t)
-
-    @staticmethod
-    def _parametric_easing(t: float):
-        square_t = t * t
-        return square_t / (2.0 * (square_t - t) + 1.0)
-
-    # constants for back easing
-    #_eb_c1 = 1.70158
-    #_eb_c2 = _eb_c1 * 1.525
-
-    _back_easing = make_cubic_bezier(0.68, -0.6, 0.32, 1.6)
-
-    # def _back_easing(t: float):
-    #     # c1 = StraightMove._eb_c1
-    #     c2 = StraightMove._eb_c2
-    #     if t < 0.5:
-    #         return (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
-    #     else:
-    #         return (pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2
 
     def update_actor(self, current_time: float):
         #  all times relative to start
