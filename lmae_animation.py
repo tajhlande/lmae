@@ -32,6 +32,7 @@ class StraightMove(Animation):
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
         self.easing = None
+        self.easing_function = None
         self.set_easing(easing)
         self.logger = logging.getLogger(name)
 
