@@ -15,7 +15,7 @@ class Still(Animation):
         super().__init__(name, duration=duration)
 
     def update_actor(self, current_time: float):
-        pass
+        self.set_update_time(current_time)
 
     def is_finished(self) -> bool:
         return self.get_simulated_time() > self.duration

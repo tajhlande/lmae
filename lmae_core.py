@@ -167,7 +167,7 @@ class Animation(LMAEObject, metaclass=ABCMeta):
         """
         Override this to update this animation's actor based on the current time.
 
-        Implementors must call `this.set_updated_time(time)`, usually at the end of their implementation.
+        Implementors must call `self.set_update_time(time)`, usually at the end of their implementation.
 
         Actors must correctly reflect their state of needing to be rendered after being updated.
         If updating would cause any changes in the way an actor is rendered, then
