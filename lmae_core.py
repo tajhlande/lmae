@@ -104,7 +104,6 @@ class CompositeActor(Actor, metaclass=ABCMeta):
         return self.changes_since_last_render or (self.child.needs_render() if self.child else False)
 
 
-
 class Animation(LMAEObject, metaclass=ABCMeta):
     """
     A clock-based way to update an actor based on elapsed real time.

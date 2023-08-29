@@ -7,7 +7,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 from lmae_core import parse_matrix_options_command_line
 from lmae_actor import StillImage, Text, CropMask
-from lmae_animation import StraightMove, Sequence, Easing
+from lmae_animation import Still, StraightMove, Sequence, Easing
 from lmae_module import AppModule, SingleStageRenderLoopAppModule
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
@@ -39,8 +39,15 @@ kirby_go_right_2 = StraightMove(name='Kirby go right', actor=kirby, distance=(ki
                                 duration=1.2, easing=Easing.BEZIER)
 kirby_go_left_2 = StraightMove(name='Kirby go left', actor=kirby, distance=(-kirby_move_dist, 0),
                                duration=1.2, easing=Easing.BACK)
+
+kirby_still_1 = Still(duration=2.0)
+kirby_still_2 = Still(duration=2.0)
+kirby_still_3 = Still(duration=2.0)
+kirby_still_4 = Still(duration=2.0)
+
 kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=True,
-                      animations=[kirby_go_right_1, kirby_go_left_1, kirby_go_right_2, kirby_go_left_2])
+                      animations=[kirby_go_right_1, kirby_still_1, kirby_go_left_1, kirby_still_2,
+                                  kirby_go_right_2, kirby_still_3,  kirby_go_left_2, kirby_still_4])
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),

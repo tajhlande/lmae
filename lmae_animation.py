@@ -5,6 +5,22 @@ from typing import Callable
 from lmae_core import Actor, Animation, _get_sequential_name
 
 
+class Still(Animation):
+    """
+    A  "no-op" animation that makes no changes to its actor. Useful for pausing in a sequence.
+    """
+
+    def __init__(self, name: str = None, duration: float = 1.0):
+        name = name or _get_sequential_name("Still")
+        super().__init__(name, duration=duration)
+
+    def update_actor(self, current_time: float):
+        pass
+
+    def is_finished(self) -> bool:
+        return self.get_simulated_time() > self.duration
+
+
 class Easing(Enum):
     """
     Easing function variations
