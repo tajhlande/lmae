@@ -31,11 +31,14 @@ class StraightMove(Animation):
         super().__init__(name=name, actor=actor, repeat=repeat, duration=duration)
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
-        self.easing = easing
+        self.easing = None
+        self.set_easing(easing)
         self.easing_function = lambda t: t  # default linear
+        self.logger = logging.getLogger(name)
 
     def set_easing(self, easing: Easing):
         self.easing = easing
+        self.logger.debug(f"Easing: {easing}")
         if self.easing == Easing.QUADRATIC:
             self.easing_function = self._quadratic_easing
         elif self.easing == Easing.BEZIER:
