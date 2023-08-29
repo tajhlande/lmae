@@ -34,7 +34,7 @@ logger.debug(f"Kirby move distance is {kirby_move_dist}")
 kirby_go_right = StraightMove(name='Kirby go right', actor=kirby, distance=(kirby_move_dist, 0),
                               duration=2.0, easing=Easing.QUADRATIC)
 kirby_go_left = StraightMove(name='Kirby go left', actor=kirby, distance=(-kirby_move_dist, 0),
-                             duration=2.0, easing=Easing.PARAMETRIC)
+                             duration=2.0, easing=Easing.BEZIER)
 kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=True, animations=[kirby_go_right, kirby_go_left])
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
