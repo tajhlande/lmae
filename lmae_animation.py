@@ -27,11 +27,25 @@ class StraightMove(Animation):
     def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False,
                  distance: tuple[int, int] = None, duration: float = 1.0,
                  easing: Easing = Easing.LINEAR):
-        name = name or _get_sequential_name("LinearMove")
+        name = name or _get_sequential_name("StraightMove")
         super().__init__(name=name, actor=actor, repeat=repeat, duration=duration)
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
         self.easing = easing
+        self.easing_function = lambda t: t  # default linear
+
+    def set_easing(self, easing: Easing):
+        self.easing = easing
+        if self.easing == Easing.QUADRATIC:
+            self.easing_function = self._quadratic_easing
+        elif self.easing == Easing.BEZIER:
+            self.easing_function = self._bezier_easing
+        elif self.easing == Easing.PARAMETRIC:
+            self.easing_function = self._parametric_easing
+        elif self.easing == Easing.BACK:
+            self.easing_function = self._back_easing
+        else:
+            self.easing_function = lambda t: t  # default linear
 
     def reset(self):
         super().reset()
@@ -80,17 +94,7 @@ class StraightMove(Animation):
         if elapsed_time > self.duration:
             action_time = self.duration
         duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
-
-        if self.easing == Easing.QUADRATIC:
-            easing_fraction = self._quadratic_easing(duration_fraction)
-        elif self.easing == Easing.BEZIER:
-            easing_fraction = self._bezier_easing(duration_fraction)
-        elif self.easing == Easing.PARAMETRIC:
-            easing_fraction = self._parametric_easing(duration_fraction)
-        elif self.easing == Easing.BACK:
-            easing_fraction = self._back_easing(duration_fraction)
-        else:
-            easing_fraction = duration_fraction
+        easing_fraction = self.easing_function(duration_fraction)
 
         # self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
         #                   f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
