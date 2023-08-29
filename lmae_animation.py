@@ -87,6 +87,8 @@ class StraightMove(Animation):
             easing_fraction = self._bezier_easing(duration_fraction)
         elif self.easing == Easing.PARAMETRIC:
             easing_fraction = self._parametric_easing(duration_fraction)
+        elif self.easing == Easing.BACK:
+            easing_fraction = self._back_easing(duration_fraction)
         else:
             easing_fraction = duration_fraction
 
