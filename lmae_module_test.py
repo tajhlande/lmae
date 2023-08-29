@@ -39,7 +39,7 @@ grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('R
 words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
              font=ImageFont.truetype("fonts/et-bt6001-font/EtBt6001-JO47.ttf", 6),  # good option for fitting a lot
              color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-trees_cropped = CropMask(name='Trees Crop', child=words, crop_area=(16, 8, 47, 24))
+trees_cropped = CropMask(name='Trees Crop', child=trees, crop_area=(16, 8, 47, 24))
 
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(matrix, options=options)
