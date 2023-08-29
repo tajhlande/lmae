@@ -41,8 +41,10 @@ def _quadratic_easing(t: float):
     return 2.0 * t * (1.0 - t) + 0.5
 
 
-def _bezier_easing(t: float):
-    return t * t * (3.0 - 2.0 * t)
+# def _bezier_easing(t: float):
+#     return t * t * (3.0 - 2.0 * t)
+
+_bezier_easing = make_cubic_bezier(0.42, 0.0, 0.58, 1.0)
 
 
 def _parametric_easing(t: float):

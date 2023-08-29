@@ -32,13 +32,13 @@ kirby = StillImage(name='Kirby', position=(0, 12), image=Image.open("images/kirb
 kirby_move_dist = 64 - kirby.size[0]
 logger.debug(f"Kirby move distance is {kirby_move_dist}")
 kirby_go_right_1 = StraightMove(name='Kirby go right', actor=kirby, distance=(kirby_move_dist, 0),
-                                duration=1.2, easing=Easing.LINEAR)
+                                duration=1.2, easing=Easing.BEZIER)
 kirby_go_left_1 = StraightMove(name='Kirby go left', actor=kirby, distance=(-kirby_move_dist, 0),
                                duration=1.2, easing=Easing.BACK)
 kirby_go_right_2 = StraightMove(name='Kirby go right', actor=kirby, distance=(kirby_move_dist, 0),
                                 duration=1.2, easing=Easing.BEZIER)
 kirby_go_left_2 = StraightMove(name='Kirby go left', actor=kirby, distance=(-kirby_move_dist, 0),
-                               duration=1.2, easing=Easing.QUADRATIC)
+                               duration=1.2, easing=Easing.BACK)
 kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=True,
                       animations=[kirby_go_right_1, kirby_go_left_1, kirby_go_right_2, kirby_go_left_2])
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
