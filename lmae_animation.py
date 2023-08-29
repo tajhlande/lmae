@@ -31,8 +31,6 @@ class StraightMove(Animation):
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
         self.easing = easing
-        self.logger = logging.getLogger(name)
-        self.logger.debug(f"Easing function is {self.easing}")
 
     def reset(self):
         super().reset()
