@@ -53,7 +53,7 @@ class Carousel(LMAEComponent):
         self.logger.debug("Constructing individual animations")
         animations = dict((actor.name, list()) for actor in self.panels)
         crop_width = self.crop_area[2] - self.crop_area[0]
-        total_carousel_width = crop_width * len(self.panels)
+        total_carousel_width = crop_width * (len(self.panels) - 1)
         self.logger.debug(f"Crop width: {crop_width}, total carousel width: {total_carousel_width}")
 
         for i, actor in enumerate(self.panels):

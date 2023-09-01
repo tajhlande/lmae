@@ -91,7 +91,7 @@ class WeatherApp(AppModule):
         # self.stage.actors.append(self.high_temp_label)
 
         # carousel for temps
-        self.temp_carousel = Carousel(name='TempsCarousel', crop_area=(5, 23, 33, 30), easing=Easing.BEZIER,
+        self.temp_carousel = Carousel(name='TempsCarousel', crop_area=(5, 23, 36, 30), easing=Easing.BEZIER,
                                       position=(5, 23),
                                       panels=[self.dewpoint_label, self.feels_like_label,
                                               self.low_temp_label, self.high_temp_label])
