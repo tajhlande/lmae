@@ -37,7 +37,7 @@ class WeatherApp(AppModule):
         self.feels_like_label: Text = None
         self.low_temp_label: Text = None
         self.high_temp_label: Text = None
-        self.temp_carousel: Carousel = None
+        self.temps_carousel: Carousel = None
 
         self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
@@ -91,12 +91,12 @@ class WeatherApp(AppModule):
         # self.stage.actors.append(self.high_temp_label)
 
         # carousel for temps
-        self.temp_carousel = Carousel(name='TempsCarousel', crop_area=(5, 23, 38, 30), easing=Easing.BEZIER,
-                                      position=(5, 23),
-                                      panels=[self.dewpoint_label, self.feels_like_label,
+        self.temps_carousel = Carousel(name='TempsCarousel', crop_area=(5, 23, 38, 30), easing=Easing.BEZIER,
+                                       position=(5, 23),
+                                       panels=[self.dewpoint_label, self.feels_like_label,
                                               self.low_temp_label, self.high_temp_label])
-        self.stage.actors.append(self.temp_carousel)
-        self.stage.add_animations(self.temp_carousel.get_animations())
+        self.stage.actors.append(self.temps_carousel)
+        self.stage.add_animations(self.temps_carousel.get_animations())
         self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
         # conditions image actor
@@ -226,7 +226,7 @@ class WeatherApp(AppModule):
     async def run(self):
         await super().run()
         self.logger.debug("Run started")
-        self.compose_view()
+        # self.compose_view()
         max_frame_rate = 60
         min_time_per_frame = 1.0 / max_frame_rate
 

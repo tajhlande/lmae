@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from copy import deepcopy
 from typing import List
 
 from lmae_core import Actor, Animation, Canvas, _get_sequential_name
@@ -46,7 +45,7 @@ class Carousel(LMAEComponent):
         for actor in self.panels:
             actor.set_position((self.position[0] + offset, self.position[1]))
             offset += crop_width
-            self.crop_actors.append(CropMask(name=f"{name} crop mask for {actor.name}",
+            self.crop_actors.append(CropMask(name=f"{name}_CropMask_{actor.name}",
                                              crop_area=crop_area, child=actor))
 
     def get_animations(self) -> List[Animation]:
