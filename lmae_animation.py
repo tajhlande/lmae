@@ -206,7 +206,7 @@ class Sequence(Animation):
 
     def update_actor(self, current_time: float):
         if self.seq_index >= len(self.animations):
-            # self.logger.debug("All animations finished")
+            self.logger.debug("All animations finished")
             return  # nothing to do, we're done
 
         current_anim = self.animations[self.seq_index]
@@ -214,18 +214,18 @@ class Sequence(Animation):
             # self.logger.debug(f"Animation {self.seq_index} finished, looking for next")
             self.seq_index += 1
             if self.seq_index >= len(self.animations):
-                # self.logger.debug("All animations finished")
+                self.logger.debug("All animations finished")
                 return  # nothing to do, we're done
             current_anim = self.animations[self.seq_index]
 
-        # if not current_anim.is_started():
-        #     if current_anim:
-        #         if current_anim.actor:
-        #             self.logger.debug(f"Starting animation {self.seq_index} ({current_anim.name}) for {current_anim.actor.name}")
-        #         else:
-        #             self.logger.warning(f"Starting animation {self.seq_index} ({current_anim.name}) for None actor")
-        #     else:
-        #         self.logger.warning(f"Starting animation {self.seq_index} (None)")
+        if not current_anim.is_started():
+            if current_anim:
+                if current_anim.actor:
+                    self.logger.debug(f"Starting animation {self.seq_index} ({current_anim.name}) for {current_anim.actor.name}")
+                else:
+                    self.logger.warning(f"Starting animation {self.seq_index} ({current_anim.name}) for None actor")
+            else:
+                self.logger.warning(f"Starting animation {self.seq_index} (None)")
 
             current_anim.start(current_time)
             self.seq_start_time = current_time
