@@ -10,9 +10,9 @@ class Still(Animation):
     A  "no-op" animation that makes no changes to its actor. Useful for pausing in a sequence.
     """
 
-    def __init__(self, name: str = None, duration: float = 1.0):
+    def __init__(self, name: str = None, actor: Actor = None, duration: float = 1.0):
         name = name or _get_sequential_name("Still")
-        super().__init__(name, duration=duration)
+        super().__init__(name, actor=actor, duration=duration)
 
     def update_actor(self, current_time: float):
         self.set_update_time(current_time)
