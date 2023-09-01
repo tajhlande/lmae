@@ -128,7 +128,7 @@ class WeatherApp(AppModule):
         self.dewpoint_label.set_visible(True)
 
         # feels like
-        feels_like = f"Feel {round(self.current_conditions['currentConditions']['feelslike'])}º"
+        feels_like = f"FL {round(self.current_conditions['currentConditions']['feelslike'])}º"
         # self.logger.debug(f"    Feels like: {feels_like}")
         self.feels_like_label.text = feels_like
         self.feels_like_label.set_visible(True)
