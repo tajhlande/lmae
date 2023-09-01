@@ -1,14 +1,15 @@
 from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 from typing import List
 
 from lmae_core import Actor, Animation, Canvas, _get_sequential_name
-from lmae_animation import Easing
+from lmae_actor import CropMask
+from lmae_animation import Easing, Still, StraightMove
 
 
 class LMAEComponent(Actor, metaclass=ABCMeta):
     """
     An actor that is able to self-generate animations.
-    If the
     """
 
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0)):
@@ -27,7 +28,8 @@ class Carousel(LMAEComponent):
     """
 
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), panels: List[Actor] = None,
-                 dwell_time: float = 10.0, transition_time: float = 1.2, easing: Easing = Easing.QUADRATIC):
+                 dwell_time: float = 10.0, transition_time: float = 1.2, easing: Easing = Easing.QUADRATIC,
+                 crop_area: tuple[int, int, int, int] = (16, 8, 47, 23)):
         name = name or _get_sequential_name("Carousel")
         super().__init__(name, position)
         self.dwell_time = dwell_time
@@ -35,14 +37,42 @@ class Carousel(LMAEComponent):
         self.easing = easing
         self.panels = panels or list()
 
-    def add_panel(self, panel: Actor):
-        self.panels.append(panel)
+        self.crop_area = crop_area
 
-    def add_panels(self, *args: Actor):
-        self.panels.extend(args)
+        # set up actor panel positioning and crops
+        offset = 0
+        crop_width = self.crop_area[2] - self.crop_area[0]
+        self.crop_actors = list()
+        for actor in self.panels:
+            actor.set_position((self.position[0] + offset, self.position[1]))
+            offset += crop_width
+            self.crop_actors.append(CropMask(name=f"{name} crop mask for {actor.name}",
+                                             crop_area=crop_area, child=actor))
 
     def get_animations(self) -> List[Animation]:
-        pass
+        base_animations = list()
+        total_actor_width = sum(actor.size[0] for actor in self.panels)
+        for i, actor in enumerate(self.panels):
+            base_animations.append(Still(name=f"wait {i+1}", duration=self.dwell_time))
+            if i < len(self.panels) - 1:
+                base_animations.append(StraightMove(name=f"transition{i+1}", duration=self.transition_time,
+                                                    easing=self.easing, distance=(-actor.size[0])))
+            else:
+                base_animations.append(StraightMove(name=f"reset transition", duration=self.transition_time,
+                                                    easing=self.easing, distance=total_actor_width))
+
+        actor_animations = list()
+        for actor in self.panels:
+            for anim in base_animations:
+                actor_anim = deepcopy(anim)
+                actor_anim.actor = actor
+                actor_animations.append(actor_anim)
+        return actor_animations
+
+    def needs_render(self):
+        return any(crop.needs_render() for crop in self.crop_actors)
 
     def render(self, canvas: Canvas):
-        pass
+        for crop_mask in self.crop_actors:
+            crop_mask.render(canvas)
+        self.changes_since_last_render = False
