@@ -97,6 +97,7 @@ class WeatherApp(AppModule):
                                               self.low_temp_label, self.high_temp_label])
         self.stage.actors.append(self.temp_carousel)
         self.stage.add_animations(self.temp_carousel.get_animations())
+        self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
         # conditions image actor
         sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
