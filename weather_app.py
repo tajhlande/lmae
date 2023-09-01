@@ -104,30 +104,30 @@ class WeatherApp(AppModule):
     def update_view(self, elapsed_time: float):
         # temperature
         temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
-        self.logger.debug(f"    Temperature: {temperature}")
+        # self.logger.debug(f"    Temperature: {temperature}")
         self.temperature_label.text = temperature
 
         # dewpoint
         dewpoint = f"DP {round(self.current_conditions['currentConditions']['dew'])}º"
-        self.logger.debug(f"    Dewpoint: {dewpoint}")
+        # self.logger.debug(f"    Dewpoint: {dewpoint}")
         self.dewpoint_label.text = dewpoint
         self.dewpoint_label.set_visible(False)
 
         # feels like
         feels_like = f"FL {round(self.current_conditions['currentConditions']['feelslike'])}"
-        self.logger.debug(f"    Feels like: {feels_like}")
+        # self.logger.debug(f"    Feels like: {feels_like}")
         self.feels_like_label.text = feels_like
-        self.feels_like_label.set_visible(True)
+        self.feels_like_label.set_visible(False)
 
         # low temp
         low_temp = f"Low {round(self.current_conditions['days'][0]['tempmin'])}"
-        self.logger.debug(f"    Forecast low temperature: {low_temp}")
+        # self.logger.debug(f"    Forecast low temperature: {low_temp}")
         self.low_temp_label.text = low_temp
-        self.low_temp_label.set_visible(False)
+        self.low_temp_label.set_visible(True)
 
         # high temp
         high_temp = f"Low {round(self.current_conditions['days'][0]['tempmax'])}"
-        self.logger.debug(f"    Forecast high temperature: {high_temp}")
+        # self.logger.debug(f"    Forecast high temperature: {high_temp}")
         self.high_temp_label.text = high_temp
         self.high_temp_label.set_visible(False)
 
