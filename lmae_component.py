@@ -52,9 +52,9 @@ class Carousel(LMAEComponent):
     def get_animations(self) -> List[Animation]:
         self.logger.debug("Constructing individual animations")
         animations = dict((actor.name, list()) for actor in self.panels)
-        crop_width = self.crop_area[2] - self.crop_area[0]
-        total_carousel_width = crop_width * (len(self.panels) - 1)
-        self.logger.debug(f"Crop width: {crop_width}, total carousel width: {total_carousel_width}")
+        spacing = self.crop_area[2] - self.crop_area[0] + 2
+        total_carousel_width = spacing * (len(self.panels) - 1)
+        self.logger.debug(f"Spacing: {spacing}, total carousel width: {total_carousel_width}")
 
         for i, actor in enumerate(self.panels):
             for actor2 in self.panels:
@@ -64,7 +64,7 @@ class Carousel(LMAEComponent):
             if i < len(self.panels) - 1:
                 for actor2 in self.panels:
                     move = StraightMove(name=f"Slide {i+1} for {actor2.name}", duration=self.transition_time,
-                                        easing=self.easing, distance=(-crop_width, 0), actor=actor2)
+                                        easing=self.easing, distance=(-spacing, 0), actor=actor2)
                     animations[actor2.name].append(move)
                     self.logger.debug(f"    Slide animation {i+1} for {actor2.name}: {move.distance} over "
                                       f"{move.duration:.1f}s")
