@@ -52,25 +52,28 @@ class Carousel(LMAEComponent):
     def get_animations(self) -> List[Animation]:
         self.logger.debug("Constructing individual animations")
         animations = dict((actor.name, list()) for actor in self.panels)
-        total_actor_width = sum(actor.size[0] for actor in self.panels)
+        crop_width = self.crop_area[2] - self.crop_area[0]
+        total_carousel_width = crop_width * len(self.panels)
+        self.logger.debug(f"Crop width: {crop_width}, total carousel width: {total_carousel_width}")
+
         for i, actor in enumerate(self.panels):
             for actor2 in self.panels:
-                still = Still(name=f"wait {i+1} for {actor.name}", duration=self.dwell_time, actor=actor2)
+                still = Still(name=f"Wait {i+1} for {actor2.name}", duration=self.dwell_time, actor=actor2)
                 animations[actor2.name].append(still)
-                self.logger.debug(f"    Wait animation {i+1} for {actor.name}: {still.duration:.1f}s")
+                self.logger.debug(f"    Wait animation {i+1} for {actor2.name}: {still.duration:.1f}s")
             if i < len(self.panels) - 1:
                 for actor2 in self.panels:
-                    move = StraightMove(name=f"transition{i+1} for {actor.name}", duration=self.transition_time,
-                                        easing=self.easing, distance=(-actor.size[0], 0), actor=actor2)
+                    move = StraightMove(name=f"Slide {i+1} for {actor2.name}", duration=self.transition_time,
+                                        easing=self.easing, distance=(crop_width, 0), actor=actor2)
                     animations[actor2.name].append(move)
-                    self.logger.debug(f"    Slide animation {i+1} for {actor.name}: {move.distance} over "
+                    self.logger.debug(f"    Slide animation {i+1} for {actor2.name}: {move.distance} over "
                                       f"{move.duration:.1f}s")
             else:
                 for actor2 in self.panels:
-                    reset_move = StraightMove(name=f"reset_transition for {actor.name}", duration=self.transition_time,
-                                              easing=self.easing, distance=(total_actor_width, 0), actor=actor2)
+                    reset_move = StraightMove(name=f"Reset for {actor2.name}", duration=self.transition_time,
+                                              easing=self.easing, distance=(total_carousel_width, 0), actor=actor2)
                     animations[actor2.name].append(reset_move)
-                    self.logger.debug(f"    Reset animation for {actor.name}: {reset_move.distance} over "
+                    self.logger.debug(f"    Reset animation for {actor2.name}: {reset_move.distance} over "
                                       f"{reset_move.duration:.1f}s")
 
         self.logger.debug(f"Constructing sequences")
