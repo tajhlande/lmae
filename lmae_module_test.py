@@ -40,10 +40,10 @@ kirby_go_right_2 = StraightMove(name='Kirby go right', actor=kirby, distance=(ki
 kirby_go_left_2 = StraightMove(name='Kirby go left', actor=kirby, distance=(-kirby_move_dist, 0),
                                duration=1.2, easing=Easing.BACK)
 
-kirby_still_1 = Still(duration=2.0)
-kirby_still_2 = Still(duration=2.0)
-kirby_still_3 = Still(duration=2.0)
-kirby_still_4 = Still(duration=2.0)
+kirby_still_1 = Still(actor=kirby, duration=2.0)
+kirby_still_2 = Still(actor=kirby, duration=2.0)
+kirby_still_3 = Still(actor=kirby, duration=2.0)
+kirby_still_4 = Still(actor=kirby, duration=2.0)
 
 kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=True,
                       animations=[kirby_go_right_1, kirby_still_1, kirby_go_left_1, kirby_still_2,
