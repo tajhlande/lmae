@@ -122,14 +122,15 @@ class Text(Actor):
 
     def render(self, canvas: Canvas):
         if self.text:
-            self.logger.debug(f"Rendering at {self.position}")
+            # self.logger.debug(f"Rendering at {self.position}")
             draw = canvas.image_draw
             # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
             #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
             draw.text(self.position, self.text, fill=self.color, font=self.font,
                       stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
         else:
-            self.logger.debug("No text to render")
+            # self.logger.debug("No text to render")
+            pass
         self.changes_since_last_render = False
 
 
@@ -329,7 +330,7 @@ class CropMask(CompositeActor):
 
     def render(self, canvas: Canvas):
         if self.child:
-            self.logger.debug(f"Rendering at {self.crop_area}")
+            # self.logger.debug(f"Rendering at {self.crop_area}")
             # set up the crop canvas
             self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=self.size)
 
@@ -352,6 +353,6 @@ class CropMask(CompositeActor):
             # composite the crop canvas into the parameter canvas
             canvas.image.alpha_composite(self.crop_canvas.image, dest=self.position)
         else:
-            self.logger.warning("No child to render")
+            # self.logger.warning("No child to render")
             pass
         self.changes_since_last_render = False
