@@ -78,6 +78,7 @@ class Carousel(LMAEComponent):
             anims_for_sequence = list()
             for anim in base_animations:
                 actor_anim = deepcopy(anim)
+                actor_anim.name = f"{anim.name}_for_{actor.name}"
                 actor_anim.actor = actor
                 anims_for_sequence.append(actor_anim)
             self.logger.debug(f"   Constructed {len(anims_for_sequence)} animations for sequence for {actor.name}")

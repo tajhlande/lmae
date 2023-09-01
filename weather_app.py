@@ -227,7 +227,7 @@ class WeatherApp(AppModule):
         await super().run()
         self.logger.debug("Run started")
         self.compose_view()
-        max_frame_rate = 120
+        max_frame_rate = 60
         min_time_per_frame = 1.0 / max_frame_rate
 
         try:
@@ -263,6 +263,8 @@ class WeatherApp(AppModule):
                         sleep_time = min_time_per_frame - elapsed_render_time
                         # self.logger.debug(f"Sleeping for {sleep_time}")
                         await asyncio.sleep(sleep_time)
+                    else:
+                        yield
 
                     # mark the timestamp
                     last_time = time.perf_counter()
