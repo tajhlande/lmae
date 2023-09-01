@@ -64,7 +64,7 @@ class Carousel(LMAEComponent):
             if i < len(self.panels) - 1:
                 for actor2 in self.panels:
                     move = StraightMove(name=f"Slide {i+1} for {actor2.name}", duration=self.transition_time,
-                                        easing=self.easing, distance=(crop_width, 0), actor=actor2)
+                                        easing=self.easing, distance=(-crop_width, 0), actor=actor2)
                     animations[actor2.name].append(move)
                     self.logger.debug(f"    Slide animation {i+1} for {actor2.name}: {move.distance} over "
                                       f"{move.duration:.1f}s")
