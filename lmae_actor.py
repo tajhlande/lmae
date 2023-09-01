@@ -295,6 +295,7 @@ class CropMask(CompositeActor):
                  crop_area: tuple[int, int, int, int] = (16, 8, 47, 23)):
         name = name or _get_sequential_name("CropMask")
         super().__init__(name, child=child, position=position)
+        self.logger = logging.getLogger(name)
         self.size = size
         self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=False, size=size)
         self.crop_rect_1 = (0, 0, 0, 0)
@@ -303,7 +304,7 @@ class CropMask(CompositeActor):
         self.crop_rect_4 = (0, 0, 0, 0)
         self.crop_area = (16, 8, 47, 23)
         self.set_crop_area(crop_area)
-        self.logger = logging.getLogger(name)
+        self.logger.debug(f"Set crop area to {self.crop_area}")
 
     def set_crop_area(self, crop_area: tuple[int, int, int, int]):
         if self.crop_area != crop_area:
@@ -327,6 +328,11 @@ class CropMask(CompositeActor):
         self.crop_rect_2 = (self.position[0], self.crop_area[1], self.crop_area[0] - 1, self.crop_area[3])
         self.crop_rect_3 = (self.crop_area[2] + 1, self.crop_area[1], self.size[0] - 1, self.crop_area[3])
         self.crop_rect_4 = (self.position[0], self.crop_area[3] + 1, self.size[0] - 1, self.size[1] - 1)
+
+        self.logger.debug(f"Crop rectangle 1: {self.crop_rect_1}")
+        self.logger.debug(f"Crop rectangle 2: {self.crop_rect_2}")
+        self.logger.debug(f"Crop rectangle 3: {self.crop_rect_3}")
+        self.logger.debug(f"Crop rectangle 4: {self.crop_rect_4}")
 
     def render(self, canvas: Canvas):
         if self.child:
