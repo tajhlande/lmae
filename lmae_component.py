@@ -50,41 +50,36 @@ class Carousel(LMAEComponent):
                                              crop_area=crop_area, child=actor))
 
     def get_animations(self) -> List[Animation]:
-        self.logger.debug("Getting animations")
-        base_animations = list()
+        self.logger.debug("Constructing individual animations")
+        animations = dict((actor.name, list()) for actor in self.panels)
         total_actor_width = sum(actor.size[0] for actor in self.panels)
         for i, actor in enumerate(self.panels):
-            self.logger.debug(f"Constructing base animations for panel {i+1}")
-            still = Still(name=f"wait {i+1}", duration=self.dwell_time)
-            base_animations.append(still)
-            self.logger.debug(f"    Base animation for still: {still.duration:.1f}s")
+            for actor2 in self.panels:
+                still = Still(name=f"wait {i+1} for {actor.name}", duration=self.dwell_time, actor=actor2)
+                animations[actor2.name].append(still)
+                self.logger.debug(f"    Wait animation {i+1} for {actor.name}: {still.duration:.1f}s")
             if i < len(self.panels) - 1:
-                move = StraightMove(name=f"transition{i+1}", duration=self.transition_time,
-                                    easing=self.easing, distance=(-actor.size[0], 0))
-                base_animations.append(move)
-                self.logger.debug(f"    Base animation for straight move: {move.distance} over {move.duration:.1f}s")
+                for actor2 in self.panels:
+                    move = StraightMove(name=f"transition{i+1} for {actor.name}", duration=self.transition_time,
+                                        easing=self.easing, distance=(-actor.size[0], 0), actor=actor2)
+                    animations[actor2.name].append(move)
+                    self.logger.debug(f"    Slide animation {i+1} for {actor.name}: {move.distance} over "
+                                      f"{move.duration:.1f}s")
             else:
-                reset_move = StraightMove(name=f"reset transition", duration=self.transition_time,
-                                          easing=self.easing, distance=(total_actor_width, 0))
-                base_animations.append(reset_move)
-                self.logger.debug(f"    Base animation for straight move: {reset_move.distance} over "
-                                  f"{reset_move.duration:.1f}s")
+                for actor2 in self.panels:
+                    reset_move = StraightMove(name=f"reset_transition for {actor.name}", duration=self.transition_time,
+                                              easing=self.easing, distance=(total_actor_width, 0), actor=actor2)
+                    animations[actor2.name].append(reset_move)
+                    self.logger.debug(f"    Reset animation for {actor.name}: {reset_move.distance} over "
+                                      f"{reset_move.duration:.1f}s")
 
-        self.logger.debug(f"Constructed {len(base_animations)} base animations")
-
+        self.logger.debug(f"Constructing sequences")
         animation_sequences = list()
         for actor in self.panels:
-            self.logger.debug(f"Tailoring base animations for actor {actor.name}")
-            anims_for_sequence = list()
-            for anim in base_animations:
-                actor_anim = deepcopy(anim)
-                actor_anim.name = f"{anim.name}_for_{actor.name}"
-                actor_anim.actor = actor
-                anims_for_sequence.append(actor_anim)
-            self.logger.debug(f"   Constructed {len(anims_for_sequence)} animations for sequence for {actor.name}")
-            sequence = Sequence(name=f"Carousel sequence for {actor.name}", actor=actor, animations=anims_for_sequence,
-                                repeat=True)
+            sequence = Sequence(name=f"Carousel sequence for {actor.name}", actor=actor,
+                                animations=animations[actor.name], repeat=True)
             animation_sequences.append(sequence)
+            self.logger.debug(f"   Constructed sequence anim with {len(animation_sequences)} animations for {actor.name}")
         return animation_sequences
 
     def needs_render(self):
