@@ -297,7 +297,7 @@ class CropMask(CompositeActor):
         super().__init__(name, child=child, position=position)
         self.logger = logging.getLogger(name)
         self.size = size
-        self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=False, size=size)
+        self.crop_canvas = Canvas(name=f"{self.name}_crop_Canvas", background_fill=False, size=size)
         self.crop_rect_1 = (0, 0, 0, 0)
         self.crop_rect_2 = (0, 0, 0, 0)
         self.crop_rect_3 = (0, 0, 0, 0)
@@ -338,7 +338,7 @@ class CropMask(CompositeActor):
         if self.child:
             # self.logger.debug(f"Rendering at {self.crop_area}")
             # set up the crop canvas
-            self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=self.size)
+            self.crop_canvas = Canvas(name=f"{self.name}_crop_Canvas", background_fill=False, size=self.size)
 
             # ask the child to render into the crop canvas
             self.child.render(self.crop_canvas)
