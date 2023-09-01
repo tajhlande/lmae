@@ -122,7 +122,7 @@ class Text(Actor):
 
     def render(self, canvas: Canvas):
         if self.text:
-            self.logger.debug("Rendering")
+            self.logger.debug(f"Rendering at {self.position}")
             draw = canvas.image_draw
             # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
             #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
@@ -329,7 +329,7 @@ class CropMask(CompositeActor):
 
     def render(self, canvas: Canvas):
         if self.child:
-            self.logger.debug("Rendering")
+            self.logger.debug(f"Rendering at {self.position}")
             # set up the crop canvas
             self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=self.size)
 
