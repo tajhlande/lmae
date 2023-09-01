@@ -5,6 +5,7 @@ import os
 import sys
 import time
 from abc import ABCMeta, abstractmethod
+from typing import List
 from PIL import Image, ImageDraw
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
@@ -223,6 +224,13 @@ class Stage(LMAEObject):
         :param animation: the animation to add
         """
         self.animations.append(animation)
+
+    def add_animations(self, animations: List[Animation]):
+        """
+        Add a bunch of animations to this stage
+        :param animations: a list of animations to add
+        """
+        self.animations.extend(animations)
 
     def prepare_frame(self):
         """

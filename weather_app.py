@@ -1,11 +1,15 @@
 import asyncio
 import time
 import json
+
+from PIL import Image, ImageFont
+
 from vx_wx.vx_client import get_current_conditions_by_zipcode
 from lmae_core import Stage
 from lmae_module import AppModule
 from lmae_actor import SpriteImage, Text, Line
-from PIL import Image, ImageFont
+from lmae_animation import Easing
+from lmae_component import Carousel
 
 
 class WeatherApp(AppModule):
@@ -33,6 +37,7 @@ class WeatherApp(AppModule):
         self.feels_like_label: Text = None
         self.low_temp_label: Text = None
         self.high_temp_label: Text = None
+        self.temp_carousel: Carousel = None
 
         self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
@@ -68,22 +73,30 @@ class WeatherApp(AppModule):
         # dewpoint actor
         self.dewpoint_label = Text(name='dewpoint', position=(5, 23), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.stage.actors.append(self.dewpoint_label)
+        # self.stage.actors.append(self.dewpoint_label)
 
         # feels like actor
         self.feels_like_label = Text(name='feels like', position=(5, 23), font=self.secondary_text_font,
-                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.stage.actors.append(self.feels_like_label)
+                                     color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        # self.stage.actors.append(self.feels_like_label)
 
         # low temp actor
         self.low_temp_label = Text(name='low temp', position=(5, 23), font=self.secondary_text_font,
-                                     color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.stage.actors.append(self.low_temp_label)
+                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        # self.stage.actors.append(self.low_temp_label)
 
         # high temp actor
         self.high_temp_label = Text(name='high temp', position=(5, 23), font=self.secondary_text_font,
-                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.stage.actors.append(self.high_temp_label)
+                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        # self.stage.actors.append(self.high_temp_label)
+
+        # carousel for temps
+        self.temp_carousel = Carousel(name='Temps carousel', crop_area=(5, 23, 32, 30), easing=Easing.BEZIER,
+                                      position=(5, 23),
+                                      panels=[self.temperature_label, self.dewpoint_label, self.feels_like_label,
+                                              self.low_temp_label, self.high_temp_label])
+        self.stage.actors.append(self.temp_carousel)
+        self.stage.add_animations(self.temp_carousel.get_animations())
 
         # conditions image actor
         sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
@@ -114,19 +127,19 @@ class WeatherApp(AppModule):
         self.dewpoint_label.set_visible(False)
 
         # feels like
-        feels_like = f"Feel {round(self.current_conditions['currentConditions']['feelslike'])}"
+        feels_like = f"Feel {round(self.current_conditions['currentConditions']['feelslike'])}º"
         # self.logger.debug(f"    Feels like: {feels_like}")
         self.feels_like_label.text = feels_like
         self.feels_like_label.set_visible(False)
 
         # low temp
-        low_temp = f"Low {round(self.current_conditions['days'][0]['tempmin'])}"
+        low_temp = f"Low {round(self.current_conditions['days'][0]['tempmin'])}º"
         # self.logger.debug(f"    Forecast low temperature: {low_temp}")
         self.low_temp_label.text = low_temp
         self.low_temp_label.set_visible(False)
 
         # high temp
-        high_temp = f"Hi {round(self.current_conditions['days'][0]['tempmax'])}"
+        high_temp = f"Hi {round(self.current_conditions['days'][0]['tempmax'])}º"
         # self.logger.debug(f"    Forecast high temperature: {high_temp}")
         self.high_temp_label.text = high_temp
         self.high_temp_label.set_visible(True)
