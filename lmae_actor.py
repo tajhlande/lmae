@@ -326,7 +326,7 @@ class CropMask(CompositeActor):
 
     def render(self, canvas: Canvas):
         if self.child:
-            # self.logger.debug("Rendering crop")
+            self.logger.debug(f"Rendering crop mask {self.name}")
             # set up the crop canvas
             self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=self.size)
 
@@ -349,6 +349,6 @@ class CropMask(CompositeActor):
             # composite the crop canvas into the parameter canvas
             canvas.image.alpha_composite(self.crop_canvas.image, dest=self.position)
         else:
-            # self.logger.warning("No child to render")
+            self.logger.warning("No child to render")
             pass
         self.changes_since_last_render = False

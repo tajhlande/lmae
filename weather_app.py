@@ -124,19 +124,19 @@ class WeatherApp(AppModule):
         dewpoint = f"Dew {round(self.current_conditions['currentConditions']['dew'])}º"
         # self.logger.debug(f"    Dewpoint: {dewpoint}")
         self.dewpoint_label.text = dewpoint
-        self.dewpoint_label.set_visible(False)
+        self.dewpoint_label.set_visible(True)
 
         # feels like
         feels_like = f"Feel {round(self.current_conditions['currentConditions']['feelslike'])}º"
         # self.logger.debug(f"    Feels like: {feels_like}")
         self.feels_like_label.text = feels_like
-        self.feels_like_label.set_visible(False)
+        self.feels_like_label.set_visible(True)
 
         # low temp
         low_temp = f"Low {round(self.current_conditions['days'][0]['tempmin'])}º"
         # self.logger.debug(f"    Forecast low temperature: {low_temp}")
         self.low_temp_label.text = low_temp
-        self.low_temp_label.set_visible(False)
+        self.low_temp_label.set_visible(True)
 
         # high temp
         high_temp = f"Hi {round(self.current_conditions['days'][0]['tempmax'])}º"

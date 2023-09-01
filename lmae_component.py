@@ -70,9 +70,12 @@ class Carousel(LMAEComponent):
         return actor_animations
 
     def needs_render(self):
-        return any(crop.needs_render() for crop in self.crop_actors)
+        need = any(crop.needs_render() for crop in self.crop_actors)
+        self.logger.debug(f"Carousel needs render? {need}")
+        return need
 
     def render(self, canvas: Canvas):
+        self.logger.debug("Rendering carousel")
         for crop_mask in self.crop_actors:
             crop_mask.render(canvas)
         self.changes_since_last_render = False
