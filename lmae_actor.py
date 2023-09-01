@@ -329,7 +329,7 @@ class CropMask(CompositeActor):
 
     def render(self, canvas: Canvas):
         if self.child:
-            self.logger.debug(f"Rendering at {self.position}")
+            self.logger.debug(f"Rendering at {self.crop_area}")
             # set up the crop canvas
             self.crop_canvas = Canvas(name=f"{self.name} crop canvas", background_fill=True, size=self.size)
 
