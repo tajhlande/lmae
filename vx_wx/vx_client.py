@@ -3,7 +3,7 @@ import requests
 from munch import Munch
 
 
-def get_current_conditions_by_zipcode(zipcode: str, api_key: str):
+def get_conditions_and_forecast_by_zipcode(zipcode: str, api_key: str):
     endpoint = f'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{zipcode}?' \
                f'unitGroup=us&include=current&key={api_key}&contentType=json&lang=id'
 

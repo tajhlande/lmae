@@ -112,7 +112,7 @@ class StraightMove(Animation):
         :param easing_function: A function that takes a float t: 0 <= t <= 1 and returns a float t: 0 <= t <= 1
         :param easing: If setting a provided easing function, set this to the matching enum value
         """
-        self.logger.debug(f"Setting easing to {easing.name}")
+        # self.logger.debug(f"Setting easing to {easing.name}")
         self.easing_function = easing_function
         self.easing = easing
 
@@ -218,14 +218,14 @@ class Sequence(Animation):
                 return  # nothing to do, we're done
             current_anim = self.animations[self.seq_index]
 
-        if not current_anim.is_started():
-            if current_anim:
-                if current_anim.actor:
-                    self.logger.debug(f"Starting animation {self.seq_index} ({current_anim.name}) for {current_anim.actor.name}")
-                else:
-                    self.logger.warning(f"Starting animation {self.seq_index} ({current_anim.name}) for None actor")
-            else:
-                self.logger.warning(f"Starting animation {self.seq_index} (None)")
+        # if not current_anim.is_started():
+        #     if current_anim:
+        #         if current_anim.actor:
+        #             self.logger.debug(f"Starting animation {self.seq_index} ({current_anim.name}) for {current_anim.actor.name}")
+        #         else:
+        #             self.logger.warning(f"Starting animation {self.seq_index} ({current_anim.name}) for None actor")
+        #     else:
+        #         self.logger.warning(f"Starting animation {self.seq_index} (None)")
 
             current_anim.start(current_time)
             self.seq_start_time = current_time

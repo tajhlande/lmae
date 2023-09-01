@@ -2,9 +2,10 @@ import asyncio
 import time
 import json
 
+from datetime import datetime
 from PIL import Image, ImageFont
 
-from vx_wx.vx_client import get_current_conditions_by_zipcode
+from vx_wx.vx_client import get_conditions_and_forecast_by_zipcode
 from lmae_core import Stage
 from lmae_module import AppModule
 from lmae_actor import SpriteImage, Text, Line
@@ -28,7 +29,7 @@ class WeatherApp(AppModule):
         self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
-        self.current_conditions = None
+        self.conditions_and_forecast = None
         self.call_status = "ok"
         self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
         self.temperature_label: Text = None
@@ -39,6 +40,12 @@ class WeatherApp(AppModule):
         self.high_temp_label: Text = None
         self.temps_carousel: Carousel = None
 
+        self.temperature_str: str = None
+        self.dewpoint_str: str = None
+        self.feels_like_str: str = None
+        self.low_temp_str: str = None
+        self.high_temp_str: str = None
+
         self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
         self.timer_line: Line = None
@@ -48,14 +55,30 @@ class WeatherApp(AppModule):
     def get_current_conditions(self):
         try:
             self.logger.debug(f"Fetching current conditions for ZIP code {self.zipcode}")
-            current_conditions = get_current_conditions_by_zipcode(self.zipcode, self.api_key)
-            if current_conditions:
-                self.logger.debug("Call to get conditions succeeded")
-                self.current_conditions = current_conditions
+            conditions_and_forecast = get_conditions_and_forecast_by_zipcode(self.zipcode, self.api_key)
+            if conditions_and_forecast:
+                self.logger.debug("Call to get conditions and forecast succeeded")
+                self.conditions_and_forecast = conditions_and_forecast
                 self.call_status = "ok"
                 self.fresh_weather_data = True
+
+                # set up weather values
+                self.temperature_str = f"{round(conditions_and_forecast['currentConditions']['temp'])}º"
+                self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['currentConditions']['dew'])}º"
+                self.feels_like_str = f"FL {round(self.conditions_and_forecast['currentConditions']['feelslike'])}º"
+                self.low_temp_str = f"Low {round(self.conditions_and_forecast['days'][0]['tempmin'])}º"
+                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['tempmax'])}º"
+
+                self.logger.debug(f"    Temperature : {self.temperature_str}")
+                self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
+                self.logger.debug(f"    Feels like  : {self.feels_like_str}")
+                self.logger.debug(f"    Low temp    : {self.low_temp_str}")
+                self.logger.debug(f"    High temp   : {self.high_temp_str}")
+                self.logger.debug(f" Forecast date  : {self.conditions_and_forecast['days'][0]['datetime']}")
+                datetimeEpoch = datetime_object = datetime.fromtimestamp(self.conditions_and_forecast['days'][0]['datetimeEpoch'])
+                self.logger.debug(f" Forecast epoch : {datetimeEpoch}")
             else:
-                self.logger.error("Call to get conditions did not return any conditions")
+                self.logger.error("Call to get conditions and forecast did not return any conditions")
                 self.call_status = "error"
                 # old conditions remain available
 
@@ -116,39 +139,16 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.timer_line)
 
     def update_view(self, elapsed_time: float):
-        # temperature
-        temperature = f"{round(self.current_conditions['currentConditions']['temp'])}º"
-        # self.logger.debug(f"    Temperature: {temperature}")
-        self.temperature_label.text = temperature
-
-        # dewpoint
-        dewpoint = f"Dew {round(self.current_conditions['currentConditions']['dew'])}º"
-        # self.logger.debug(f"    Dewpoint: {dewpoint}")
-        self.dewpoint_label.text = dewpoint
-        # self.dewpoint_label.set_visible(True)
-
-        # feels like
-        feels_like = f"FL {round(self.current_conditions['currentConditions']['feelslike'])}º"
-        # self.logger.debug(f"    Feels like: {feels_like}")
-        self.feels_like_label.text = feels_like
-        # self.feels_like_label.set_visible(True)
-
-        # low temp
-        low_temp = f"Low {round(self.current_conditions['days'][0]['tempmin'])}º"
-        # self.logger.debug(f"    Forecast low temperature: {low_temp}")
-        self.low_temp_label.text = low_temp
-        # self.low_temp_label.set_visible(True)
-
-        # high temp
-        high_temp = f"Hi {round(self.current_conditions['days'][0]['tempmax'])}º"
-        # self.logger.debug(f"    Forecast high temperature: {high_temp}")
-        self.high_temp_label.text = high_temp
-        # self.high_temp_label.set_visible(True)
+        self.temperature_label.text = self.temperature_str
+        self.dewpoint_label.text = self.dewpoint_str
+        self.feels_like_label.text = self.feels_like_str
+        self.low_temp_label.text = self.low_temp_str
+        self.high_temp_label.text = self.high_temp_str
 
         # figure out whether it is day or night
         time_of_day = time.strftime("%H:%M:%S", time.localtime())
-        sunrise = self.current_conditions['currentConditions']['sunrise']
-        sunset = self.current_conditions['currentConditions']['sunset']
+        sunrise = self.conditions_and_forecast['currentConditions']['sunrise']
+        sunset = self.conditions_and_forecast['currentConditions']['sunset']
         is_daytime = sunrise < time_of_day < sunset
         if self.fresh_weather_data: self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, "
                                                       f"time of day: {time_of_day}")
@@ -162,7 +162,7 @@ class WeatherApp(AppModule):
         if is_daytime:
             self.daytime_image.show()
             condition_sprite = None
-            condition_str = self.current_conditions['currentConditions']['conditions']
+            condition_str = self.conditions_and_forecast['currentConditions']['conditions']
             if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {condition_str}')
             if condition_str in ['clear', 'type_43']:
                 condition_sprite = 'sunny'
@@ -180,7 +180,7 @@ class WeatherApp(AppModule):
 
         # moon phase
         if not is_daytime:
-            moon_phase_num = self.current_conditions['currentConditions']['moonphase']
+            moon_phase_num = self.conditions_and_forecast['currentConditions']['moonphase']
             # moon_phase_name = None
             if moon_phase_num > 0.9375:
                 moon_phase_name = "moon-new"
