@@ -227,6 +227,8 @@ class WeatherApp(AppModule):
         await super().run()
         self.logger.debug("Run started")
         self.compose_view()
+        max_frame_rate = 120
+        min_time_per_frame = 1.0 / max_frame_rate
 
         try:
             while self.running:
@@ -241,14 +243,29 @@ class WeatherApp(AppModule):
                 waiting = True
                 wait_start = time.time()
                 self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh weather data")
+                last_time = time.perf_counter()
                 while waiting and self.running:
-                    await asyncio.sleep(1)
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time)
                     self.stage.needs_render = True  # have to force this for some reason
                     self.stage.render_frame()
                     waiting = elapsed_time < self.refresh_time
+
+                    # await asyncio.sleep(1)
+
+                    # calculate the frame rate and render that
+                    render_end_time = time.perf_counter()
+
+                    # if we are rendering faster than max frame rate, slow down
+                    elapsed_render_time = render_end_time - last_time
+                    if elapsed_render_time < min_time_per_frame:
+                        sleep_time = min_time_per_frame - elapsed_render_time
+                        # self.logger.debug(f"Sleeping for {sleep_time}")
+                        await asyncio.sleep(sleep_time)
+
+                    # mark the timestamp
+                    last_time = time.perf_counter()
 
         finally:
             self.logger.debug("Run stopped")
