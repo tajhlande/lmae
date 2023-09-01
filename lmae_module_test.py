@@ -58,7 +58,7 @@ words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
 
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(matrix, options=options)
-sample_app.add_actors(trees, words, kirby_crop, grass)
+sample_app.add_actors(trees, words, kirby, grass)
 sample_app.add_animations(kirby_anim)
 
 
