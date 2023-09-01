@@ -71,7 +71,7 @@ async def async_input(string: str) -> str:
 
 async def stop_app(app: AppModule):
     logger.info("***** Press return to stop the app *****")
-    await async_input('>')
+    await async_input('')
     logger.debug("Return pressed")
     app.stop()
 
