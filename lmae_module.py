@@ -118,6 +118,8 @@ class SingleStageRenderLoopAppModule(AppModule):
 
                 # mark the timestamp
                 last_time = time.perf_counter()
+        except:
+            self.logger.exception("Exception while running app")
         finally:
             self.logger.debug("Run stopped")
 
