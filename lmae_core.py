@@ -43,6 +43,7 @@ class Canvas(LMAEObject):
         super().__init__(name=name)
         self.size = size
         self.background_fill = background_fill
+        self.logger.debug(f"Background fill: {self.background_fill}")
         self.image = Image.new("RGBA", self.size, (0, 0, 0, 255 if background_fill else 0))
         self.image_draw = ImageDraw.Draw(self.image)
         self.blank()
