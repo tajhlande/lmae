@@ -60,12 +60,12 @@ class Carousel(LMAEComponent):
             self.logger.debug(f"    Base animation for still: {still.duration:.1f}s")
             if i < len(self.panels) - 1:
                 move = StraightMove(name=f"transition{i+1}", duration=self.transition_time,
-                                    easing=self.easing, distance=(-actor.size[0]))
+                                    easing=self.easing, distance=(-actor.size[0], 0))
                 base_animations.append(move)
                 self.logger.debug(f"    Base animation for straight move: {move.distance} over {move.duration:.1f}s")
             else:
                 reset_move = StraightMove(name=f"reset transition", duration=self.transition_time,
-                                          easing=self.easing, distance=total_actor_width)
+                                          easing=self.easing, distance=(total_actor_width, 0))
                 base_animations.append(reset_move)
                 self.logger.debug(f"    Base animation for straight move: {reset_move.distance} over "
                                   f"{reset_move.duration:.1f}s")
