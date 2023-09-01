@@ -47,6 +47,7 @@ class Carousel(LMAEComponent):
             offset += crop_width
             self.crop_actors.append(CropMask(name=f"{name}_CropMask_{actor.name}",
                                              crop_area=crop_area, child=actor))
+        self.logger.debug(f"Total crop actors: {len(self.crop_actors)}")
 
     def get_animations(self) -> List[Animation]:
         self.logger.debug("Constructing individual animations")
