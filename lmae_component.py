@@ -50,9 +50,11 @@ class Carousel(LMAEComponent):
                                              crop_area=crop_area, child=actor))
 
     def get_animations(self) -> List[Animation]:
+        self.logger.debug("Getting animations")
         base_animations = list()
         total_actor_width = sum(actor.size[0] for actor in self.panels)
         for i, actor in enumerate(self.panels):
+            self.logger.debug(f"Constructing base animations for panel {i+1}")
             base_animations.append(Still(name=f"wait {i+1}", duration=self.dwell_time))
             if i < len(self.panels) - 1:
                 base_animations.append(StraightMove(name=f"transition{i+1}", duration=self.transition_time,
@@ -60,14 +62,17 @@ class Carousel(LMAEComponent):
             else:
                 base_animations.append(StraightMove(name=f"reset transition", duration=self.transition_time,
                                                     easing=self.easing, distance=total_actor_width))
+        self.logger.debug(f"Constructed {len(base_animations)} base animations")
 
         animation_sequences = list()
         for actor in self.panels:
+            self.logger.debug(f"Tailoring base animations for actor {actor.name}")
             anims_for_sequence = list()
             for anim in base_animations:
                 actor_anim = deepcopy(anim)
                 actor_anim.actor = actor
                 anims_for_sequence.append(actor_anim)
+            self.logger.debug(f"   Constructed {len(anims_for_sequence)} animations for sequence for {actor.name}")
             sequence = Sequence(name=f"Carousel sequence for {actor.name}", actor=actor, animations=anims_for_sequence,
                                 repeat=True)
             animation_sequences.append(sequence)
