@@ -66,32 +66,32 @@ class WeatherApp(AppModule):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
 
         # temperature actor
-        self.temperature_label = Text(name='temperature', position=(5, 5), font=self.primary_text_font,
+        self.temperature_label = Text(name='TemperatureActor', position=(5, 5), font=self.primary_text_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
         # dewpoint actor
-        self.dewpoint_label = Text(name='dewpoint', position=(5, 23), font=self.secondary_text_font,
+        self.dewpoint_label = Text(name='DewpointActor', position=(5, 23), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         # self.stage.actors.append(self.dewpoint_label)
 
         # feels like actor
-        self.feels_like_label = Text(name='feels like', position=(5, 23), font=self.secondary_text_font,
+        self.feels_like_label = Text(name='FeelsLikeActor', position=(5, 23), font=self.secondary_text_font,
                                      color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         # self.stage.actors.append(self.feels_like_label)
 
         # low temp actor
-        self.low_temp_label = Text(name='low temp', position=(5, 23), font=self.secondary_text_font,
+        self.low_temp_label = Text(name='LowTempActor', position=(5, 23), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         # self.stage.actors.append(self.low_temp_label)
 
         # high temp actor
-        self.high_temp_label = Text(name='high temp', position=(5, 23), font=self.secondary_text_font,
+        self.high_temp_label = Text(name='HighTempActor', position=(5, 23), font=self.secondary_text_font,
                                     color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         # self.stage.actors.append(self.high_temp_label)
 
         # carousel for temps
-        self.temp_carousel = Carousel(name='Temps carousel', crop_area=(5, 23, 33, 30), easing=Easing.BEZIER,
+        self.temp_carousel = Carousel(name='TempsCarousel', crop_area=(5, 23, 33, 30), easing=Easing.BEZIER,
                                       position=(5, 23),
                                       panels=[self.dewpoint_label, self.feels_like_label,
                                               self.low_temp_label, self.high_temp_label])

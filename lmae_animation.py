@@ -185,7 +185,7 @@ class Sequence(Animation):
         for anim in self.animations:
             duration += anim.duration
         self.duration = duration
-        self.logger.debug(f"computed duration is {self.duration}")
+        self.logger.debug(f"computed duration is {self.duration:.1f}s")
 
     def reset(self):
         # self.logger.debug("reset")
