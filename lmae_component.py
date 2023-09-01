@@ -4,7 +4,7 @@ from typing import List
 
 from lmae_core import Actor, Animation, Canvas, _get_sequential_name
 from lmae_actor import CropMask
-from lmae_animation import Easing, Still, StraightMove
+from lmae_animation import Easing, Sequence, Still, StraightMove
 
 
 class LMAEComponent(Actor, metaclass=ABCMeta):
@@ -61,13 +61,17 @@ class Carousel(LMAEComponent):
                 base_animations.append(StraightMove(name=f"reset transition", duration=self.transition_time,
                                                     easing=self.easing, distance=total_actor_width))
 
-        actor_animations = list()
+        animation_sequences = list()
         for actor in self.panels:
+            anims_for_sequence = list()
             for anim in base_animations:
                 actor_anim = deepcopy(anim)
                 actor_anim.actor = actor
-                actor_animations.append(actor_anim)
-        return actor_animations
+                anims_for_sequence.append(actor_anim)
+            sequence = Sequence(name=f"Carousel sequence for {actor.name}", actor=actor, animations=anims_for_sequence,
+                                repeat=True)
+            animation_sequences.append(sequence)
+        return animation_sequences
 
     def needs_render(self):
         need = any(crop.needs_render() for crop in self.crop_actors)
