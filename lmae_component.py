@@ -40,11 +40,11 @@ class Carousel(LMAEComponent):
 
         # set up actor panel positioning and crops
         offset = 0
-        crop_width = self.crop_area[2] - self.crop_area[0]
+        spacing = self.crop_area[2] - self.crop_area[0] + 2
         self.crop_actors = list()
         for actor in self.panels:
             actor.set_position((self.position[0] + offset, self.position[1]))
-            offset += crop_width
+            offset += spacing
             self.crop_actors.append(CropMask(name=f"{name}_CropMask_{actor.name}",
                                              crop_area=crop_area, child=actor))
         self.logger.debug(f"Total crop actors: {len(self.crop_actors)}")
