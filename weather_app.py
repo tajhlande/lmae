@@ -30,6 +30,9 @@ class WeatherApp(AppModule):
         self.temperature_label: Text = None
         self.secondary_text_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
         self.dewpoint_label: Text = None
+        self.feels_like_label: Text = None
+        self.low_temp_label: Text = None
+        self.high_temp_label: Text = None
 
         self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
@@ -62,10 +65,25 @@ class WeatherApp(AppModule):
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
-        # dewpoint actors
+        # dewpoint actor
         self.dewpoint_label = Text(name='dewpoint', position=(5, 23), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.dewpoint_label)
+
+        # feels like actor
+        self.feels_like_label = Text(name='feels like', position=(5, 23), font=self.secondary_text_font,
+                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        self.stage.actors.append(self.feels_like_label)
+
+        # low temp actor
+        self.low_temp_label = Text(name='low temp', position=(5, 23), font=self.secondary_text_font,
+                                     color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        self.stage.actors.append(self.low_temp_label)
+
+        # high temp actor
+        self.high_temp_label = Text(name='high temp', position=(5, 23), font=self.secondary_text_font,
+                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+        self.stage.actors.append(self.high_temp_label)
 
         # conditions image actor
         sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
@@ -92,6 +110,22 @@ class WeatherApp(AppModule):
         # dewpoint
         dewpoint = f"DP {round(self.current_conditions['currentConditions']['dew'])}º"
         self.dewpoint_label.text = dewpoint
+        self.dewpoint_label.set_visible(False)
+
+        # feels like
+        feels_like = f"FL {round(self.current_conditions['currentConditions']['feelslike'])}"
+        self.feels_like_label.text = feels_like
+        self.feels_like_label.set_visible(True)
+
+        # low temp
+        low_temp = f"Low {round(self.current_conditions['days'][0]['tempmin'])}"
+        self.low_temp_label.text = low_temp
+        self.low_temp_label.set_visible(False)
+
+        # high temp
+        high_temp = f"Low {round(self.current_conditions['days'][0]['tempmax'])}"
+        self.high_temp_label.text = high_temp
+        self.high_temp_label.set_visible(False)
 
         # figure out whether it is day or night
         time_of_day = time.strftime("%H:%M:%S", time.localtime())
