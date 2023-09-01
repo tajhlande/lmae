@@ -92,6 +92,6 @@ class Carousel(LMAEComponent):
 
     def render(self, canvas: Canvas):
         # self.logger.debug("Rendering carousel")
-        for actor in self.panels:
+        for actor in self.crop_actors:
             actor.render(canvas)
         self.changes_since_last_render = False
