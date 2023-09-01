@@ -152,8 +152,8 @@ class StraightMove(Animation):
         x = self.actor.position[0] + net_d_x
         y = self.actor.position[1] + net_d_y
         self.actor.position = (x, y)
-        # self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
-        #                   f"net mvmt: {(net_d_x, net_d_y)}, actor at {self.actor.position}")
+        self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
+                          f"net mvmt: {(net_d_x, net_d_y)}, actor at {self.actor.position}")
 
         # account for movement
         self.accumulated_movement = (self.accumulated_movement[0] + net_d_x, self.accumulated_movement[1] + net_d_y)
@@ -206,12 +206,12 @@ class Sequence(Animation):
 
     def update_actor(self, current_time: float):
         if self.seq_index >= len(self.animations):
-            self.logger.debug("All animations finished")
+            # self.logger.debug("All animations finished")
             return  # nothing to do, we're done
 
         current_anim = self.animations[self.seq_index]
         if current_anim.is_finished():
-            self.logger.debug(f"Animation {self.seq_index} finished, looking for next")
+            # self.logger.debug(f"Animation {self.seq_index} finished, looking for next")
             self.seq_index += 1
             if self.seq_index >= len(self.animations):
                 # self.logger.debug("All animations finished")
