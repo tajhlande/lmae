@@ -264,7 +264,8 @@ class WeatherApp(AppModule):
                         # self.logger.debug(f"Sleeping for {sleep_time}")
                         await asyncio.sleep(sleep_time)
                     else:
-                        yield
+                        # gotta yield control
+                        await asyncio.sleep(min_time_per_frame/10.0)
 
                     # mark the timestamp
                     last_time = time.perf_counter()
