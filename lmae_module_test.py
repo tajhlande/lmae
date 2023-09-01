@@ -48,6 +48,7 @@ kirby_still_4 = Still(duration=2.0)
 kirby_anim = Sequence(name="Kirby Repeat", actor=kirby, repeat=True,
                       animations=[kirby_go_right_1, kirby_still_1, kirby_go_left_1, kirby_still_2,
                                   kirby_go_right_2, kirby_still_3,  kirby_go_left_2, kirby_still_4])
+kirby_crop = CropMask(name='Kirby Crop', child=kirby, crop_area=(10, 20, 54, 30))
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
@@ -57,7 +58,7 @@ words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
 
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(matrix, options=options)
-sample_app.add_actors(trees, words, kirby, grass)
+sample_app.add_actors(trees, words, kirby_crop, grass)
 sample_app.add_animations(kirby_anim)
 
 
