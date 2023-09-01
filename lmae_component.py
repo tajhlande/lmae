@@ -55,13 +55,21 @@ class Carousel(LMAEComponent):
         total_actor_width = sum(actor.size[0] for actor in self.panels)
         for i, actor in enumerate(self.panels):
             self.logger.debug(f"Constructing base animations for panel {i+1}")
-            base_animations.append(Still(name=f"wait {i+1}", duration=self.dwell_time))
+            still = Still(name=f"wait {i+1}", duration=self.dwell_time)
+            base_animations.append(still)
+            self.logger.debug(f"    Base animation for still: {still.duration:.1f}s")
             if i < len(self.panels) - 1:
-                base_animations.append(StraightMove(name=f"transition{i+1}", duration=self.transition_time,
-                                                    easing=self.easing, distance=(-actor.size[0])))
+                move = StraightMove(name=f"transition{i+1}", duration=self.transition_time,
+                                    easing=self.easing, distance=(-actor.size[0]))
+                base_animations.append(move)
+                self.logger.debug(f"    Base animation for straight move: {move.distance} over {move.duration:.1f}s")
             else:
-                base_animations.append(StraightMove(name=f"reset transition", duration=self.transition_time,
-                                                    easing=self.easing, distance=total_actor_width))
+                reset_move = StraightMove(name=f"reset transition", duration=self.transition_time,
+                                          easing=self.easing, distance=total_actor_width)
+                base_animations.append(reset_move)
+                self.logger.debug(f"    Base animation for straight move: {reset_move.distance} over "
+                                  f"{reset_move.duration:.1f}s")
+
         self.logger.debug(f"Constructed {len(base_animations)} base animations")
 
         animation_sequences = list()
