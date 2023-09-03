@@ -144,7 +144,7 @@ class WeatherApp(AppModule):
                 self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['current']['dew_point'])}º"
                 self.humidity_str = f"RH {round(self.conditions_and_forecast['current']['humidity'])}%"
                 self.low_temp_str = f"Low {round(self.conditions_and_forecast['daily'][0]['temp']['min'])}º"
-                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['temp']['max'])}º"
+                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['daily'][0]['temp']['max'])}º"
                 self.sunrise = self.conditions_and_forecast['current']['sunrise']
                 self.sunset = self.conditions_and_forecast['current']['sunset']
                 self.condition_code = self.conditions_and_forecast['current']['weather']['id']
