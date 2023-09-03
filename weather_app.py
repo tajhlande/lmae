@@ -136,6 +136,7 @@ class WeatherApp(AppModule):
                 self.low_temp_str = f"Low {round(self.conditions_and_forecast['days'][0]['tempmin'])}º"
                 self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['tempmax'])}º"
                 self.moon_phase_num = self.conditions_and_forecast['currentConditions']['moonphase']
+                forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['days'][0]['datetimeEpoch'])
                 """
 
                 # OpenWeather API response format
@@ -150,6 +151,7 @@ class WeatherApp(AppModule):
                 self.condition_code = self.conditions_and_forecast['current']['weather'][0]['id']
                 self.condition_str = self.conditions_and_forecast['current']['weather'][0]['main'].lower()
                 self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moon_phase']
+                forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
 
                 # log
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
@@ -158,15 +160,7 @@ class WeatherApp(AppModule):
                 self.logger.debug(f"    Humidity    : {self.humidity_str}")
                 self.logger.debug(f"    Low temp    : {self.low_temp_str}")
                 self.logger.debug(f"    High temp   : {self.high_temp_str}")
-                self.logger.debug(f" Forecast date  : {self.conditions_and_forecast['days'][0]['datetime']}")
-
-                # VX format
-                # forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['days'][0]['datetimeEpoch'])
-
-                # OpenWeather format
-                forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
-
-                self.logger.debug(f" Forecast epoch : {forecast_date_time}")
+                self.logger.debug(f" Forecast date  : {forecast_date_time}")
 
             else:
                 self.logger.error("Call to get weather data failed")
