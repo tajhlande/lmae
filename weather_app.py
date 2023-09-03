@@ -51,66 +51,16 @@ class WeatherApp(AppModule):
         self.humidity_str: str = None
         self.low_temp_str: str = None
         self.high_temp_str: str = None
+        self.sunrise: str = None
+        self.sunset: str = None
+        self.condition_str: str = None
+        self.condition_code: int = None
+        self.moon_phase_num: float = None
 
         self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
         self.timer_line: Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
-
-    # noinspection PyBroadException
-    def update_weather_data(self):
-        try:
-            self.logger.debug(f"Fetching current weather data")
-            conditions_and_forecast = get_conditions_and_forecast_by_lat_long(self.latitude, self.longitude,
-                                                                              self.api_key)
-            if conditions_and_forecast:
-                self.logger.debug("Call to get conditions and forecast succeeded")
-                self.conditions_and_forecast = conditions_and_forecast
-                self.call_status = "ok"
-                self.fresh_weather_data = True
-
-                # set up weather values
-                """
-                # VisualCrossing API response format
-                self.temperature_str = f"{round(conditions_and_forecast['currentConditions']['temp'])}º"
-                self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['currentConditions']['dew'])}º"
-                self.feels_like_str = f"FL {round(self.conditions_and_forecast['currentConditions']['feelslike'])}º"
-                self.low_temp_str = f"Low {round(self.conditions_and_forecast['days'][0]['tempmin'])}º"
-                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['tempmax'])}º"
-                """
-
-                # OpenWeather API response format
-                self.temperature_str = f"{round(conditions_and_forecast['current']['temp'])}º"
-                self.feels_like_str = f"FL {round(self.conditions_and_forecast['current']['feels_like'])}º"
-                self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['current']['dew_point'])}º"
-                self.humidity_str = f"RH {round(self.conditions_and_forecast['current']['humidity'])}%"
-                self.low_temp_str = f"Low {round(self.conditions_and_forecast['daily'][0]['temp']['min'])}º"
-                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['temp']['max'])}º"
-
-                # log
-                self.logger.debug(f"    Temperature : {self.temperature_str}")
-                self.logger.debug(f"    Feels like  : {self.feels_like_str}")
-                self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
-                self.logger.debug(f"    Humidity    : {self.humidity_str}")
-                self.logger.debug(f"    Low temp    : {self.low_temp_str}")
-                self.logger.debug(f"    High temp   : {self.high_temp_str}")
-                self.logger.debug(f" Forecast date  : {self.conditions_and_forecast['days'][0]['datetime']}")
-
-                # VX format
-                # forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['days'][0]['datetimeEpoch'])
-
-                # OpenWeather format
-                forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
-
-                self.logger.debug(f" Forecast epoch : {forecast_date_time}")
-            else:
-                self.logger.error("Call to get weather data failed")
-                self.call_status = "error"
-                self.fresh_weather_data = False
-                # old conditions remain available
-
-        except:
-            self.logger.error("Call to get weather status failed")
 
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
@@ -165,6 +115,75 @@ class WeatherApp(AppModule):
         self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
         self.stage.actors.append(self.timer_line)
 
+    # noinspection PyBroadException
+    def update_weather_data(self):
+        try:
+            self.logger.debug(f"Fetching current weather data")
+            conditions_and_forecast = get_conditions_and_forecast_by_lat_long(self.latitude, self.longitude,
+                                                                              self.api_key)
+            if conditions_and_forecast:
+                self.logger.debug("Call to get conditions and forecast succeeded")
+                self.conditions_and_forecast = conditions_and_forecast
+                self.call_status = "ok"
+                self.fresh_weather_data = True
+
+                # set up weather values
+                """
+                # VisualCrossing API response format
+                self.temperature_str = f"{round(conditions_and_forecast['currentConditions']['temp'])}º"
+                self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['currentConditions']['dew'])}º"
+                self.feels_like_str = f"FL {round(self.conditions_and_forecast['currentConditions']['feelslike'])}º"
+                self.low_temp_str = f"Low {round(self.conditions_and_forecast['days'][0]['tempmin'])}º"
+                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['tempmax'])}º"
+                self.moon_phase_num = self.conditions_and_forecast['currentConditions']['moonphase']
+                """
+
+                # OpenWeather API response format
+                self.temperature_str = f"{round(conditions_and_forecast['current']['temp'])}º"
+                self.feels_like_str = f"FL {round(self.conditions_and_forecast['current']['feels_like'])}º"
+                self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['current']['dew_point'])}º"
+                self.humidity_str = f"RH {round(self.conditions_and_forecast['current']['humidity'])}%"
+                self.low_temp_str = f"Low {round(self.conditions_and_forecast['daily'][0]['temp']['min'])}º"
+                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['temp']['max'])}º"
+                self.sunrise = self.conditions_and_forecast['current']['sunrise']
+                self.sunset = self.conditions_and_forecast['current']['sunset']
+                self.condition_code = self.conditions_and_forecast['current']['weather']['id']
+                self.condition_str = self.conditions_and_forecast['current']['weather']['main'].lower()
+                self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moonphase']
+
+                # log
+                self.logger.debug(f"    Temperature : {self.temperature_str}")
+                self.logger.debug(f"    Feels like  : {self.feels_like_str}")
+                self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
+                self.logger.debug(f"    Humidity    : {self.humidity_str}")
+                self.logger.debug(f"    Low temp    : {self.low_temp_str}")
+                self.logger.debug(f"    High temp   : {self.high_temp_str}")
+                self.logger.debug(f" Forecast date  : {self.conditions_and_forecast['days'][0]['datetime']}")
+
+                # VX format
+                # forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['days'][0]['datetimeEpoch'])
+
+                # OpenWeather format
+                forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
+
+                self.logger.debug(f" Forecast epoch : {forecast_date_time}")
+
+            else:
+                self.logger.error("Call to get weather data failed")
+                self.call_status = "error"
+                self.fresh_weather_data = False
+                # old conditions remain available
+
+        except:
+            self.logger.error("Call to get weather status failed")
+
+    @staticmethod
+    def format_epoch_time(timestamp):
+        timestamp_format = "%H:%M:%S"
+        if timestamp is str:
+            timestamp = float(timestamp)
+        return time.strftime(timestamp_format, time.localtime(timestamp))
+
     def update_view(self, elapsed_time: float):
         self.temperature_label.text = self.temperature_str
         self.dewpoint_label.text = self.dewpoint_str
@@ -173,13 +192,16 @@ class WeatherApp(AppModule):
         self.high_temp_label.text = self.high_temp_str
 
         # figure out whether it is day or night
-        time_of_day = time.strftime("%H:%M:%S", time.localtime())
-        sunrise = self.conditions_and_forecast['currentConditions']['sunrise']
-        sunset = self.conditions_and_forecast['currentConditions']['sunset']
-        is_daytime = sunrise < time_of_day < sunset
-        if self.fresh_weather_data: self.logger.debug(f"Sunrise: {sunrise}, sunset: {sunset}, "
-                                                      f"time of day: {time_of_day}")
-        if self.fresh_weather_data: self.logger.debug(f"Is is daytime? {is_daytime}")
+        # time_of_day = time.strftime(timestamp_format, time.localtime())
+        time_of_day = time.localtime()
+        is_daytime = self.sunrise < time_of_day < self.sunset
+        sunrise_str = self.format_epoch_time(self.sunrise)
+        sunset_str = self.format_epoch_time(self.sunset)
+        tod_str = self.format_epoch_time(time_of_day)
+        if self.fresh_weather_data:
+            self.logger.debug(f"Sunrise: {sunrise_str}, sunset: {sunset_str}, time of day: {tod_str}")
+        if self.fresh_weather_data:
+            self.logger.debug(f"Is is daytime? {is_daytime}")
 
         # conditions
         # sprite names for conditions we can show
@@ -189,16 +211,35 @@ class WeatherApp(AppModule):
         if is_daytime:
             self.daytime_image.show()
             condition_sprite = None
-            condition_str = self.conditions_and_forecast['currentConditions']['conditions']
-            if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {condition_str}')
-            if condition_str in ['clear', 'type_43']:
+            if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {self.condition_str}')
+
+            # VX interpretation
+            """
+            if self.condition_str in ['clear', 'type_43']:
                 condition_sprite = 'sunny'
-            elif condition_str in ['overcast', 'type_41', 'type_42']:
+            elif self.condition_str in ['overcast', 'type_41', 'type_42']:
                 condition_sprite = 'cloudy'
-            elif condition_str in ['rainy', 'type_2', 'type_3', 'type_4', 'type_5', 'type_6', 'type_9', 'type_10',
+            elif self.condition_str in ['rainy', 'type_2', 'type_3', 'type_4', 'type_5', 'type_6', 'type_9', 'type_10',
                                    'type_11', 'type_13', 'type_14', 'type_20', 'type_21', 'type_22', 'type_23',
                                    'type_24', 'type_25', 'type_26', 'type_32', 'type_36', 'type_37', 'type_38']:
                 condition_sprite = 'rainy'
+            """
+
+            # OW interpretation
+            if 200 <= self.condition_code <= 299:
+                condition_sprite = 'lightning'
+            elif 300 <= self.condition_code <= 399:
+                condition_sprite = 'rainy'
+            elif 500 <= self.condition_code <= 599:
+                condition_sprite = 'rainy'
+            elif 500 <= self.condition_code <= 599:
+                condition_sprite = 'snowflake-large'
+            elif 700 <= self.condition_code <= 799:
+                condition_sprite = 'foggy'
+            elif 800 <= self.condition_code <= 802:
+                condition_sprite = 'sunny'
+            elif 803 <= self.condition_code <= 899:
+                condition_sprite = 'cloudy'
             if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
         else:
@@ -207,28 +248,28 @@ class WeatherApp(AppModule):
 
         # moon phase
         if not is_daytime:
-            moon_phase_num = self.conditions_and_forecast['currentConditions']['moonphase']
             # moon_phase_name = None
-            if moon_phase_num > 0.9375:
+            if self.moon_phase_num > 0.9375:
                 moon_phase_name = "moon-new"
-            elif moon_phase_num > 0.8125:
+            elif self.moon_phase_num > 0.8125:
                 moon_phase_name = "moon-waning-crescent"
-            elif moon_phase_num > 0.6875:
+            elif self.moon_phase_num > 0.6875:
                 moon_phase_name = "moon-waning-half"
-            elif moon_phase_num > 0.5625:
+            elif self.moon_phase_num > 0.5625:
                 moon_phase_name = "moon-waning-gibbous"
-            elif moon_phase_num > 0.4375:
+            elif self.moon_phase_num > 0.4375:
                 moon_phase_name = "moon-full"
-            elif moon_phase_num > 0.3125:
+            elif self.moon_phase_num > 0.3125:
                 moon_phase_name = "moon-waxing-gibbous"
-            elif moon_phase_num > 0.1875:
+            elif self.moon_phase_num > 0.1875:
                 moon_phase_name = "moon-waxing-half"
-            elif moon_phase_num > 0.0625:
+            elif self.moon_phase_num > 0.0625:
                 moon_phase_name = "moon-waxing-crescent"
             else:
                 moon_phase_name = "moon-new"
 
-            if self.fresh_weather_data: self.logger.debug(f"Showing moon phase {moon_phase_num} as {moon_phase_name}")
+            if self.fresh_weather_data:
+                self.logger.debug(f"Showing moon phase {self.moon_phase_num} as {moon_phase_name}")
             self.moon_phase_image.show()
             self.moon_phase_image.set_sprite(moon_phase_name)
         else:
