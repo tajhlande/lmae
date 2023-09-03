@@ -47,14 +47,22 @@ async def run_app(app: AppModule):
 
     logger.debug("run_app() finished")
 
+# Visual Crossing
+# api_key = os.environ.get('VX_API_KEY')
 
-api_key = os.environ.get('VX_API_KEY')
+# OpenWeather
+api_key = os.environ.get('OW_API_KEY')
 
 if not api_key:
     config = configparser.ConfigParser()
     config.read('env.ini')
-    api_key = config['visual.crossing']['vx_api_key']
 
-wx_app = WeatherApp(zipcode='20895', api_key=api_key)
+    # VX
+    # api_key = config['visual.crossing']['vx_api_key']
+
+    # OpenWeather
+    api_key = config['openweather']['ow_api_key']
+
+wx_app = WeatherApp(api_key=api_key)
 wx_app.set_matrix(matrix, options=options)
 asyncio.run(run_app(wx_app))

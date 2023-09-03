@@ -5,12 +5,15 @@ import json
 from datetime import datetime
 from PIL import Image, ImageFont
 
-from vx_wx.vx_client import get_conditions_and_forecast_by_zipcode
+from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae_core import Stage
 from lmae_module import AppModule
 from lmae_actor import SpriteImage, Text, Line
 from lmae_animation import Easing
 from lmae_component import Carousel
+
+TOK_LAT = '39.0158678'
+TOK_LONG = '-77.0734945'
 
 
 class WeatherApp(AppModule):
@@ -19,12 +22,13 @@ class WeatherApp(AppModule):
     """
 
     # noinspection PyTypeChecker
-    def __init__(self, api_key: str, zipcode: str):
+    def __init__(self, api_key: str, latitude: str = TOK_LAT, longitude: str = TOK_LONG):
         super().__init__()
         self.fresh_weather_data = False
         self.api_key = api_key
-        self.zipcode = zipcode
-        self.logger.info(f"Checking weather for ZIP code {self.zipcode}")
+        self.latitude = latitude
+        self.longitude = longitude
+        self.logger.info(f"Weather conditions for location at lat/long {self.latitude}, {self.longitude}")
         self.lock = asyncio.Lock()
         self.stage: Stage = None
         self.actors = list()
@@ -36,6 +40,7 @@ class WeatherApp(AppModule):
         self.secondary_text_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
         self.dewpoint_label: Text = None
         self.feels_like_label: Text = None
+        self.humidity_label: Text = None
         self.low_temp_label: Text = None
         self.high_temp_label: Text = None
         self.temps_carousel: Carousel = None
@@ -43,6 +48,7 @@ class WeatherApp(AppModule):
         self.temperature_str: str = None
         self.dewpoint_str: str = None
         self.feels_like_str: str = None
+        self.humidity_str: str = None
         self.low_temp_str: str = None
         self.high_temp_str: str = None
 
@@ -52,10 +58,11 @@ class WeatherApp(AppModule):
         self.refresh_time = 900  # 900 seconds = 15 minutes
 
     # noinspection PyBroadException
-    def get_current_conditions(self):
+    def update_weather_data(self):
         try:
-            self.logger.debug(f"Fetching current conditions for ZIP code {self.zipcode}")
-            conditions_and_forecast = get_conditions_and_forecast_by_zipcode(self.zipcode, self.api_key)
+            self.logger.debug(f"Fetching current weather data")
+            conditions_and_forecast = get_conditions_and_forecast_by_lat_long(self.latitude, self.longitude,
+                                                                              self.api_key)
             if conditions_and_forecast:
                 self.logger.debug("Call to get conditions and forecast succeeded")
                 self.conditions_and_forecast = conditions_and_forecast
@@ -63,23 +70,43 @@ class WeatherApp(AppModule):
                 self.fresh_weather_data = True
 
                 # set up weather values
+                """
+                # VisualCrossing API response format
                 self.temperature_str = f"{round(conditions_and_forecast['currentConditions']['temp'])}º"
                 self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['currentConditions']['dew'])}º"
                 self.feels_like_str = f"FL {round(self.conditions_and_forecast['currentConditions']['feelslike'])}º"
                 self.low_temp_str = f"Low {round(self.conditions_and_forecast['days'][0]['tempmin'])}º"
                 self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['tempmax'])}º"
+                """
 
+                # OpenWeather API response format
+                self.temperature_str = f"{round(conditions_and_forecast['current']['temp'])}º"
+                self.feels_like_str = f"FL {round(self.conditions_and_forecast['current']['feels_like'])}º"
+                self.dewpoint_str = f"Dew {round(self.conditions_and_forecast['current']['dew_point'])}º"
+                self.humidity_str = f"RH {round(self.conditions_and_forecast['current']['humidity'])}%"
+                self.low_temp_str = f"Low {round(self.conditions_and_forecast['daily'][0]['temp']['min'])}º"
+                self.high_temp_str = f"Hi {round(self.conditions_and_forecast['days'][0]['temp']['max'])}º"
+
+                # log
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
-                self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
                 self.logger.debug(f"    Feels like  : {self.feels_like_str}")
+                self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
+                self.logger.debug(f"    Humidity    : {self.humidity_str}")
                 self.logger.debug(f"    Low temp    : {self.low_temp_str}")
                 self.logger.debug(f"    High temp   : {self.high_temp_str}")
                 self.logger.debug(f" Forecast date  : {self.conditions_and_forecast['days'][0]['datetime']}")
-                datetimeEpoch = datetime_object = datetime.fromtimestamp(self.conditions_and_forecast['days'][0]['datetimeEpoch'])
-                self.logger.debug(f" Forecast epoch : {datetimeEpoch}")
+
+                # VX format
+                # forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['days'][0]['datetimeEpoch'])
+
+                # OpenWeather format
+                forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
+
+                self.logger.debug(f" Forecast epoch : {forecast_date_time}")
             else:
-                self.logger.error("Call to get conditions and forecast did not return any conditions")
+                self.logger.error("Call to get weather data failed")
                 self.call_status = "error"
+                self.fresh_weather_data = False
                 # old conditions remain available
 
         except:
@@ -93,31 +120,31 @@ class WeatherApp(AppModule):
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
-        # dewpoint actor
-        self.dewpoint_label = Text(name='DewpointActor', position=(5, 23), font=self.secondary_text_font,
-                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        # self.stage.actors.append(self.dewpoint_label)
-
         # feels like actor
         self.feels_like_label = Text(name='FeelsLikeActor', position=(5, 23), font=self.secondary_text_font,
                                      color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        # self.stage.actors.append(self.feels_like_label)
+
+        # dewpoint actor
+        self.dewpoint_label = Text(name='DewpointActor', position=(5, 23), font=self.secondary_text_font,
+                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
+
+        # humidity actor
+        self.humidity_label = Text(name='HumidityActor', position=(5, 23), font=self.secondary_text_font,
+                                   color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
 
         # low temp actor
         self.low_temp_label = Text(name='LowTempActor', position=(5, 23), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        # self.stage.actors.append(self.low_temp_label)
 
         # high temp actor
         self.high_temp_label = Text(name='HighTempActor', position=(5, 23), font=self.secondary_text_font,
                                     color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        # self.stage.actors.append(self.high_temp_label)
 
         # carousel for temps
         self.temps_carousel = Carousel(name='TempsCarousel', crop_area=(5, 23, 38, 30), easing=Easing.BEZIER,
                                        position=(5, 23),
-                                       panels=[self.dewpoint_label, self.feels_like_label,
-                                              self.low_temp_label, self.high_temp_label])
+                                       panels=[self.feels_like_label, self.dewpoint_label, self.humidity_label,
+                                               self.low_temp_label, self.high_temp_label])
         self.stage.actors.append(self.temps_carousel)
         self.stage.add_animations(self.temps_carousel.get_animations())
         self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
@@ -233,7 +260,7 @@ class WeatherApp(AppModule):
         try:
             while self.running:
                 # get updated weather conditions
-                self.get_current_conditions()
+                self.update_weather_data()
 
                 # update the view
                 self.update_view(0)
