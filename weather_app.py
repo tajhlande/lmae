@@ -182,6 +182,7 @@ class WeatherApp(AppModule):
         self.temperature_label.text = self.temperature_str
         self.dewpoint_label.text = self.dewpoint_str
         self.feels_like_label.text = self.feels_like_str
+        self.humidity_label.text = self.humidity_str
         self.low_temp_label.text = self.low_temp_str
         self.high_temp_label.text = self.high_temp_str
 
