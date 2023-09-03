@@ -175,7 +175,7 @@ class WeatherApp(AppModule):
                 # old conditions remain available
 
         except:
-            self.logger.error("Call to get weather status failed")
+            self.logger.exception("Call to get weather status failed")
 
     @staticmethod
     def format_epoch_time(timestamp):
