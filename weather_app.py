@@ -194,15 +194,15 @@ class WeatherApp(AppModule):
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
         time_of_day = time.time()
-        self.logger.debug(f"RAW: Sunrise: {self.sunrise}, sunset: {self.sunset}, time of day: {time_of_day}")
+        # self.logger.debug(f"RAW: Sunrise: {self.sunrise}, sunset: {self.sunset}, time of day: {time_of_day}")
         is_daytime = self.sunrise < time_of_day < self.sunset
         sunrise_str = self.format_epoch_time(self.sunrise)
         sunset_str = self.format_epoch_time(self.sunset)
         tod_str = self.format_epoch_time(time_of_day)
-        if self.fresh_weather_data:
-            self.logger.debug(f"Sunrise: {sunrise_str}, sunset: {sunset_str}, time of day: {tod_str}")
-        if self.fresh_weather_data:
-            self.logger.debug(f"Is is daytime? {is_daytime}")
+        # if self.fresh_weather_data:
+        #    self.logger.debug(f"Sunrise: {sunrise_str}, sunset: {sunset_str}, time of day: {tod_str}")
+        # if self.fresh_weather_data:
+        #    self.logger.debug(f"Is is daytime? {is_daytime}")
 
         # conditions
         # sprite names for conditions we can show
@@ -212,7 +212,7 @@ class WeatherApp(AppModule):
         if is_daytime:
             self.daytime_image.show()
             condition_sprite = None
-            if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {self.condition_str}')
+            # if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {self.condition_str}')
 
             # VX interpretation
             """
@@ -244,7 +244,7 @@ class WeatherApp(AppModule):
             if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
         else:
-            if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
+            #if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
             self.daytime_image.hide()
 
         # moon phase
