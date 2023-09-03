@@ -51,8 +51,8 @@ class WeatherApp(AppModule):
         self.humidity_str: str = None
         self.low_temp_str: str = None
         self.high_temp_str: str = None
-        self.sunrise: str = None
-        self.sunset: str = None
+        self.sunrise: int = None
+        self.sunset: int = None
         self.condition_str: str = None
         self.condition_code: int = None
         self.moon_phase_num: float = None
@@ -193,7 +193,7 @@ class WeatherApp(AppModule):
 
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
-        time_of_day = time.localtime()
+        time_of_day = time.time()
         is_daytime = self.sunrise < time_of_day < self.sunset
         sunrise_str = self.format_epoch_time(self.sunrise)
         sunset_str = self.format_epoch_time(self.sunset)
