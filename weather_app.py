@@ -147,9 +147,9 @@ class WeatherApp(AppModule):
                 self.high_temp_str = f"Hi {round(self.conditions_and_forecast['daily'][0]['temp']['max'])}º"
                 self.sunrise = self.conditions_and_forecast['current']['sunrise']
                 self.sunset = self.conditions_and_forecast['current']['sunset']
-                self.condition_code = self.conditions_and_forecast['current']['weather']['id']
-                self.condition_str = self.conditions_and_forecast['current']['weather']['main'].lower()
-                self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moonphase']
+                self.condition_code = self.conditions_and_forecast['current']['weather'][0]['id']
+                self.condition_str = self.conditions_and_forecast['current']['weather'][0]['main'].lower()
+                self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moon_phase']
 
                 # log
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
