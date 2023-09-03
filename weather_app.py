@@ -194,6 +194,7 @@ class WeatherApp(AppModule):
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
         time_of_day = time.time()
+        self.logger.debug(f"RAW: Sunrise: {self.sunrise}, sunset: {self.sunset}, time of day: {time_of_day}")
         is_daytime = self.sunrise < time_of_day < self.sunset
         sunrise_str = self.format_epoch_time(self.sunrise)
         sunset_str = self.format_epoch_time(self.sunset)
