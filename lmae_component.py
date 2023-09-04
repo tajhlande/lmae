@@ -28,7 +28,7 @@ class Carousel(LMAEComponent):
 
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), panels: List[Actor] = None,
                  dwell_time: float = 10.0, transition_time: float = 1.2, easing: Easing = Easing.QUADRATIC,
-                 crop_area: tuple[int, int, int, int] = (16, 8, 47, 23)):
+                 crop_area: tuple[int, int, int, int] = (16, 8, 47, 23), panel_offset: tuple[int, int] = (0, 0)):
         name = name or _get_sequential_name("Carousel")
         super().__init__(name, position)
         self.dwell_time = dwell_time
@@ -37,13 +37,14 @@ class Carousel(LMAEComponent):
         self.panels = panels or list()
 
         self.crop_area = crop_area
+        self.panel_offset = panel_offset
 
         # set up actor panel positioning and crops
         offset = 0
         spacing = self.crop_area[2] - self.crop_area[0] + 2
         self.crop_actors = list()
         for actor in self.panels:
-            actor.set_position((self.position[0] + offset, self.position[1]))
+            actor.set_position((self.position[0] + offset + self.panel_offset[0], self.position[1] + panel_offset[1]))
             offset += spacing
             self.crop_actors.append(CropMask(name=f"{name}_CropMask_{actor.name}",
                                              crop_area=crop_area, child=actor))

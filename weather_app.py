@@ -103,8 +103,8 @@ class WeatherApp(AppModule):
                                     color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
 
         # carousel for temps
-        self.temps_carousel = Carousel(name='TempsCarousel', crop_area=(5, 23, 38, 30), easing=Easing.BEZIER,
-                                       position=(5, 23),
+        self.temps_carousel = Carousel(name='TempsCarousel', crop_area=(4, 22, 38, 30), easing=Easing.BEZIER,
+                                       position=(4, 22), panel_offset=(1, 1),
                                        panels=[self.feels_like_label, self.dewpoint_label, self.humidity_label,
                                                self.low_temp_label, self.high_temp_label])
         self.stage.actors.append(self.temps_carousel)
@@ -315,7 +315,7 @@ class WeatherApp(AppModule):
             self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         else:
             self.background_image = None
-            self.logger.debug(f"Unrecognized condition code: {self.condition_code}")
+            self.logger.warning(f"Unrecognized condition code: {self.condition_code}")
 
         bg_image_name = ""
         if self.background_image:
