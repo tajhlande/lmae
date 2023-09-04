@@ -100,7 +100,7 @@ class WeatherApp(AppModule):
 
         # high temp actor
         self.high_temp_label = Text(name='HighTempActor', position=(5, 23), font=self.secondary_text_font,
-                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 128), stroke_width=1)
+                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
 
         # carousel for temps
         self.temps_carousel = Carousel(name='TempsCarousel', crop_area=(4, 22, 38, 30), easing=Easing.BEZIER,
