@@ -63,11 +63,11 @@ class WeatherApp(AppModule):
         self.timer_line: Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
 
-        self.blue_sky_image: Image = Image.open("images/backgrounds/blue_sky.png")
-        self.cloudy_image: Image = Image.open("images/backgrounds/cloudy.png")
-        self.dark_clouds_image: Image = Image.open("images/backgrounds/dark_clouds.png")
-        self.night_sky_image: Image = Image.open("images/backgrounds/night_sky.png")
-        self.sunrise_sunset_image: Image = Image.open("images/backgrounds/sunrise_sunset.png")
+        self.blue_sky_image: Image = Image.open("images/backgrounds/blue_sky.png").convert('RGBA')
+        self.cloudy_image: Image = Image.open("images/backgrounds/cloudy.png").convert('RGBA')
+        self.dark_clouds_image: Image = Image.open("images/backgrounds/dark_clouds.png").convert('RGBA')
+        self.night_sky_image: Image = Image.open("images/backgrounds/night_sky.png").convert('RGBA')
+        self.sunrise_sunset_image: Image = Image.open("images/backgrounds/sunrise_sunset.png").convert('RGBA')
 
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
