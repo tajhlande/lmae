@@ -57,6 +57,7 @@ class WeatherApp(AppModule):
         self.condition_str: str = None
         self.condition_code: int = None
         self.moon_phase_num: float = None
+        self.is_daytime: bool = None
 
         self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
@@ -163,6 +164,7 @@ class WeatherApp(AppModule):
                 self.condition_str = self.conditions_and_forecast['current']['weather'][0]['main'].lower()
                 self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moon_phase']
                 forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
+                self.is_daytime = None
 
                 # log
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
@@ -201,21 +203,23 @@ class WeatherApp(AppModule):
         # time_of_day = time.strftime(timestamp_format, time.localtime())
         time_of_day = time.time()
         # self.logger.debug(f"RAW: Sunrise: {self.sunrise}, sunset: {self.sunset}, time of day: {time_of_day}")
-        is_daytime = self.sunrise < time_of_day < self.sunset
-        # sunrise_str = self.format_epoch_time(self.sunrise)
-        # sunset_str = self.format_epoch_time(self.sunset)
-        # tod_str = self.format_epoch_time(time_of_day)
-        # if self.fresh_weather_data:
-        #    self.logger.debug(f"Sunrise: {sunrise_str}, sunset: {sunset_str}, time of day: {tod_str}")
-        # if self.fresh_weather_data:
-        #    self.logger.debug(f"Is is daytime? {is_daytime}")
+        last_is_daytime = self.is_daytime
+        self.is_daytime = self.sunrise < time_of_day < self.sunset
+        if self.is_daytime != last_is_daytime:
+            sunrise_str = self.format_epoch_time(self.sunrise)
+            sunset_str = self.format_epoch_time(self.sunset)
+            tod_str = self.format_epoch_time(time_of_day)
+            if self.fresh_weather_data:
+                self.logger.debug(f"Sunrise: {sunrise_str}, sunset: {sunset_str}, time of day: {tod_str}")
+            if self.fresh_weather_data:
+                self.logger.debug(f"Is is daytime? {self.is_daytime}")
 
         # conditions
         # sprite names for conditions we can show
         # "sunny"  "cloudy" "rainy"  "lightning"  "snowflake-large" "snowflake-small"
         #   "foggy" "windy"
 
-        if is_daytime:
+        if self.is_daytime:
             self.daytime_image.show()
             condition_sprite = None
             # if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {self.condition_str}')
@@ -254,7 +258,7 @@ class WeatherApp(AppModule):
             self.daytime_image.hide()
 
         # moon phase
-        if not is_daytime:
+        if not self.is_daytime:
             # moon_phase_name = None
             if self.moon_phase_num > 0.9375:
                 moon_phase_name = "moon-new"
@@ -293,22 +297,22 @@ class WeatherApp(AppModule):
         # OW interpretation
         last_background_image = self.background_image.image
         if 200 <= self.condition_code <= 299:
-            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         elif 300 <= self.condition_code <= 399:
-            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         elif 500 <= self.condition_code <= 599:
-            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         elif 500 <= self.condition_code <= 599:
-            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         elif 700 <= self.condition_code <= 799:
-            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         elif 800 <= self.condition_code <= 802:
             if is_sunrise or is_sunset:
                 self.background_image = self.sunrise_sunset_image
             else:
-                self.background_image.image = self.blue_sky_image if is_daytime else self.night_sky_image
+                self.background_image.image = self.blue_sky_image if self.is_daytime else self.night_sky_image
         elif 803 <= self.condition_code <= 899:
-            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         else:
             self.background_image = None
 
@@ -337,7 +341,7 @@ class WeatherApp(AppModule):
         # if old_size[0] != self.timer_line.size[0]:
         #     self.logger.debug(f"Timer line length is now {relative_length}")
 
-        self.timer_line.set_color((255, 255, 0, 128) if is_daytime else (0, 0, 255, 128))
+        self.timer_line.set_color((255, 255, 0, 128) if self.is_daytime else (0, 0, 255, 128))
 
         self.fresh_weather_data = False
 
