@@ -26,9 +26,12 @@ class StillImage(Actor):
 
     def set_from_image(self, image: Image):
         self.image = image
-        if not self.image.mode == 'RGBA':
-            self.image = self.image.convert('RGBA')
-        self.size = self.image.size
+        if self.image:
+            if not self.image.mode == 'RGBA':
+                self.image = self.image.convert('RGBA')
+            self.size = self.image.size
+        else:
+            self.size = (0, 0)
 
     def set_from_file(self, filename: str):
         self.set_from_image(Image.open(filename))

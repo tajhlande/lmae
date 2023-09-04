@@ -69,6 +69,7 @@ class WeatherApp(AppModule):
         self.dark_clouds_image: Image = Image.open("images/backgrounds/dark_clouds.png").convert('RGBA')
         self.night_sky_image: Image = Image.open("images/backgrounds/night_sky.png").convert('RGBA')
         self.sunrise_sunset_image: Image = Image.open("images/backgrounds/sunrise_sunset.png").convert('RGBA')
+        self.bg_image_name = None
 
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
@@ -254,7 +255,7 @@ class WeatherApp(AppModule):
             if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
         else:
-            #if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
+            # if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
             self.daytime_image.hide()
 
         # moon phase
@@ -295,47 +296,65 @@ class WeatherApp(AppModule):
 
         # set background based on condition
         # OW interpretation
-        last_background_image = self.background_image.image
-        if 200 <= self.condition_code <= 299:
-            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
-        elif 300 <= self.condition_code <= 399:
-            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
-        elif 500 <= self.condition_code <= 599:
-            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
-        elif 500 <= self.condition_code <= 599:
-            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
-        elif 700 <= self.condition_code <= 799:
-            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
-        elif 800 <= self.condition_code <= 802:
-            if is_sunrise or is_sunset:
-                self.background_image = self.sunrise_sunset_image
-            else:
-                self.background_image.image = self.blue_sky_image if self.is_daytime else self.night_sky_image
-        elif 803 <= self.condition_code <= 899:
-            self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
+        self.background_image.set_from_image(None)
+        if self.is_daytime:
+            if 200 <= self.condition_code <= 299:
+                self.background_image.set_from_image(self.cloudy_image)
+            elif 300 <= self.condition_code <= 399:
+                self.background_image.set_from_image(self.cloudy_image)
+            elif 500 <= self.condition_code <= 599:
+                self.background_image.set_from_image(self.cloudy_image)
+            elif 500 <= self.condition_code <= 599:
+                self.background_image.set_from_image(self.cloudy_image)
+            elif 700 <= self.condition_code <= 799:
+                self.background_image.set_from_image(self.cloudy_image)
+            elif 800 <= self.condition_code <= 802:
+                if is_sunrise or is_sunset:
+                    self.background_image.set_from_image(self.sunrise_sunset_image)
+                else:
+                    self.background_image.set_from_image(self.blue_sky_image)
+            elif 803 <= self.condition_code <= 899:
+                self.background_image.set_from_image(self.cloudy_image)
         else:
-            self.background_image = None
+            if 200 <= self.condition_code <= 299:
+                self.background_image.set_from_image(self.dark_clouds_image)
+            elif 300 <= self.condition_code <= 399:
+                self.background_image.set_from_image(self.dark_clouds_image)
+            elif 500 <= self.condition_code <= 599:
+                self.background_image.set_from_image(self.dark_clouds_image)
+            elif 500 <= self.condition_code <= 599:
+                self.background_image.set_from_image(self.dark_clouds_image)
+            elif 700 <= self.condition_code <= 799:
+                self.background_image.set_from_image(self.dark_clouds_image)
+            elif 800 <= self.condition_code <= 802:
+                if is_sunrise or is_sunset:
+                    self.background_image.set_from_image(self.sunrise_sunset_image)
+                else:
+                    self.background_image.set_from_image(self.night_sky_image)
+            elif 803 <= self.condition_code <= 899:
+                self.background_image.set_from_image(self.dark_clouds_image)
+        if self.background_image.image is None:
             self.logger.warning(f"Unrecognized condition code: {self.condition_code}")
 
-        bg_image_name = ""
+        last_background_image_name = self.bg_image_name
         if self.background_image:
             if self.background_image.image == self.cloudy_image:
-                bg_image_name = "cloudy"
+                self.bg_image_name = "cloudy"
             elif self.background_image.image == self.dark_clouds_image:
-                bg_image_name = "dark_clouds"
+                self.bg_image_name = "dark_clouds"
             elif self.background_image.image == self.sunrise_sunset_image:
-                bg_image_name = "sunrise_sunset"
+                self.bg_image_name = "sunrise_sunset"
             elif self.background_image.image == self.blue_sky_image:
-                bg_image_name = "blue_sky"
+                self.bg_image_name = "blue_sky"
             elif self.background_image.image == self.night_sky_image:
-                bg_image_name = "night_sky"
+                self.bg_image_name = "night_sky"
             else:
-                bg_image_name = "none"
+                self.bg_image_name = "none"
         else:
-            bg_image_name = "none"
+            self.bg_image_name = "none"
 
-        if last_background_image != self.background_image.image:
-            self.logger.debug(f"Setting background image to {bg_image_name}")
+        if last_background_image_name != self.bg_image_name:
+            self.logger.debug(f"Setting background image to {self.bg_image_name}")
 
         # timer line, shows remaining time until next call to refresh weather data
         # old_size = self.timer_line.size
