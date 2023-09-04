@@ -74,6 +74,7 @@ class WeatherApp(AppModule):
 
         # background image
         self.background_image = StillImage(name='BackgroundImage', position=(0, 0))
+        self.stage.actors.append(self.background_image)
 
         # temperature actor
         self.temperature_label = Text(name='TemperatureActor', position=(5, 5), font=self.primary_text_font,
