@@ -291,7 +291,7 @@ class WeatherApp(AppModule):
 
         # set background based on condition
         # OW interpretation
-        self.background_image.image = None
+        last_background_image = self.background_image.image
         if 200 <= self.condition_code <= 299:
             self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
         elif 300 <= self.condition_code <= 399:
@@ -309,6 +309,25 @@ class WeatherApp(AppModule):
                 self.background_image.image = self.blue_sky_image if is_daytime else self.night_sky_image
         elif 803 <= self.condition_code <= 899:
             self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+        else:
+            self.background_image = None
+
+        bg_image_name = ""
+        if self.background_image.image == self.cloudy_image:
+            bg_image_name = "cloudy"
+        elif self.background_image.image == self.dark_clouds_image:
+            bg_image_name = "dark_clouds"
+        elif self.background_image.image == self.sunrise_sunset_image:
+            bg_image_name = "sunrise_sunset"
+        elif self.background_image.image == self.blue_sky_image:
+            bg_image_name = "blue_sky"
+        elif self.background_image.image == self.night_sky_image:
+            bg_image_name = "night_sky"
+        else:
+            bg_image_name = "none"
+
+        if last_background_image != self.background_image:
+            self.logger.debug(f"Setting background image to {bg_image_name}")
 
         # timer line, shows remaining time until next call to refresh weather data
         # old_size = self.timer_line.size
