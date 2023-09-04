@@ -226,3 +226,4 @@ cython_debug/
 #.idea/
 
 env.ini
+/images/backgrounds/raw/

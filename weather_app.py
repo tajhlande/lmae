@@ -8,7 +8,7 @@ from PIL import Image, ImageFont
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae_core import Stage
 from lmae_module import AppModule
-from lmae_actor import SpriteImage, Text, Line
+from lmae_actor import StillImage, SpriteImage, Text, Line
 from lmae_animation import Easing
 from lmae_component import Carousel
 
@@ -44,6 +44,7 @@ class WeatherApp(AppModule):
         self.low_temp_label: Text = None
         self.high_temp_label: Text = None
         self.temps_carousel: Carousel = None
+        self.background_image: StillImage = None
 
         self.temperature_str: str = None
         self.dewpoint_str: str = None
@@ -62,8 +63,17 @@ class WeatherApp(AppModule):
         self.timer_line: Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
 
+        self.blue_sky_image: Image = Image.open("images/backgrounds/blue_sky.png")
+        self.cloudy_image: Image = Image.open("images/backgrounds/cloudy.png")
+        self.dark_clouds_image: Image = Image.open("images/backgrounds/dark_clouds.png")
+        self.night_sky_image: Image = Image.open("images/backgrounds/night_sky.png")
+        self.sunrise_sunset_image: Image = Image.open("images/backgrounds/sunrise_sunset.png")
+
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
+
+        # background image
+        self.background_image = StillImage(name='BackgroundImage', position=(0, 0))
 
         # temperature actor
         self.temperature_label = Text(name='TemperatureActor', position=(5, 5), font=self.primary_text_font,
@@ -191,9 +201,9 @@ class WeatherApp(AppModule):
         time_of_day = time.time()
         # self.logger.debug(f"RAW: Sunrise: {self.sunrise}, sunset: {self.sunset}, time of day: {time_of_day}")
         is_daytime = self.sunrise < time_of_day < self.sunset
-        sunrise_str = self.format_epoch_time(self.sunrise)
-        sunset_str = self.format_epoch_time(self.sunset)
-        tod_str = self.format_epoch_time(time_of_day)
+        # sunrise_str = self.format_epoch_time(self.sunrise)
+        # sunset_str = self.format_epoch_time(self.sunset)
+        # tod_str = self.format_epoch_time(time_of_day)
         # if self.fresh_weather_data:
         #    self.logger.debug(f"Sunrise: {sunrise_str}, sunset: {sunset_str}, time of day: {tod_str}")
         # if self.fresh_weather_data:
@@ -271,6 +281,33 @@ class WeatherApp(AppModule):
         else:
             if self.fresh_weather_data: self.logger.debug(f"Not showing moon phase")
             self.moon_phase_image.hide()
+
+        # Background image
+
+        # sunrise or sunset are within 30 minutes of the threshold
+        is_sunrise = abs(self.sunrise - time_of_day) < (30*60)
+        is_sunset = abs(self.sunset - time_of_day) < (30*60)
+
+        # set background based on condition
+        # OW interpretation
+        self.background_image.image = None
+        if 200 <= self.condition_code <= 299:
+            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+        elif 300 <= self.condition_code <= 399:
+            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+        elif 500 <= self.condition_code <= 599:
+            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+        elif 500 <= self.condition_code <= 599:
+            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+        elif 700 <= self.condition_code <= 799:
+            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
+        elif 800 <= self.condition_code <= 802:
+            if is_sunrise or is_sunset:
+                self.background_image = self.sunrise_sunset_image
+            else:
+                self.background_image.image = self.blue_sky_image if is_daytime else self.night_sky_image
+        elif 803 <= self.condition_code <= 899:
+            self.background_image.image = self.cloudy_image if is_daytime else self.dark_clouds_image
 
         # timer line, shows remaining time until next call to refresh weather data
         # old_size = self.timer_line.size
