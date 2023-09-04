@@ -315,18 +315,22 @@ class WeatherApp(AppModule):
             self.background_image.image = self.cloudy_image if self.is_daytime else self.dark_clouds_image
         else:
             self.background_image = None
+            self.logger.debug(f"Unrecognized condition code: {self.condition_code}")
 
         bg_image_name = ""
-        if self.background_image.image == self.cloudy_image:
-            bg_image_name = "cloudy"
-        elif self.background_image.image == self.dark_clouds_image:
-            bg_image_name = "dark_clouds"
-        elif self.background_image.image == self.sunrise_sunset_image:
-            bg_image_name = "sunrise_sunset"
-        elif self.background_image.image == self.blue_sky_image:
-            bg_image_name = "blue_sky"
-        elif self.background_image.image == self.night_sky_image:
-            bg_image_name = "night_sky"
+        if self.background_image:
+            if self.background_image.image == self.cloudy_image:
+                bg_image_name = "cloudy"
+            elif self.background_image.image == self.dark_clouds_image:
+                bg_image_name = "dark_clouds"
+            elif self.background_image.image == self.sunrise_sunset_image:
+                bg_image_name = "sunrise_sunset"
+            elif self.background_image.image == self.blue_sky_image:
+                bg_image_name = "blue_sky"
+            elif self.background_image.image == self.night_sky_image:
+                bg_image_name = "night_sky"
+            else:
+                bg_image_name = "none"
         else:
             bg_image_name = "none"
 
