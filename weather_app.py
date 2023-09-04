@@ -326,7 +326,7 @@ class WeatherApp(AppModule):
         else:
             bg_image_name = "none"
 
-        if last_background_image != self.background_image:
+        if last_background_image != self.background_image.image:
             self.logger.debug(f"Setting background image to {bg_image_name}")
 
         # timer line, shows remaining time until next call to refresh weather data
