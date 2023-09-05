@@ -232,9 +232,11 @@ class WeatherApp(AppModule):
             # this is tricky
             self.is_moon_out = time_of_day < self.moonset or self.moonrise < time_of_day
         if self.is_moon_out != last_is_moon_out:
+            tod_str = self.format_epoch_time(time_of_day)
             self.logger.debug(f"Moonrise: {self.format_epoch_time(self.moonrise)}, "
                               f"moonset: {self.format_epoch_time(self.moonset)}, "
                               f"time of day: {tod_str}")
+            self.logger.debug(f"Is moon out? {self.is_moon_out}")
 
         # conditions
         # sprite names for conditions we can show
