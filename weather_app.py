@@ -130,13 +130,13 @@ class WeatherApp(AppModule):
         edges = sprite_grayscale.filter(ImageFilter.FIND_EDGES)
 
         # Make fatter edges
-        # edges = edges.filter(ImageFilter.MaxFilter(3))
+        edges = edges.filter(ImageFilter.MaxFilter(3))
         # Make very fat edges
         # edges = edges.filter(ImageFilter.MaxFilter(7))
         enhancer = ImageEnhance.Brightness(edges)
-        # to reduce brightness by 50%, use factor 0.5
-        # edges = enhancer.enhance(0.6)
         edges = edges.filter(ImageFilter.GaussianBlur(2))
+        # to reduce brightness by 50%, use factor 0.5
+        edges = enhancer.enhance(0.8)
 
         shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
         shadow_image.putalpha(edges)
