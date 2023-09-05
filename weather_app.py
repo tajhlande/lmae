@@ -135,7 +135,7 @@ class WeatherApp(AppModule):
         # edges = edges.filter(ImageFilter.MaxFilter(7))
         enhancer = ImageEnhance.Brightness(edges)
         # to reduce brightness by 50%, use factor 0.5
-        edges = enhancer.enhance(0.6)
+        # edges = enhancer.enhance(0.6)
         edges = edges.filter(ImageFilter.GaussianBlur(2))
 
         shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
