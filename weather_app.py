@@ -130,10 +130,10 @@ class WeatherApp(AppModule):
         edges = sprite_grayscale.filter(ImageFilter.FIND_EDGES)
 
         # Make fatter edges
-        fat_edges = edges.filter(ImageFilter.MaxFilter)
+        # edges = edges.filter(ImageFilter.MaxFilter)
         # Make very fat edges
-        # veryFatEdges = edges.filter(ImageFilter.MaxFilter(7))
-        enhancer = ImageEnhance.Brightness(fat_edges)
+        # edges = edges.filter(ImageFilter.MaxFilter(7))
+        enhancer = ImageEnhance.Brightness(edges)
         # to reduce brightness by 50%, use factor 0.5
         fat_edges = enhancer.enhance(0.6)
 
