@@ -3,7 +3,7 @@ import time
 import json
 
 from datetime import datetime
-from PIL import Image, ImageFont
+from PIL import Image, ImageFont, ImageFilter
 
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae_core import Stage
@@ -63,6 +63,7 @@ class WeatherApp(AppModule):
         self.is_moon_out: bool = None
 
         self.daytime_image: SpriteImage = None
+        self.daytime_image_shadow: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
         self.timer_line: Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
@@ -116,11 +117,30 @@ class WeatherApp(AppModule):
         self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
         # conditions image actor
-        sprite_sheet = Image.open("images/weather-sprites.png").convert('RGBA')
+        sprite_sheet: Image = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
             sprite_spec = json.load(spec_file)
         self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 7), sheet=sprite_sheet,
                                          spec=sprite_spec)
+
+        # set up outline shadow for these sprites
+        sprite_grayscale = sprite_sheet.copy().convert('L')
+
+        # Detect edges
+        edges = sprite_grayscale.filter(ImageFilter.FIND_EDGES)
+
+        # Make fatter edges
+        fat_edges = edges.filter(ImageFilter.MaxFilter)
+
+        # Make very fat edges and save
+        #veryFatEdges = edges.filter(ImageFilter.MaxFilter(7))
+        #veryFatEdges.save('DEBUG-veryFatEdges.png')
+
+        shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 192))
+        shadow_image.putalpha(fat_edges)
+        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=(39, 7),
+                                                sheet=shadow_image, spec=sprite_spec)
+        self.stage.actors.append(self.daytime_image_shadow)
         self.stage.actors.append(self.daytime_image)
 
         # moon phase actor
@@ -246,6 +266,7 @@ class WeatherApp(AppModule):
 
         if self.is_daytime:
             self.daytime_image.show()
+            self.daytime_image_shadow.show()
             condition_sprite = None
             # if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {self.condition_str}')
 
@@ -278,9 +299,11 @@ class WeatherApp(AppModule):
                 condition_sprite = 'cloudy'
             if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
+            self.daytime_image_shadow.set_sprite(condition_sprite)
         else:
             # if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
             self.daytime_image.hide()
+            self.daytime_image_shadow.hide()
 
         # moon phase
         if not self.is_daytime:
