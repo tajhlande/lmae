@@ -175,6 +175,7 @@ class WeatherApp(AppModule):
                 self.is_moon_out = None
 
                 # log
+                self.logger.debug(f" Condition code : {self.condition_code}")
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
                 self.logger.debug(f"    Feels like  : {self.feels_like_str}")
                 self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
