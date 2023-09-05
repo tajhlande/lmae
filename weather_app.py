@@ -136,13 +136,15 @@ class WeatherApp(AppModule):
         enhancer = ImageEnhance.Brightness(edges)
         # to reduce brightness by 50%, use factor 0.5
         edges = enhancer.enhance(0.4)
-        edges = edges.filter(ImageFilter.GaussianBlur(2))
+        # edges = edges.filter(ImageFilter.GaussianBlur(2))
 
         # convert edges into shadow image by applying edges as alpha to black image
         shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
         shadow_image.putalpha(edges)
         self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=(39, 7),
                                                 sheet=shadow_image, spec=sprite_spec)
+
+        # add them to the stage
         self.stage.actors.append(self.daytime_image_shadow)
         self.stage.actors.append(self.daytime_image)
 
