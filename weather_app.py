@@ -3,7 +3,7 @@ import time
 import json
 
 from datetime import datetime
-from PIL import Image, ImageFont, ImageFilter
+from PIL import Image, ImageFont, ImageFilter, ImageEnhance
 
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae_core import Stage
@@ -131,12 +131,13 @@ class WeatherApp(AppModule):
 
         # Make fatter edges
         fat_edges = edges.filter(ImageFilter.MaxFilter)
+        # Make very fat edges
+        # veryFatEdges = edges.filter(ImageFilter.MaxFilter(7))
+        enhancer = ImageEnhance.Brightness(fat_edges)
+        # to reduce brightness by 50%, use factor 0.5
+        fat_edges = enhancer.enhance(0.6)
 
-        # Make very fat edges and save
-        #veryFatEdges = edges.filter(ImageFilter.MaxFilter(7))
-        #veryFatEdges.save('DEBUG-veryFatEdges.png')
-
-        shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 192))
+        shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
         shadow_image.putalpha(fat_edges)
         self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=(39, 7),
                                                 sheet=shadow_image, spec=sprite_spec)
