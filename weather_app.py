@@ -224,12 +224,17 @@ class WeatherApp(AppModule):
             if self.fresh_weather_data:
                 self.logger.debug(f"Is is daytime? {self.is_daytime}")
 
+        last_is_moon_out = self.is_moon_out
         moonrise_before_sunset = self.moonrise < self.moonset
         if moonrise_before_sunset:
             self.is_moon_out = self.moonrise < time_of_day < self.moonset
         else:
             # this is tricky
             self.is_moon_out = time_of_day < self.moonset or self.moonrise < time_of_day
+        if self.is_moon_out != last_is_moon_out:
+            self.logger.debug(f"Moonrise: {self.format_epoch_time(self.moonrise)}, "
+                              f"moonset: {self.format_epoch_time(self.moonset)}, "
+                              f"time of day: {tod_str}")
 
         # conditions
         # sprite names for conditions we can show
