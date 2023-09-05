@@ -58,6 +58,9 @@ class WeatherApp(AppModule):
         self.condition_code: int = None
         self.moon_phase_num: float = None
         self.is_daytime: bool = None
+        self.moonrise: int = None
+        self.moonset: int = None
+        self.is_moon_out: bool = None
 
         self.daytime_image: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
@@ -163,9 +166,13 @@ class WeatherApp(AppModule):
                 self.sunset = self.conditions_and_forecast['current']['sunset']
                 self.condition_code = self.conditions_and_forecast['current']['weather'][0]['id']
                 self.condition_str = self.conditions_and_forecast['current']['weather'][0]['main'].lower()
-                self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moon_phase']
                 forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
                 self.is_daytime = None
+
+                self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moon_phase']
+                self.moonrise = self.conditions_and_forecast['daily'][0]['moonrise']
+                self.moonset = self.conditions_and_forecast['daily'][0]['moonset']
+                self.is_moon_out = None
 
                 # log
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
@@ -175,6 +182,8 @@ class WeatherApp(AppModule):
                 self.logger.debug(f"    Low temp    : {self.low_temp_str}")
                 self.logger.debug(f"    High temp   : {self.high_temp_str}")
                 self.logger.debug(f" Forecast date  : {forecast_date_time}")
+                self.logger.debug(f" Moonrise       : {self.format_epoch_time(self.moonrise)}")
+                self.logger.debug(f" Moonset        : {self.format_epoch_time(self.moonset)}")
 
             else:
                 self.logger.error("Call to get weather data failed")
@@ -214,6 +223,13 @@ class WeatherApp(AppModule):
                 self.logger.debug(f"Sunrise: {sunrise_str}, sunset: {sunset_str}, time of day: {tod_str}")
             if self.fresh_weather_data:
                 self.logger.debug(f"Is is daytime? {self.is_daytime}")
+
+        moonrise_before_sunset = self.moonrise < self.moonset
+        if moonrise_before_sunset:
+            self.is_moon_out = self.moonrise < time_of_day < self.moonset
+        else:
+            # this is tricky
+            self.is_moon_out = time_of_day < self.moonset or self.moonrise < time_of_day
 
         # conditions
         # sprite names for conditions we can show
