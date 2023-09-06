@@ -298,9 +298,9 @@ class WeatherApp(AppModule):
                 condition_sprite = 'snowflake-large'
             elif 700 <= self.condition_code <= 799:
                 condition_sprite = 'foggy'
-            elif 800 <= self.condition_code <= 802:
+            elif 800 <= self.condition_code <= 803:
                 condition_sprite = 'sunny'
-            elif 803 <= self.condition_code <= 899:
+            elif 804 <= self.condition_code <= 899:
                 condition_sprite = 'cloudy'
             if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
@@ -359,13 +359,21 @@ class WeatherApp(AppModule):
             elif 500 <= self.condition_code <= 599:
                 self.background_image.set_from_image(self.cloudy_image)
             elif 700 <= self.condition_code <= 799:
-                self.background_image.set_from_image(self.cloudy_image)
-            elif 800 <= self.condition_code <= 802:
+                # smoke, haze, dist
+                if self.condition_code in [711, 721, 731, 761]:
+                    if is_sunrise or is_sunset:
+                        self.background_image.set_from_image(self.sunrise_sunset_image)
+                    else:
+                        self.background_image.set_from_image(self.blue_sky_image)
+                # mist, fog, sand, ash, squall, tornado!
+                else:
+                    self.background_image.set_from_image(self.cloudy_image)
+            elif 800 <= self.condition_code <= 803:
                 if is_sunrise or is_sunset:
                     self.background_image.set_from_image(self.sunrise_sunset_image)
                 else:
                     self.background_image.set_from_image(self.blue_sky_image)
-            elif 803 <= self.condition_code <= 899:
+            elif 804 <= self.condition_code <= 899:
                 self.background_image.set_from_image(self.cloudy_image)
         else:
             if 200 <= self.condition_code <= 299:
@@ -377,13 +385,21 @@ class WeatherApp(AppModule):
             elif 500 <= self.condition_code <= 599:
                 self.background_image.set_from_image(self.dark_clouds_image)
             elif 700 <= self.condition_code <= 799:
-                self.background_image.set_from_image(self.dark_clouds_image)
-            elif 800 <= self.condition_code <= 802:
+                # smoke, haze, dust
+                if self.condition_code in [711, 721, 731, 761]:
+                    if is_sunrise or is_sunset:
+                        self.background_image.set_from_image(self.sunrise_sunset_image)
+                    else:
+                        self.background_image.set_from_image(self.night_sky_image)
+                # mist, fog, sand, ash, squall, tornado!
+                else:
+                    self.background_image.set_from_image(self.dark_clouds_image)
+            elif 800 <= self.condition_code <= 803:
                 if is_sunrise or is_sunset:
                     self.background_image.set_from_image(self.sunrise_sunset_image)
                 else:
                     self.background_image.set_from_image(self.night_sky_image)
-            elif 803 <= self.condition_code <= 899:
+            elif 804 <= self.condition_code <= 899:
                 self.background_image.set_from_image(self.dark_clouds_image)
         if self.background_image.image is None:
             self.logger.warning(f"Unrecognized condition code: {self.condition_code}")
