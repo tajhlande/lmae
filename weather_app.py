@@ -54,8 +54,9 @@ class WeatherApp(AppModule):
         self.high_temp_str: str = None
         self.sunrise: int = None
         self.sunset: int = None
-        self.condition_str: str = None
         self.condition_code: int = None
+        self.condition_short_desc: str = None
+        self.condition_long_desc: str = None
         self.moon_phase_num: float = None
         self.is_daytime: bool = None
         self.moonrise: int = None
@@ -190,7 +191,8 @@ class WeatherApp(AppModule):
                 self.sunrise = self.conditions_and_forecast['current']['sunrise']
                 self.sunset = self.conditions_and_forecast['current']['sunset']
                 self.condition_code = self.conditions_and_forecast['current']['weather'][0]['id']
-                self.condition_str = self.conditions_and_forecast['current']['weather'][0]['main'].lower()
+                self.condition_short_desc = self.conditions_and_forecast['current']['weather'][0]['main']
+                self.condition_long_desc = self.conditions_and_forecast['current']['weather'][0]['description']
                 forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
                 self.is_daytime = None
 
@@ -201,6 +203,8 @@ class WeatherApp(AppModule):
 
                 # log
                 self.logger.debug(f" Condition code : {self.condition_code}")
+                self.logger.debug(f"     Short desc : {self.condition_short_desc}")
+                self.logger.debug(f"      Long desc : {self.condition_long_desc}")
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
                 self.logger.debug(f"    Feels like  : {self.feels_like_str}")
                 self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")

@@ -18,7 +18,7 @@ Example response:
 
 Our lat long: 39.0158678,-77.0734945
 
-OneCall API 
+OneCall API
 https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units={units}&exclude={part}&appid={API key}
 units can be standard, metric, or imperial
 
@@ -159,9 +159,11 @@ Example response:
 
 def get_conditions_and_forecast_by_lat_long(latitude: str, longitude: str, api_key: str):
     units = 'imperial'
-    part = 'alerts'
-    endpoint = f'https://api.openweathermap.org/data/3.0/onecall?lat={latitude}&lon={longitude}&units={units}' \
-               f'&exclude={part}&appid={api_key}'
+    exclude_part = None #  'alerts'
+    endpoint = f'https://api.openweathermap.org/data/3.0/onecall?' \
+               f'lat={latitude}&lon={longitude}&units={units}' \
+               f'{"&exclude=" + exclude_part if exclude_part else ""}' \
+               f'&appid={api_key}'
 
     headers = {'User-Agent': 'com.bluefilament.rpi-matrix.weather'}
     with requests.get(endpoint, headers=headers) as request:
