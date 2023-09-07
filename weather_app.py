@@ -244,7 +244,7 @@ class WeatherApp(AppModule):
         self.humidity_label.text = self.humidity_str
         self.low_temp_label.text = self.low_temp_str
         self.high_temp_label.text = self.high_temp_str
-        self.condition_description_label = self.condition_long_desc
+        self.condition_description_label.text = self.condition_long_desc
 
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
