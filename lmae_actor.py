@@ -130,7 +130,7 @@ class Text(Actor):
             draw = canvas.image_draw
             # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
             #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
-            if canvas.image.mode is not "RGBA" and not self.has_warned_about_image_mode:
+            if canvas.image.mode != "RGBA" and not self.has_warned_about_image_mode:
                 logging.warning(f"Text render canvas was '{canvas.image.mode}' and not 'RGBA' as expected")
                 self.has_warned_about_image_mode = True
             draw.text(self.position, self.text, fill=self.color, font=self.font,
