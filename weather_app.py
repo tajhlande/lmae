@@ -118,6 +118,12 @@ class WeatherApp(AppModule):
         self.stage.add_animations(self.temps_carousel.get_animations())
         self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
+        # condition description actor
+        self.condition_description_label = Text(name='condition-description', position=(1, 1),
+                                                font=self.secondary_text_font, stroke_width=1,
+                                                color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220))
+        self.stage.actors.append(self.condition_description_label)
+
         # conditions image actor
         sprite_sheet: Image = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
@@ -158,10 +164,6 @@ class WeatherApp(AppModule):
         self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
         self.stage.actors.append(self.timer_line)
 
-        # condition description actor
-        self.condition_description_label = Text(name='condition-description', position=(1, 1),  font=self.secondary_text_font,
-                                                color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
-        self.stage.actors.append(self.condition_description_label)
 
     # noinspection PyBroadException
     def update_weather_data(self):
