@@ -45,6 +45,7 @@ class WeatherApp(AppModule):
         self.high_temp_label: Text = None
         self.temps_carousel: Carousel = None
         self.background_image: StillImage = None
+        self.condition_description_label: Text = None
 
         self.temperature_str: str = None
         self.dewpoint_str: str = None
@@ -157,6 +158,11 @@ class WeatherApp(AppModule):
         self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
         self.stage.actors.append(self.timer_line)
 
+        # condition description actor
+        self.condition_description_label = Text(name='condition-description', position=(1, 1),  font=self.secondary_text_font,
+                                                color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
+        self.stage.actors.append(self.condition_description_label)
+
     # noinspection PyBroadException
     def update_weather_data(self):
         try:
@@ -238,6 +244,7 @@ class WeatherApp(AppModule):
         self.humidity_label.text = self.humidity_str
         self.low_temp_label.text = self.low_temp_str
         self.high_temp_label.text = self.high_temp_str
+        self.condition_description_label = self.condition_long_desc
 
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
