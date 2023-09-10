@@ -128,7 +128,7 @@ class WeatherApp(AppModule):
         sprite_sheet: Image = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
             sprite_spec = json.load(spec_file)
-        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 7), sheet=sprite_sheet,
+        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 9), sheet=sprite_sheet,
                                          spec=sprite_spec)
 
         # set up outline shadow for these sprites
@@ -149,7 +149,7 @@ class WeatherApp(AppModule):
         # convert edges into shadow image by applying edges as alpha to black image
         shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
         shadow_image.putalpha(edges)
-        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=(39, 7),
+        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=self.daytime_image.position,
                                                 sheet=shadow_image, spec=sprite_spec)
 
         # add them to the stage
