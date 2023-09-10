@@ -466,7 +466,8 @@ class WeatherApp(AppModule):
 
                 # update the view
                 self.update_view(0)
-                self.stage.render_frame()
+                if self.stage.needs_render:
+                    self.stage.render_frame()
 
                 # wait 15 minutes
                 waiting = True
