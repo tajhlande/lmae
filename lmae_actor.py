@@ -112,29 +112,48 @@ class Text(Actor):
         name = name or _get_sequential_name("Text")  # 'Text_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
         self.font = font
-        self.text = text
         self.color = color
         self.stroke_color = stroke_color
         self.stroke_width = stroke_width
         self.logger = logging.getLogger(name)
         self.has_warned_about_image_mode = False
+        self.rendered_text: Image = None
+        self.text: str|None = None
+        if text:
+            self.set_text(text)
 
     def set_text(self, text: str):
-        if not text == self.text:
-            self.changes_since_last_render = True
+        self.changes_since_last_render = True
         self.text = text
+
+        # measure size of text
+        image = Image.new('RGBA', (64, 32), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(image)
+        # assume font is TTF for now, because the doc for this function says that is required
+        text_bbox = draw.textbbox(xy=(0, 0), text=self.text, font=self.font, stroke_width=self.stroke_width)
+        self.size = text_bbox[2:4]
+
+        # render into the image we'll keep
+        self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(self.rendered_text)
+        draw.text((0, 0), self.text, fill=self.color, font=self.font,
+                  stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
 
     def render(self, canvas: Canvas):
         if self.text:
-            # self.logger.debug(f"Rendering at {self.position}")
-            draw = canvas.image_draw
-            # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
-            #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
-            if canvas.image.mode is not "RGBA" and not self.has_warned_about_image_mode:
-                logging.warning(f"Text render canvas was '{canvas.image.mode}' and not 'RGBA' as expected")
-                self.has_warned_about_image_mode = True
-            draw.text(self.position, self.text, fill=self.color, font=self.font,
-                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+            if self.rendered_text:
+                canvas.image.alpha_composite(self.rendered_text, dest=self.position)
+
+            # previous method
+            # # self.logger.debug(f"Rendering at {self.position}")
+            # draw = canvas.image_draw
+            # # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
+            # #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
+            # if canvas.image.mode is not "RGBA" and not self.has_warned_about_image_mode:
+            #     logging.warning(f"Text render canvas was '{canvas.image.mode}' and not 'RGBA' as expected")
+            #     self.has_warned_about_image_mode = True
+            # draw.text(self.position, self.text, fill=self.color, font=self.font,
+            #           stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
         else:
             # self.logger.debug("No text to render")
             pass
