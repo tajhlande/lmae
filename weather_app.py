@@ -35,7 +35,7 @@ class WeatherApp(AppModule):
         self.pre_render_callback = None
         self.conditions_and_forecast = None
         self.call_status = "ok"
-        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 14)
+        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 15)
         self.temperature_label: Text = None
         self.secondary_text_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
         self.dewpoint_label: Text = None
