@@ -121,7 +121,7 @@ class WeatherApp(AppModule):
         # condition description actor
         self.condition_description_label = Text(name='condition-description', position=(1, 1),
                                                 font=self.secondary_text_font, stroke_width=1,
-                                                color=(224, 224, 208, 255), stroke_color=(0, 0, 0, 220))
+                                                color=(192, 192, 192, 255), stroke_color=(0, 0, 0, 220))
         self.stage.actors.append(self.condition_description_label)
 
         # conditions image actor
