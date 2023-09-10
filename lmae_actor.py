@@ -69,12 +69,13 @@ class SpriteImage(Actor):
 
     def set_sprite(self, selected: str):
         # logger.debug(f"Setting sprite to {selected}")
+        if selected != self.selected:
+            self.changes_since_last_render = True
         self.selected = selected
         if self.sheet and self.selected and self.selected in self.spec:
             self.size = tuple(int(i) for i in self.spec[self.selected]['size'])
         else:
             self.size = (0, 0)
-        self.changes_since_last_render = True
 
     def set_from_file(self, image_filename, spec_filename):
         logger.debug(f"Loading sprite sheet image from {image_filename}")
@@ -289,18 +290,21 @@ class Line(Actor):
         self.color = color
 
     def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
+        if color != self.color:
+            self.changes_since_last_render = True
         self.color = color
-        self.changes_since_last_render = True
 
     def set_start(self, start: tuple[int, int]):
+        if start != self.start:
+            self.changes_since_last_render = True
         self.start = start
         self.calc_size_and_position()
-        self.changes_since_last_render = True
 
     def set_end(self, end: tuple[int, int]):
+        if end != self.end:
+            self.changes_since_last_render = True
         self.end = end
         self.calc_size_and_position()
-        self.changes_since_last_render = True
 
     def calc_size_and_position(self):
         self.size = abs(self.start[0] - self.end[0]), abs(self.start[1] - self.end[1])
