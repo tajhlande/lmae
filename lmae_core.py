@@ -265,7 +265,10 @@ class Stage(LMAEObject):
         self.needs_render = False
         for actor in self.actors:
             actor.update()
-            self.needs_render = self.needs_render or actor.needs_render()
+            actor_needs_render = actor.needs_render()
+            if actor_needs_render:
+                actor.logger.debug("Needs render")
+            self.needs_render = self.needs_render or actor_needs_render
             # self.logger.debug(f"Needs render after {actor.name}: {self.needs_render}")
 
     def render_actors(self):
