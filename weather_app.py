@@ -240,13 +240,13 @@ class WeatherApp(AppModule):
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
     def update_view(self, elapsed_time: float):
-        self.temperature_label.text = self.temperature_str
-        self.dewpoint_label.text = self.dewpoint_str
-        self.feels_like_label.text = self.feels_like_str
-        self.humidity_label.text = self.humidity_str
-        self.low_temp_label.text = self.low_temp_str
-        self.high_temp_label.text = self.high_temp_str
-        self.condition_description_label.text = self.condition_long_desc
+        self.temperature_label.set_text(self.temperature_str)
+        self.dewpoint_label.set_text(self.dewpoint_str)
+        self.feels_like_label.set_text(self.feels_like_str)
+        self.humidity_label.set_text(self.humidity_str)
+        self.low_temp_label.set_text(self.low_temp_str)
+        self.high_temp_label.set_text(self.high_temp_str)
+        self.condition_description_label.set_text(self.condition_long_desc)
 
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
