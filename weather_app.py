@@ -35,7 +35,7 @@ class WeatherApp(AppModule):
         self.pre_render_callback = None
         self.conditions_and_forecast = None
         self.call_status = "ok"
-        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
+        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 14)
         self.temperature_label: Text = None
         self.secondary_text_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
         self.dewpoint_label: Text = None
@@ -85,7 +85,7 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.background_image)
 
         # temperature actor
-        self.temperature_label = Text(name='TemperatureActor', position=(5, 5), font=self.primary_text_font,
+        self.temperature_label = Text(name='TemperatureActor', position=(5, 6), font=self.primary_text_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
