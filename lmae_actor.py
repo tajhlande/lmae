@@ -132,6 +132,7 @@ class Text(Actor):
         # assume font is TTF for now, because the doc for this function says that is required
         text_bbox = draw.textbbox(xy=(0, 0), text=self.text, font=self.font, stroke_width=self.stroke_width)
         self.size = text_bbox[2:4]
+        self.logger.debug(f"Measured rendered text size at {self.size}")
 
         # render into the image we'll keep
         self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
