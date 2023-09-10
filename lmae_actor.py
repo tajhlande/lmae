@@ -135,16 +135,21 @@ class Text(Actor):
             self.size = text_bbox[2:4]
             self.logger.debug(f"Measured rendered text size at {self.size}. text(len {len(self.text)}): <{self.text}>")
 
+            # account for stroke width
+            self.size[0] += self.stroke_width * 2
+            self.size[1] += self.stroke_width * 2
+
             # render into the image we'll keep
             self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
             draw = ImageDraw.Draw(self.rendered_text)
-            draw.text((0, 0), self.text, fill=self.color, font=self.font,
+            draw.text((self.stroke_width, self.stroke_width), self.text, fill=self.color, font=self.font,
                       stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
 
     def render(self, canvas: Canvas):
         if self.text:
             if self.rendered_text:
-                canvas.image.alpha_composite(self.rendered_text, dest=self.position)
+                render_pos = (self.position[0] - self.stroke_width, self.position[1] - self.stroke_width)
+                canvas.image.alpha_composite(self.rendered_text, dest=render_pos)
 
             # previous method
             # # self.logger.debug(f"Rendering at {self.position}")
