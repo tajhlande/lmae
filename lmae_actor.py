@@ -136,8 +136,7 @@ class Text(Actor):
             self.logger.debug(f"Measured rendered text size at {self.size}. text(len {len(self.text)}): <{self.text}>")
 
             # account for stroke width
-            self.size[0] += self.stroke_width * 2
-            self.size[1] += self.stroke_width * 2
+            self.size = (self.size[0] + self.stroke_width * 2, self.size[1] + self.stroke_width * 2)
 
             # render into the image we'll keep
             self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
