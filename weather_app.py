@@ -526,6 +526,7 @@ longitude = os.environ.get('LONGITUDE')
 if not longitude:
     longitude = app_runner.env_config['location']['longitude']
 
+app_runner.app_setup()
 wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude)
 wx_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 app_runner.start_app(wx_app)
