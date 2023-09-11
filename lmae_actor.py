@@ -69,12 +69,13 @@ class SpriteImage(Actor):
 
     def set_sprite(self, selected: str):
         # logger.debug(f"Setting sprite to {selected}")
+        if selected != self.selected:
+            self.changes_since_last_render = True
         self.selected = selected
         if self.sheet and self.selected and self.selected in self.spec:
             self.size = tuple(int(i) for i in self.spec[self.selected]['size'])
         else:
             self.size = (0, 0)
-        self.changes_since_last_render = True
 
     def set_from_file(self, image_filename, spec_filename):
         logger.debug(f"Loading sprite sheet image from {image_filename}")
@@ -112,29 +113,54 @@ class Text(Actor):
         name = name or _get_sequential_name("Text")  # 'Text_' + f'{randrange(65536):04X}'
         super().__init__(name=name, position=position)
         self.font = font
-        self.text = text
         self.color = color
         self.stroke_color = stroke_color
         self.stroke_width = stroke_width
         self.logger = logging.getLogger(name)
         self.has_warned_about_image_mode = False
+        self.rendered_text: Image = None
+        self.text: str|None = None
+        if text:
+            self.set_text(text)
 
     def set_text(self, text: str):
-        if not text == self.text:
+        if text != self.text:
             self.changes_since_last_render = True
-        self.text = text
+            self.text = text
+
+            # measure size of text
+            image = Image.new('RGBA', (64, 32), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(image)
+            # assume font is TTF for now, because the doc for this function says that is required
+            text_bbox = draw.textbbox(xy=(0, 0), text=self.text, font=self.font, stroke_width=self.stroke_width)
+            self.size = text_bbox[2:4]
+            self.logger.debug(f"Measured rendered text size at {self.size}. text(len {len(self.text)}): <{self.text}>")
+
+            # account for stroke width
+            self.size = (self.size[0] + self.stroke_width * 2, self.size[1] + self.stroke_width * 2)
+
+            # render into the image we'll keep
+            self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw(self.rendered_text)
+            draw.text((self.stroke_width, self.stroke_width), self.text, fill=self.color, font=self.font,
+                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
 
     def render(self, canvas: Canvas):
         if self.text:
-            # self.logger.debug(f"Rendering at {self.position}")
-            draw = canvas.image_draw
-            # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
-            #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
-            if canvas.image.mode != "RGBA" and not self.has_warned_about_image_mode:
-                logging.warning(f"Text render canvas was '{canvas.image.mode}' and not 'RGBA' as expected")
-                self.has_warned_about_image_mode = True
-            draw.text(self.position, self.text, fill=self.color, font=self.font,
-                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+            if self.rendered_text:
+                render_pos = (self.position[0] - self.stroke_width, self.position[1] - self.stroke_width)
+                canvas.image.alpha_composite(self.rendered_text, dest=render_pos)
+
+            # previous method
+            # # self.logger.debug(f"Rendering at {self.position}")
+            # draw = canvas.image_draw
+            # # logging.debug(f"Drawing text at {self.position} with color {self.color}, font {self.font.getname()}, "
+            # #               f"stroke_fill {self.stroke_color} and stroke_width {self.stroke_width}: '{self.text}'")
+            # if canvas.image.mode is not "RGBA" and not self.has_warned_about_image_mode:
+            #     logging.warning(f"Text render canvas was '{canvas.image.mode}' and not 'RGBA' as expected")
+            #     self.has_warned_about_image_mode = True
+            # draw.text(self.position, self.text, fill=self.color, font=self.font,
+            #           stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
         else:
             # self.logger.debug("No text to render")
             pass
@@ -264,18 +290,21 @@ class Line(Actor):
         self.color = color
 
     def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
+        if color != self.color:
+            self.changes_since_last_render = True
         self.color = color
-        self.changes_since_last_render = True
 
     def set_start(self, start: tuple[int, int]):
+        if start != self.start:
+            self.changes_since_last_render = True
         self.start = start
         self.calc_size_and_position()
-        self.changes_since_last_render = True
 
     def set_end(self, end: tuple[int, int]):
+        if end != self.end:
+            self.changes_since_last_render = True
         self.end = end
         self.calc_size_and_position()
-        self.changes_since_last_render = True
 
     def calc_size_and_position(self):
         self.size = abs(self.start[0] - self.end[0]), abs(self.start[1] - self.end[1])

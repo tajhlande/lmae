@@ -32,7 +32,7 @@ class WeatherApp(AppModule):
         self.pre_render_callback = None
         self.conditions_and_forecast = None
         self.call_status = "ok"
-        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 16)
+        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 15)
         self.temperature_label: Text = None
         self.secondary_text_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
         self.dewpoint_label: Text = None
@@ -82,7 +82,7 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.background_image)
 
         # temperature actor
-        self.temperature_label = Text(name='TemperatureActor', position=(5, 5), font=self.primary_text_font,
+        self.temperature_label = Text(name='TemperatureActor', position=(5, 6), font=self.primary_text_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
@@ -118,14 +118,14 @@ class WeatherApp(AppModule):
         # condition description actor
         self.condition_description_label = Text(name='condition-description', position=(1, 1),
                                                 font=self.secondary_text_font, stroke_width=1,
-                                                color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 110))
+                                                color=(192, 192, 192, 255), stroke_color=(0, 0, 0, 220))
         self.stage.actors.append(self.condition_description_label)
 
         # conditions image actor
         sprite_sheet: Image = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
             sprite_spec = json.load(spec_file)
-        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 7), sheet=sprite_sheet,
+        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 9), sheet=sprite_sheet,
                                          spec=sprite_spec)
 
         # set up outline shadow for these sprites
@@ -146,7 +146,7 @@ class WeatherApp(AppModule):
         # convert edges into shadow image by applying edges as alpha to black image
         shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
         shadow_image.putalpha(edges)
-        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=(39, 7),
+        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=self.daytime_image.position,
                                                 sheet=shadow_image, spec=sprite_spec)
 
         # add them to the stage
@@ -237,13 +237,13 @@ class WeatherApp(AppModule):
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
     def update_view(self, elapsed_time: float):
-        self.temperature_label.text = self.temperature_str
-        self.dewpoint_label.text = self.dewpoint_str
-        self.feels_like_label.text = self.feels_like_str
-        self.humidity_label.text = self.humidity_str
-        self.low_temp_label.text = self.low_temp_str
-        self.high_temp_label.text = self.high_temp_str
-        self.condition_description_label.text = self.condition_long_desc
+        self.temperature_label.set_text(self.temperature_str)
+        self.dewpoint_label.set_text(self.dewpoint_str)
+        self.feels_like_label.set_text(self.feels_like_str)
+        self.humidity_label.set_text(self.humidity_str)
+        self.low_temp_label.set_text(self.low_temp_str)
+        self.high_temp_label.set_text(self.high_temp_str)
+        self.condition_description_label.set_text(self.condition_long_desc)
 
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
@@ -463,7 +463,8 @@ class WeatherApp(AppModule):
 
                 # update the view
                 self.update_view(0)
-                self.stage.render_frame()
+                if self.stage.needs_render:
+                    self.stage.render_frame()
 
                 # wait 15 minutes
                 waiting = True
