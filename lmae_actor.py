@@ -119,7 +119,7 @@ class Text(Actor):
         self.logger = logging.getLogger(name)
         self.has_warned_about_image_mode = False
         self.rendered_text: Image = None
-        self.text: str|None = None
+        self.text: str = None
         if text:
             self.set_text(text)
 
