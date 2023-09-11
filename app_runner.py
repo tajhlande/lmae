@@ -47,6 +47,9 @@ async def run_app(app: AppModule):
 
     logger.debug("run_app() finished")
 
+config = configparser.ConfigParser()
+config.read('env.ini')
+
 # Visual Crossing
 # api_key = os.environ.get('VX_API_KEY')
 
@@ -54,15 +57,20 @@ async def run_app(app: AppModule):
 api_key = os.environ.get('OW_API_KEY')
 
 if not api_key:
-    config = configparser.ConfigParser()
-    config.read('env.ini')
-
     # VX
     # api_key = config['visual.crossing']['vx_api_key']
 
     # OpenWeather
     api_key = config['openweather']['ow_api_key']
 
-wx_app = WeatherApp(api_key=api_key)
+latitude = os.environ.get('LATITUDE')
+if not latitude:
+    latitude = config['location']['latitude']
+
+longitude = os.environ.get('LONGITUDE')
+if not longitude:
+    longitude = config['location']['longitude']
+
+wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude)
 wx_app.set_matrix(matrix, options=options)
 asyncio.run(run_app(wx_app))

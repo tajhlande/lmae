@@ -12,9 +12,6 @@ from lmae_actor import StillImage, SpriteImage, Text, Line
 from lmae_animation import Easing
 from lmae_component import Carousel
 
-TOK_LAT = '39.0158678'
-TOK_LONG = '-77.0734945'
-
 
 class WeatherApp(AppModule):
     """
@@ -22,7 +19,7 @@ class WeatherApp(AppModule):
     """
 
     # noinspection PyTypeChecker
-    def __init__(self, api_key: str, latitude: str = TOK_LAT, longitude: str = TOK_LONG):
+    def __init__(self, api_key: str, latitude: str, longitude: str):
         super().__init__()
         self.fresh_weather_data = False
         self.api_key = api_key
