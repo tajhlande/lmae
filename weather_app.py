@@ -6,7 +6,8 @@ import time
 from datetime import datetime
 from PIL import Image, ImageFont, ImageFilter, ImageEnhance
 
-from app_runner import matrix, matrix_options, start_app, env_config
+import app_runner
+# from app_runner import matrix, matrix_options, start_app, env_config
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae_core import Stage
 from lmae_module import AppModule
@@ -515,16 +516,16 @@ if not api_key:
     # api_key = config['visual.crossing']['vx_api_key']
 
     # OpenWeather
-    api_key = env_config['openweather']['ow_api_key']
+    api_key = app_runner.env_config['openweather']['ow_api_key']
 
 latitude = os.environ.get('LATITUDE')
 if not latitude:
-    latitude = env_config['location']['latitude']
+    latitude = app_runner.env_config['location']['latitude']
 
 longitude = os.environ.get('LONGITUDE')
 if not longitude:
-    longitude = env_config['location']['longitude']
+    longitude = app_runner.env_config['location']['longitude']
 
 wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude)
-wx_app.set_matrix(matrix, options=matrix_options)
-start_app(wx_app)
+wx_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
+app_runner.start_app(wx_app)
