@@ -82,33 +82,33 @@ class WeatherApp(AppModule):
         self.stage.actors.append(self.background_image)
 
         # temperature actor
-        self.temperature_label = Text(name='TemperatureActor', position=(5, 6), font=self.primary_text_font,
+        self.temperature_label = Text(name='TemperatureActor', position=(5, 7), font=self.primary_text_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
         self.stage.actors.append(self.temperature_label)
 
         # feels like actor
-        self.feels_like_label = Text(name='FeelsLikeActor', position=(5, 23), font=self.secondary_text_font,
+        self.feels_like_label = Text(name='FeelsLikeActor', position=(5, 24), font=self.secondary_text_font,
                                      color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
 
         # dewpoint actor
-        self.dewpoint_label = Text(name='DewpointActor', position=(5, 23), font=self.secondary_text_font,
+        self.dewpoint_label = Text(name='DewpointActor', position=(5, 24), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
 
         # humidity actor
-        self.humidity_label = Text(name='HumidityActor', position=(5, 23), font=self.secondary_text_font,
+        self.humidity_label = Text(name='HumidityActor', position=(5, 24), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
 
         # low temp actor
-        self.low_temp_label = Text(name='LowTempActor', position=(5, 23), font=self.secondary_text_font,
+        self.low_temp_label = Text(name='LowTempActor', position=(5, 24), font=self.secondary_text_font,
                                    color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
 
         # high temp actor
-        self.high_temp_label = Text(name='HighTempActor', position=(5, 23), font=self.secondary_text_font,
+        self.high_temp_label = Text(name='HighTempActor', position=(5, 24), font=self.secondary_text_font,
                                     color=(224, 224, 224, 255), stroke_color=(0, 0, 0, 220), stroke_width=1)
 
         # carousel for temps
-        self.temps_carousel = Carousel(name='TempsCarousel', crop_area=(4, 22, 38, 30), easing=Easing.BEZIER,
-                                       position=(4, 22), panel_offset=(1, 1),
+        self.temps_carousel = Carousel(name='TempsCarousel', crop_area=(4, 23, 38, 31), easing=Easing.BEZIER,
+                                       position=(4, 23), panel_offset=(1, 1),
                                        panels=[self.feels_like_label, self.dewpoint_label, self.humidity_label,
                                                self.low_temp_label, self.high_temp_label])
         self.stage.actors.append(self.temps_carousel)
@@ -116,7 +116,7 @@ class WeatherApp(AppModule):
         self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
         # condition description actor
-        self.condition_description_label = Text(name='condition-description', position=(1, 1),
+        self.condition_description_label = Text(name='condition-description', position=(1, 2),
                                                 font=self.secondary_text_font, stroke_width=1,
                                                 color=(192, 192, 192, 255), stroke_color=(0, 0, 0, 220))
         self.stage.actors.append(self.condition_description_label)
@@ -125,7 +125,7 @@ class WeatherApp(AppModule):
         sprite_sheet: Image = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
             sprite_spec = json.load(spec_file)
-        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 9), sheet=sprite_sheet,
+        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 10), sheet=sprite_sheet,
                                          spec=sprite_spec)
 
         # set up outline shadow for these sprites
@@ -160,7 +160,6 @@ class WeatherApp(AppModule):
         # timer actor
         self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
         self.stage.actors.append(self.timer_line)
-
 
     # noinspection PyBroadException
     def update_weather_data(self):
@@ -312,7 +311,8 @@ class WeatherApp(AppModule):
                 condition_sprite = 'sunny'
             elif 803 <= self.condition_code <= 899:
                 condition_sprite = 'cloudy'
-            if self.fresh_weather_data: self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
+            if self.fresh_weather_data:
+                self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
             self.daytime_image.set_sprite(condition_sprite)
             self.daytime_image_shadow.set_sprite(condition_sprite)
         else:
@@ -347,7 +347,8 @@ class WeatherApp(AppModule):
             self.moon_phase_image.show()
             self.moon_phase_image.set_sprite(moon_phase_name)
         else:
-            if self.fresh_weather_data: self.logger.debug(f"Not showing moon phase")
+            if self.fresh_weather_data:
+                self.logger.debug(f"Not showing moon phase")
             self.moon_phase_image.hide()
 
         # Background image
