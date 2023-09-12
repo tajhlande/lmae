@@ -43,6 +43,7 @@ mario_sprite = SpriteImage(name="Mario Sprite", position=(int((64-17)/2), 0))
 mario_sprite.set_from_file("images/smb/smb_mario_sheet.png", "images/smb/mario-sprites.json")
 mario_sprite.set_sprite("sprite1")
 
+sprite_label = Text(name="Sprite label", position=(24, 2), stroke_width=1)
 
 # def set_weather_sprite_frame(frame: int):
 #     frame_offset = frame % 1600
@@ -57,11 +58,13 @@ def set_mario_sprite_frame():
     global sprite_frame
     # frame_offset = sprite_frame % 160
     frame_index = int((sprite_frame / 20) % len(mario_sprite.spec))
-    mario_sprite.set_sprite(list(mario_sprite.spec.keys())[frame_index])
+    selected_sprite = list(mario_sprite.spec.keys())[frame_index]
+    mario_sprite.set_sprite(selected_sprite)
     # logger.debug(f"current frame: {sprite_frame}, index: {frame_index}, selected sprite: {mario_sprite.selected}")
     sprite_frame += 1
 
     mario_sprite.set_position((int((64-17)/2), 32 - mario_sprite.size[1]))
+    sprite_label.set_text(selected_sprite)
 
 
 # def stop_app(app: AppModule):
@@ -92,7 +95,7 @@ def set_mario_sprite_frame():
 app_runner.app_setup()
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-sample_app.add_actors(mario_sprite)
+sample_app.add_actors(mario_sprite, sprite_label)
 sample_app.set_pre_render_callback(set_mario_sprite_frame)
 
 app_runner.start_app(sample_app)
