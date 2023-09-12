@@ -55,7 +55,7 @@ def set_mario_sprite_frame():
     # logger.debug(f"current frame: {sprite_frame}, index: {frame_index}, selected sprite: {mario_sprite.selected}")
     sprite_frame += 1
 
-    mario_sprite.set_position((35, 32 - mario_sprite.size[1]))
+    mario_sprite.set_position((35, 31 - mario_sprite.size[1]))
     sprite_label.set_text(selected_sprite)
 
 
