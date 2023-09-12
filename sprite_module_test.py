@@ -34,7 +34,7 @@ mario_sprite.set_sprite("sprite1")
 
 font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
 
-sprite_label = Text(name="Sprite label", position=(24, 2), font=font, stroke_width=1)
+sprite_label = Text(name="Sprite label", position=(2, 24), font=font, stroke_width=1)
 
 # def set_weather_sprite_frame(frame: int):
 #     frame_offset = frame % 1600
