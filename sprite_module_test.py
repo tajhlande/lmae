@@ -28,7 +28,7 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
 # weather_sprite.set_from_file("images/weather-sprites.png", "images/weather-sprites.json")
 # weather_sprite.set_sprite("sunny")
 
-mario_sprite = SpriteImage(name="Mario Sprite", position=(int((64-17)/2), 0))
+mario_sprite = SpriteImage(name="Mario Sprite", position=(35, 0))
 mario_sprite.set_from_file("images/smb/smb_mario_sheet.png", "images/smb/mario-sprites.json")
 mario_sprite.set_sprite("sprite1")
 
