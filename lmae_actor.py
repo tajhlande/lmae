@@ -134,7 +134,7 @@ class Text(Actor):
             # assume font is TTF for now, because the doc for this function says that is required
             text_bbox = draw.textbbox(xy=(0, 0), text=self.text, font=self.font, stroke_width=self.stroke_width)
             self.size = text_bbox[2:4]
-            self.logger.debug(f"Measured rendered text size at {self.size}. text(len {len(self.text)}): <{self.text}>")
+            # self.logger.debug(f"Measured rendered text size at {self.size}. text(len {len(self.text)}): <{self.text}>")
 
             # account for stroke width
             self.size = (self.size[0] + self.stroke_width * 2, self.size[1] + self.stroke_width * 2)
