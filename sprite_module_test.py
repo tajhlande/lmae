@@ -56,10 +56,12 @@ sprite_frame = 0
 def set_mario_sprite_frame():
     global sprite_frame
     # frame_offset = sprite_frame % 160
-    frame_index = int((sprite_frame / 10) % len(mario_sprite.spec))
+    frame_index = int((sprite_frame / 20) % len(mario_sprite.spec))
     mario_sprite.set_sprite(list(mario_sprite.spec.keys())[frame_index])
     # logger.debug(f"current frame: {sprite_frame}, index: {frame_index}, selected sprite: {mario_sprite.selected}")
     sprite_frame += 1
+
+    mario_sprite.set_position((int((64-17)/2), 32 - mario_sprite.size[1]))
 
 
 # def stop_app(app: AppModule):
