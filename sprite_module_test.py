@@ -50,10 +50,15 @@ def set_weather_sprite_frame(frame: int):
     weather_sprite.set_sprite(list(weather_sprite.spec.keys())[frame_index])
 
 
-def set_mario_sprite_frame(frame: int):
-    frame_offset = frame % 1600
+sprite_frame = 0
+
+
+def set_mario_sprite_frame():
+    global sprite_frame
+    frame_offset = sprite_frame % 1600
     frame_index = int(frame_offset / 100)
     mario_sprite.set_sprite(list(weather_sprite.spec.keys())[frame_index])
+    sprite_frame += 1
 
 
 # def stop_app(app: AppModule):
