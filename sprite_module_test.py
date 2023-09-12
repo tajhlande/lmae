@@ -58,6 +58,7 @@ def set_mario_sprite_frame():
     frame_offset = sprite_frame % 1600
     frame_index = int(frame_offset / 100)
     mario_sprite.set_sprite(list(weather_sprite.spec.keys())[frame_index])
+    logger.debug(f"current frame: {sprite_frame}, index: {frame_index}, selected sprite: {mario_sprite.selected}")
     sprite_frame += 1
 
 
