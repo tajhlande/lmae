@@ -1,29 +1,18 @@
-import threading
-
-from lmae_core import parse_matrix_options_command_line
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
-from lmae_module import AppModule, SingleStageRenderLoopAppModule
-
-from threading import Thread
-import collections
 import logging
-import time
 
-from pilmoji.source import AppleEmojiSource
+from PIL import ImageFont
 
 import app_runner
-from lmae_core import Stage, parse_matrix_options_command_line
-from lmae_actor import StillImage, SpriteImage, Text
-from PIL import Image, ImageFont
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from lmae_actor import SpriteImage, Text
+from lmae_module import SingleStageRenderLoopAppModule
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
 logger = logging.getLogger("app_module_test")
 logger.setLevel(logging.DEBUG)
-print("LED Matrix Module Test")
+print("LED Matrix Module Test - Sprite App")
 
 # options: RGBMatrixOptions = parse_matrix_options_command_line()
-logger.info("Initializing matrix")
+#logger.info("Initializing matrix")
 # matrix = RGBMatrix(options=options)
 
 
@@ -43,7 +32,9 @@ mario_sprite = SpriteImage(name="Mario Sprite", position=(int((64-17)/2), 0))
 mario_sprite.set_from_file("images/smb/smb_mario_sheet.png", "images/smb/mario-sprites.json")
 mario_sprite.set_sprite("sprite1")
 
-sprite_label = Text(name="Sprite label", position=(24, 2), stroke_width=1)
+font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
+
+sprite_label = Text(name="Sprite label", position=(24, 2), font=font, stroke_width=1)
 
 # def set_weather_sprite_frame(frame: int):
 #     frame_offset = frame % 1600
