@@ -35,19 +35,19 @@ def kirby_movement(frame_number: int) -> tuple[int, int]:
     return frame_number % 86 - 22, 12
 
 
-weather_sprite = SpriteImage(name='Weather Condition', position=(int((64-17)/2), int((32-17)/2)))
-weather_sprite.set_from_file("images/weather-sprites.png", "images/weather-sprites.json")
-weather_sprite.set_sprite("sunny")
+# weather_sprite = SpriteImage(name='Weather Condition', position=(int((64-17)/2), int((32-17)/2)))
+# weather_sprite.set_from_file("images/weather-sprites.png", "images/weather-sprites.json")
+# weather_sprite.set_sprite("sunny")
 
 mario_sprite = SpriteImage(name="Mario Sprite", position=(int((64-17)/2), 0))
 mario_sprite.set_from_file("images/smb/smb_mario_sheet.png", "images/smb/mario-sprites.json")
 mario_sprite.set_sprite("sprite1")
 
 
-def set_weather_sprite_frame(frame: int):
-    frame_offset = frame % 1600
-    frame_index = int(frame_offset / 100)
-    weather_sprite.set_sprite(list(weather_sprite.spec.keys())[frame_index])
+# def set_weather_sprite_frame(frame: int):
+#     frame_offset = frame % 1600
+#     frame_index = int(frame_offset / 100)
+#     weather_sprite.set_sprite(list(weather_sprite.spec.keys())[frame_index])
 
 
 sprite_frame = 0
@@ -57,7 +57,7 @@ def set_mario_sprite_frame():
     global sprite_frame
     frame_offset = sprite_frame % 1600
     frame_index = int(frame_offset / 100)
-    mario_sprite.set_sprite(list(weather_sprite.spec.keys())[frame_index])
+    mario_sprite.set_sprite(list(mario_sprite.spec.keys())[frame_index])
     logger.debug(f"current frame: {sprite_frame}, index: {frame_index}, selected sprite: {mario_sprite.selected}")
     sprite_frame += 1
 
