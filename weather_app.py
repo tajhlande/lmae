@@ -314,8 +314,8 @@ class WeatherApp(AppModule):
             # reference: https://openweathermap.org/weather-conditions
             if 200 <= self.condition_code <= 299:
                 main_condition_sprite = 'cloudy'
-                support_condition_sprite_1 = 'lightning'
-                support_condition_sprite_2 = 'rainy'
+                support_condition_sprite_1 = 'rainy'
+                support_condition_sprite_2 = 'lightning'
             elif 300 <= self.condition_code <= 399:
                 main_condition_sprite = 'cloudy'
                 support_condition_sprite_1 = 'rainy'
@@ -329,8 +329,8 @@ class WeatherApp(AppModule):
                 if self.condition_code in [602, 622]:
                     support_condition_sprite_1 = 'snowflake-large'
                 elif 612 <= self.condition_code <= 621:
-                    support_condition_sprite_1 = 'snowflake-small'
-                    support_condition_sprite_2 = 'rainy'
+                    support_condition_sprite_1 = 'rainy'
+                    support_condition_sprite_2 = 'snowflake-small'
                 else:
                     support_condition_sprite_1 = 'snowflake-small'
             elif 700 <= self.condition_code <= 799:
@@ -354,8 +354,8 @@ class WeatherApp(AppModule):
             support_condition_sprite_2 = None
             if 200 <= self.condition_code <= 299:
                 # main_condition_sprite = 'cloudy'
-                support_condition_sprite_1 = 'lightning'
-                support_condition_sprite_2 = 'rainy'
+                support_condition_sprite_1 = 'rainy'
+                support_condition_sprite_2 = 'lightning'
             elif 300 <= self.condition_code <= 399:
                 support_condition_sprite_1 = 'cloudy'
                 support_condition_sprite_2 = 'rainy'
@@ -369,8 +369,8 @@ class WeatherApp(AppModule):
                 if self.condition_code in [602, 622]:
                     support_condition_sprite_2 = 'snowflake-large'
                 elif 612 <= self.condition_code <= 621:
-                    support_condition_sprite_1 = 'snowflake-small'
-                    support_condition_sprite_2 = 'rainy'
+                    support_condition_sprite_1 = 'rainy'
+                    support_condition_sprite_2 = 'snowflake-small'
                 else:
                     support_condition_sprite_2 = 'snowflake-small'
             elif 700 <= self.condition_code <= 799:
