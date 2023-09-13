@@ -348,8 +348,45 @@ class WeatherApp(AppModule):
             self.daytime_image_shadow.set_sprite(main_condition_sprite)
         else:
             # if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
+            # OW interpretation
+            # reference: https://openweathermap.org/weather-conditions
+            support_condition_sprite_1 = None
+            support_condition_sprite_2 = None
+            if 200 <= self.condition_code <= 299:
+                # main_condition_sprite = 'cloudy'
+                support_condition_sprite_1 = 'lightning'
+                support_condition_sprite_2 = 'rainy'
+            elif 300 <= self.condition_code <= 399:
+                support_condition_sprite_1 = 'cloudy'
+                support_condition_sprite_2 = 'rainy'
+            elif 500 <= self.condition_code <= 599:
+                support_condition_sprite_1 = 'cloudy'
+                support_condition_sprite_2 = 'rainy'
+                if self.condition_code == 511:
+                    support_condition_sprite_2 = 'snowflake-small'
+            elif 600 <= self.condition_code <= 699:
+                support_condition_sprite_1 = 'cloudy'
+                if self.condition_code in [602, 622]:
+                    support_condition_sprite_2 = 'snowflake-large'
+                elif 612 <= self.condition_code <= 621:
+                    support_condition_sprite_1 = 'snowflake-small'
+                    support_condition_sprite_2 = 'rainy'
+                else:
+                    support_condition_sprite_2 = 'snowflake-small'
+            elif 700 <= self.condition_code <= 799:
+                support_condition_sprite_1 = 'foggy'
+            elif 800 <= self.condition_code <= 802:
+                main_condition_sprite = 'cloudy'
+                support_condition_sprite_1 = 'sunny'
+            elif 803 <= self.condition_code <= 899:
+                support_condition_sprite_1 = 'cloudy'
+
+            self.support_daytime_image_1.set_sprite(support_condition_sprite_1)
+            self.support_daytime_image_2.set_sprite(support_condition_sprite_2)
+
             self.main_daytime_image.hide()
-            self.support_daytime_image_1.hide()
+            self.support_daytime_image_1.show()
+            self.support_daytime_image_1.show()
             self.daytime_image_shadow.hide()
 
         # moon phase
