@@ -158,15 +158,18 @@ class WeatherApp(AppModule):
         self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=self.main_daytime_image.position,
                                                 sheet=shadow_image, spec=sprite_spec)
 
-        # add them to the stage
+        # main condition actors
         self.stage.actors.append(self.daytime_image_shadow)
         self.stage.actors.append(self.main_daytime_image)
-        self.stage.actors.append(self.support_daytime_image_1)
-        self.stage.actors.append(self.support_daytime_image_2)
 
         # moon phase actor
         self.moon_phase_image = SpriteImage(name='moon-phase', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
         self.stage.actors.append(self.moon_phase_image)
+
+        # support condition actors
+        self.stage.actors.append(self.support_daytime_image_1)
+        self.stage.actors.append(self.support_daytime_image_2)
+
 
         # timer actor
         self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
