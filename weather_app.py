@@ -160,7 +160,9 @@ class WeatherApp(AppModule):
 
         # add them to the stage
         self.stage.actors.append(self.daytime_image_shadow)
-        self.stage.actors.extend(self.main_daytime_image, self.support_daytime_image_1, self.support_daytime_image_2)
+        self.stage.actors.append(self.main_daytime_image)
+        self.stage.actors.append(self.support_daytime_image_1)
+        self.stage.actors.append(self.support_daytime_image_2)
 
         # moon phase actor
         self.moon_phase_image = SpriteImage(name='moon-phase', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
