@@ -64,8 +64,10 @@ class WeatherApp(AppModule):
         self.moonset: int = None
         self.is_moon_out: bool = None
 
-        self.daytime_image: SpriteImage = None
+        self.main_daytime_image: SpriteImage = None
         self.daytime_image_shadow: SpriteImage = None
+        self.support_daytime_image_1: SpriteImage = None
+        self.support_daytime_image_2: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
         self.timer_line: Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
@@ -128,8 +130,12 @@ class WeatherApp(AppModule):
         sprite_sheet: Image = Image.open("images/weather-sprites.png").convert('RGBA')
         with open("images/weather-sprites.json") as spec_file:
             sprite_spec = json.load(spec_file)
-        self.daytime_image = SpriteImage(name='daytime-condition', position=(39, 10), sheet=sprite_sheet,
-                                         spec=sprite_spec)
+        self.main_daytime_image = SpriteImage(name='main-daytime-condition', position=(39, 10),
+                                              sheet=sprite_sheet, spec=sprite_spec)
+        self.support_daytime_image_1 = SpriteImage(name='support-daytime-condition-1', position=(39, 10),
+                                                   sheet=sprite_sheet, spec=sprite_spec)
+        self.support_daytime_image_2 = SpriteImage(name='support-daytime-condition-2', position=(39, 10),
+                                                   sheet=sprite_sheet, spec=sprite_spec)
 
         # set up outline shadow for these sprites
         sprite_grayscale = sprite_sheet.copy().convert('L')
@@ -149,12 +155,12 @@ class WeatherApp(AppModule):
         # convert edges into shadow image by applying edges as alpha to black image
         shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
         shadow_image.putalpha(edges)
-        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=self.daytime_image.position,
+        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=self.main_daytime_image.position,
                                                 sheet=shadow_image, spec=sprite_spec)
 
         # add them to the stage
         self.stage.actors.append(self.daytime_image_shadow)
-        self.stage.actors.append(self.daytime_image)
+        self.stage.actors.extend(self.main_daytime_image, self.support_daytime_image_1, self.support_daytime_image_2)
 
         # moon phase actor
         self.moon_phase_image = SpriteImage(name='moon-phase', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
@@ -282,9 +288,12 @@ class WeatherApp(AppModule):
         #   "foggy" "windy"
 
         if self.is_daytime:
-            self.daytime_image.show()
+            self.main_daytime_image.show()
+            self.support_daytime_image_1.show()
             self.daytime_image_shadow.show()
-            condition_sprite = None
+            main_condition_sprite = None
+            support_condition_sprite_1 = None
+            support_condition_sprite_2 = None
             # if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {self.condition_str}')
 
             # VX interpretation
@@ -300,27 +309,45 @@ class WeatherApp(AppModule):
             """
 
             # OW interpretation
+            # reference: https://openweathermap.org/weather-conditions
             if 200 <= self.condition_code <= 299:
-                condition_sprite = 'lightning'
+                main_condition_sprite = 'cloudy'
+                support_condition_sprite_1 = 'lightning'
+                support_condition_sprite_2 = 'rainy'
             elif 300 <= self.condition_code <= 399:
-                condition_sprite = 'rainy'
+                main_condition_sprite = 'cloudy'
+                support_condition_sprite_1 = 'rainy'
             elif 500 <= self.condition_code <= 599:
-                condition_sprite = 'rainy'
-            elif 500 <= self.condition_code <= 599:
-                condition_sprite = 'snowflake-large'
+                main_condition_sprite = 'cloudy'
+                support_condition_sprite_1 = 'rainy'
+                if self.condition_code == 511:
+                    support_condition_sprite_2 = 'snowflake-small'
+            elif 600 <= self.condition_code <= 699:
+                main_condition_sprite = 'cloudy'
+                if self.condition_code in [602, 622]:
+                    support_condition_sprite_1 = 'snowflake-large'
+                elif 612 <= self.condition_code <= 621:
+                    support_condition_sprite_1 = 'snowflake-small'
+                    support_condition_sprite_2 = 'rainy'
+                else:
+                    support_condition_sprite_1 = 'snowflake-small'
             elif 700 <= self.condition_code <= 799:
-                condition_sprite = 'foggy'
+                main_condition_sprite = 'foggy'
             elif 800 <= self.condition_code <= 802:
-                condition_sprite = 'sunny'
+                main_condition_sprite = 'cloudy'
+                support_condition_sprite_1 = 'sunny'
             elif 803 <= self.condition_code <= 899:
-                condition_sprite = 'cloudy'
+                main_condition_sprite = 'cloudy'
             if self.fresh_weather_data:
-                self.logger.debug(f"Selected conditions sprite: {condition_sprite}")
-            self.daytime_image.set_sprite(condition_sprite)
-            self.daytime_image_shadow.set_sprite(condition_sprite)
+                self.logger.debug(f"Selected conditions sprite: {main_condition_sprite}")
+            self.main_daytime_image.set_sprite(main_condition_sprite)
+            self.support_daytime_image_1.set_sprite(support_condition_sprite_1)
+            self.support_daytime_image_2.set_sprite(support_condition_sprite_2)
+            self.daytime_image_shadow.set_sprite(main_condition_sprite)
         else:
             # if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
-            self.daytime_image.hide()
+            self.main_daytime_image.hide()
+            self.support_daytime_image_1.hide()
             self.daytime_image_shadow.hide()
 
         # moon phase
