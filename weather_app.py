@@ -340,10 +340,13 @@ class WeatherApp(AppModule):
                 main_condition_sprite = 'foggy'
             elif 800 == self.condition_code:
                 main_condition_sprite = 'sunny'
-            elif 801 <= self.condition_code <= 802:
+            elif 801 == self.condition_code:
                 main_condition_sprite = 'cloudy'
                 support_condition_sprite_1 = 'sunny'
-            elif 803 <= self.condition_code <= 899:
+            elif 802 <= self.condition_code <= 803:
+                main_condition_sprite = 'sunny'
+                support_condition_sprite_1 = 'cloudy'
+            elif 804 <= self.condition_code <= 899:
                 main_condition_sprite = 'cloudy'
             if self.fresh_weather_data:
                 self.logger.debug(f"Selected conditions sprite: {main_condition_sprite}")
