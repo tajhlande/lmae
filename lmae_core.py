@@ -71,6 +71,12 @@ class Actor(LMAEObject, metaclass=ABCMeta):
             self.position = position
             self.changes_since_last_render = True
 
+    def move(self, amount: tuple[int, int]):
+        if tuple and amount[0] != 0 and amount[1] != 0:
+            self.position[0] += amount[0]
+            self.position[1] += amount[1]
+            self.changes_since_last_render = True
+
     def set_visible(self, visible: bool):
         if self.visible != visible:
             self.visible = visible

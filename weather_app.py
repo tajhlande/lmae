@@ -299,6 +299,8 @@ class WeatherApp(AppModule):
             main_condition_sprite = None
             support_condition_sprite_1 = None
             support_condition_sprite_2 = None
+            self.support_daytime_image_1.set_position(self.main_daytime_image.position)
+            self.support_daytime_image_2.set_position(self.main_daytime_image.position)
             # if self.fresh_weather_data: self.logger.debug(f'Current conditions from wx: {self.condition_str}')
 
             # VX interpretation
@@ -346,6 +348,7 @@ class WeatherApp(AppModule):
             elif 802 <= self.condition_code <= 803:
                 main_condition_sprite = 'sunny'
                 support_condition_sprite_1 = 'cloudy'
+                self.support_daytime_image_1.move((3, 5))
             elif 804 <= self.condition_code <= 899:
                 main_condition_sprite = 'cloudy'
             if self.fresh_weather_data:
