@@ -338,7 +338,9 @@ class WeatherApp(AppModule):
                     support_condition_sprite_1 = 'snowflake-small'
             elif 700 <= self.condition_code <= 799:
                 main_condition_sprite = 'foggy'
-            elif 800 <= self.condition_code <= 802:
+            elif 800 == self.condition_code:
+                main_condition_sprite = 'sunny'
+            elif 801 <= self.condition_code <= 802:
                 main_condition_sprite = 'cloudy'
                 support_condition_sprite_1 = 'sunny'
             elif 803 <= self.condition_code <= 899:
