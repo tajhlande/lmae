@@ -5,7 +5,6 @@ import time
 
 from datetime import datetime
 from PIL import Image, ImageFont, ImageFilter, ImageEnhance
-from rgbmatrix import RGBMatrix
 
 import app_runner
 # from app_runner import matrix, matrix_options, start_app, env_config
@@ -538,8 +537,7 @@ class WeatherApp(AppModule):
 
         if self.old_brightness != app_runner.matrix_options.brightness:
             self.logger.debug(f"Setting brightness to {app_runner.matrix_options.brightness}")
-            app_runner.matrix = RGBMatrix(app_runner.matrix_options)
-            self.stage.matrix = app_runner.matrix
+            self.stage.matrix.brightness = app_runner.matrix_options.brightness
 
         self.old_brightness = app_runner.matrix_options.brightness
 
