@@ -1,14 +1,12 @@
 # Core classes for LED Matrix Animation Engine
 import argparse
 import logging
-import os
-import sys
 import time
 from abc import ABCMeta, abstractmethod
 from typing import List
 from PIL import Image, ImageDraw
 
-sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
+# sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 logger = logging.getLogger("lmae_core")
