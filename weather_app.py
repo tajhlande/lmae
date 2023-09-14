@@ -274,6 +274,10 @@ class WeatherApp(AppModule):
             if self.fresh_weather_data:
                 self.logger.debug(f"Is is daytime? {self.is_daytime}")
 
+        # sunrise or sunset are within 30 minutes of the threshold
+        is_sunrise = abs(self.sunrise - time_of_day) < (30*60)
+        is_sunset = abs(self.sunset - time_of_day) < (30*60)
+
         last_is_moon_out = self.is_moon_out
         moonrise_before_sunset = self.moonrise < self.moonset
         if moonrise_before_sunset:
@@ -359,6 +363,7 @@ class WeatherApp(AppModule):
             self.support_daytime_image_2.set_sprite(support_condition_sprite_2)
             self.daytime_image_shadow.set_sprite(main_condition_sprite)
         else:
+            # is not daytime
             # if self.fresh_weather_data: self.logger.debug("Not showing daytime conditions")
             # OW interpretation
             # reference: https://openweathermap.org/weather-conditions
@@ -389,7 +394,7 @@ class WeatherApp(AppModule):
                 support_condition_sprite_1 = 'foggy'
             elif 800 <= self.condition_code <= 802:
                 main_condition_sprite = 'cloudy'
-                support_condition_sprite_1 = 'sunny'
+                # support_condition_sprite_1 = 'sunny'
             elif 803 <= self.condition_code <= 899:
                 support_condition_sprite_1 = 'cloudy'
 
@@ -433,10 +438,6 @@ class WeatherApp(AppModule):
             self.moon_phase_image.hide()
 
         # Background image
-
-        # sunrise or sunset are within 30 minutes of the threshold
-        is_sunrise = abs(self.sunrise - time_of_day) < (30*60)
-        is_sunset = abs(self.sunset - time_of_day) < (30*60)
 
         # set background based on condition
         # OW interpretation
