@@ -71,6 +71,7 @@ class WeatherApp(AppModule):
         self.moon_phase_image: SpriteImage = None
         self.timer_line: Line = None
         self.refresh_time = 900  # 900 seconds = 15 minutes
+        self.old_brightness: int = None
 
         self.blue_sky_image: Image = Image.open("images/backgrounds/blue_sky.png").convert('RGBA')
         self.cloudy_image: Image = Image.open("images/backgrounds/cloudy.png").convert('RGBA')
@@ -526,12 +527,17 @@ class WeatherApp(AppModule):
         self.timer_line.set_color((255, 255, 0, 128) if self.is_daytime else (0, 0, 255, 128))
 
         # set brightness according to time of day
+        self.old_brightness = app_runner.matrix_options.brightness
         if self.is_daytime:
             app_runner.matrix_options.brightness = 100
         elif is_sunset or is_sunrise:
             app_runner.matrix_options.brightness = 90
         else:
             app_runner.matrix_options.brightness = 70
+
+        if self.old_brightness != app_runner.matrix_options.brightness:
+            self.logger.debug(f"Setting brightness to {app_runner.matrix_options.brightness}")
+        self.old_brightness = app_runner.matrix_options.brightness
 
         self.fresh_weather_data = False
 
