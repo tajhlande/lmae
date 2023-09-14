@@ -531,9 +531,11 @@ class WeatherApp(AppModule):
         if self.is_daytime:
             app_runner.matrix_options.brightness = 100
         elif is_sunset or is_sunrise:
-            app_runner.matrix_options.brightness = 90
-        else:
+            app_runner.matrix_options.brightness = 85
+        elif time_of_day < 5 * 60 * 60 or time_of_day > 22 * 60 * 60:
             app_runner.matrix_options.brightness = 40
+        else:
+            app_runner.matrix_options.brightness = 70
 
         if self.old_brightness != app_runner.matrix_options.brightness:
             self.logger.debug(f"Setting brightness to {app_runner.matrix_options.brightness}")
