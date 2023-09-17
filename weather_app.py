@@ -643,11 +643,11 @@ if not longitude:
 
 
 # time to wait before refreshing weather data, in seconds
+refresh_time = None
 try:
     refresh_time = int(os.environ.get('REFRESH_TIME'))
 except:
-    print("Environment variable REFRESH_TIME must be an integer")
-    sys.exit(-1)
+    pass
 
 if not refresh_time:
     try:
