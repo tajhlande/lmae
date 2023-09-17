@@ -1,6 +1,7 @@
 import asyncio
 import os
 import json
+import sys
 import time
 
 from datetime import datetime
@@ -615,22 +616,41 @@ if not api_key:
     # api_key = config['visual.crossing']['vx_api_key']
 
     # OpenWeather
-    api_key = app_runner.env_config['openweather']['ow_api_key']
+    try:
+        api_key = app_runner.env_config['openweather']['ow_api_key']
+    except:
+        print("Unable to find weather API key. Set environment variable OW_API_KEY or env.ini [openweather] ow_api_key")
+        sys.exit(-1)
 
 latitude = os.environ.get('LATITUDE')
 if not latitude:
-    latitude = app_runner.env_config['location']['latitude']
+    try:
+        latitude = app_runner.env_config['location']['latitude']
+    except:
+        print("Unable to find latitude/longitude. Set environment variables LATITUDE,LONGITUDE or "
+              "env.ini [location] latitude/longitude")
+        sys.exit(-1)
+
 
 longitude = os.environ.get('LONGITUDE')
 if not longitude:
-    longitude = app_runner.env_config['location']['longitude']
+    try:
+        longitude = app_runner.env_config['location']['longitude']
+    except:
+        print("Unable to find latitude/longitude. Set environment variables LATITUDE,LONGITUDE or "
+              "env.ini [location] latitude/longitude")
+        sys.exit(-1)
+
 
 # time to wait before refreshing weather data, in seconds
 refresh_time = os.environ.get('REFRESH_TIME')
 if not refresh_time:
-    refresh_time = app_runner.env_config['settings']['refresh_time']
-if not refresh_time:
-    refresh_time = 60 * 15 # default to 15 minutes
+    try:
+        refresh_time = app_runner.env_config['settings']['refresh_time']
+    except:
+        # dont need an error because we have a default set below
+        refresh_time = 60 * 15 # default to 15 minutes
+
 
 app_runner.app_setup()
 wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude, refresh_time=refresh_time)
