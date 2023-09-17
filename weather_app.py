@@ -22,7 +22,7 @@ class WeatherApp(AppModule):
     """
 
     # noinspection PyTypeChecker
-    def __init__(self, api_key: str, latitude: str, longitude: str):
+    def __init__(self, api_key: str, latitude: str, longitude: str, refresh_time: int = 900):
         super().__init__()
         self.fresh_weather_data = False
         self.api_key = api_key
@@ -70,7 +70,8 @@ class WeatherApp(AppModule):
         self.support_daytime_image_2: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
         self.timer_line: Line = None
-        self.refresh_time = 900  # 900 seconds = 15 minutes
+        self.refresh_time = refresh_time  # 900 seconds = 15 minutes
+        self.logger.info(f"Refreshing weather data every {self.refresh_time} seconds")
         self.old_brightness: int = None
 
         self.blue_sky_image: Image = Image.open("images/backgrounds/blue_sky.png").convert('RGBA')
@@ -601,6 +602,8 @@ class WeatherApp(AppModule):
             self.logger.debug("Run stopped")
 
 
+# get environment variables
+
 # Visual Crossing
 # api_key = os.environ.get('VX_API_KEY')
 
@@ -622,7 +625,14 @@ longitude = os.environ.get('LONGITUDE')
 if not longitude:
     longitude = app_runner.env_config['location']['longitude']
 
+# time to wait before refreshing weather data, in seconds
+refresh_time = os.environ.get('REFRESH_TIME')
+if not refresh_time:
+    refresh_time = app_runner.env_config['settings']['refresh_time']
+if not refresh_time:
+    refresh_time = 60 * 15 # default to 15 minutes
+
 app_runner.app_setup()
-wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude)
+wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude, refresh_time=refresh_time)
 wx_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 app_runner.start_app(wx_app)
