@@ -71,7 +71,7 @@ class WeatherApp(AppModule):
         self.support_daytime_image_2: SpriteImage = None
         self.moon_phase_image: SpriteImage = None
         self.timer_line: Line = None
-        self.refresh_time = refresh_time  # 900 seconds = 15 minutes
+        self.refresh_time: int = refresh_time  # 900 seconds = 15 minutes
         self.logger.info(f"Refreshing weather data every {self.refresh_time} seconds")
         self.old_brightness: int = None
 
@@ -643,10 +643,15 @@ if not longitude:
 
 
 # time to wait before refreshing weather data, in seconds
-refresh_time = os.environ.get('REFRESH_TIME')
+try:
+    refresh_time = int(os.environ.get('REFRESH_TIME'))
+except:
+    print("Environment variable REFRESH_TIME must be an integer")
+    sys.exit(-1)
+
 if not refresh_time:
     try:
-        refresh_time = app_runner.env_config['settings']['refresh_time']
+        refresh_time = int(app_runner.env_config['settings']['refresh_time'])
     except:
         # dont need an error because we have a default set below
         refresh_time = 60 * 15 # default to 15 minutes
