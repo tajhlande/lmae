@@ -241,7 +241,7 @@ class Stage(LMAEObject):
         :param actor: The actor for which we should remove animations
         """
         size_before = len(self.animations)
-        self.animations = [anim for anim in self.animations if anim.actor == actor]
+        self.animations = [anim for anim in self.animations if anim.actor != actor]
         size_after = len(self.animations)
         self.logger.debug(f"Cleared animations for actor {actor.name}. Total anims before: {size_before}, "
                           f"after: {size_after}")
