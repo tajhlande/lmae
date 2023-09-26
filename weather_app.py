@@ -284,7 +284,7 @@ class WeatherApp(AppModule):
                 scroll_distance = self.condition_description_label.size[0] - self.stage.size[0]
                 # scroll duration: 6 seconds per full width
                 scroll_duration = 6.0 * scroll_distance / self.stage.size[0]
-                pause_duration = 10.0
+                pause_duration = 5.0
                 self.logger.debug(f"Adding scroll animation for condition text. "
                                   f"Text width: {self.condition_description_label.size[0]} px, "
                                   f"scroll distance: {scroll_distance}")
