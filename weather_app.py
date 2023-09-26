@@ -241,7 +241,7 @@ class WeatherApp(AppModule):
                 self.logger.debug(f"      Condition code : {self.condition_code}")
                 self.logger.debug(f"    First short desc : {self.condition_short_desc}")
                 self.logger.debug(f"     First long desc : {self.condition_long_desc}")
-                self.logger.debug(f" Combined short desc : {self.combined_long_desc}")
+                self.logger.debug(f" Combined short desc : {self.combined_short_desc}")
                 self.logger.debug(f"  Combined long desc : {self.combined_long_desc}")
                 self.logger.debug(f"         Temperature : {self.temperature_str}")
                 self.logger.debug(f"         Feels like  : {self.feels_like_str}")
