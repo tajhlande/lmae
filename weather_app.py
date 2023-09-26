@@ -60,6 +60,7 @@ class WeatherApp(AppModule):
         self.condition_short_desc: str = None
         self.condition_long_desc: str = None
         self.other_condition_short_desc: list[str] = []
+        self.other_condition_long_desc: list[str] = []
         self.moon_phase_num: float = None
         self.is_daytime: bool = None
         self.moonrise: int = None
@@ -219,6 +220,8 @@ class WeatherApp(AppModule):
                 self.is_daytime = None
                 self.other_condition_short_desc = [item['main'] for item in
                                                    self.conditions_and_forecast['current']['weather'][1:]]
+                self.other_condition_long_desc = [item['description'] for item in
+                                                   self.conditions_and_forecast['current']['weather'][1:]]
 
                 self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moon_phase']
                 self.moonrise = self.conditions_and_forecast['daily'][0]['moonrise']
@@ -229,7 +232,8 @@ class WeatherApp(AppModule):
                 self.logger.debug(f" Condition code : {self.condition_code}")
                 self.logger.debug(f"     Short desc : {self.condition_short_desc}")
                 self.logger.debug(f"      Long desc : {self.condition_long_desc}")
-                self.logger.debug(f"    Other descs : {self.other_condition_short_desc}")
+                for desc in self.other_condition_long_desc:
+                    self.logger.debug(f"     Addtl desc : {desc}")
                 self.logger.debug(f"    Temperature : {self.temperature_str}")
                 self.logger.debug(f"    Feels like  : {self.feels_like_str}")
                 self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
