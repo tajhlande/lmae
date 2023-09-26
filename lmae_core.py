@@ -235,6 +235,13 @@ class Stage(LMAEObject):
         """
         self.animations.extend(animations)
 
+    def clear_animations_for(self, actor: Actor):
+        """
+        Remove animations for a particular actor
+        :param actor: The actor for which we should remove animations
+        """
+        self.animations = [anim for anim in self.animations if anim.actor == actor]
+
     def prepare_frame(self):
         """
         Prepare for a frame to be rendered

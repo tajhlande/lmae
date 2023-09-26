@@ -13,7 +13,7 @@ from openweather.openweather_client import get_conditions_and_forecast_by_lat_lo
 from lmae_core import Stage
 from lmae_module import AppModule
 from lmae_actor import StillImage, SpriteImage, Text, Line
-from lmae_animation import Easing
+from lmae_animation import Easing, Sequence, Still, StraightMove
 from lmae_component import Carousel
 
 
@@ -59,8 +59,12 @@ class WeatherApp(AppModule):
         self.condition_code: int = None
         self.condition_short_desc: str = None
         self.condition_long_desc: str = None
-        self.other_condition_short_desc: list[str] = []
-        self.other_condition_long_desc: list[str] = []
+        self.condition_short_desc_list: list[str] = []
+        self.condition_long_desc_list: list[str] = []
+        self.combined_short_desc: str = None
+        self.combined_long_desc: str = None
+        self.condition_description_label_position: tuple[int, int] = None
+        self.need_to_update_condition_desc_animation: bool = True
         self.moon_phase_num: float = None
         self.is_daytime: bool = None
         self.moonrise: int = None
@@ -126,7 +130,9 @@ class WeatherApp(AppModule):
         self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
         # condition description actor
-        self.condition_description_label = Text(name='condition-description', position=(1, 2),
+        self.condition_description_label_position = (1, 2)
+        self.condition_description_label = Text(name='condition-description',
+                                                position=self.condition_description_label_position,
                                                 font=self.secondary_text_font, stroke_width=1,
                                                 color=(192, 192, 192, 255), stroke_color=(0, 0, 0, 220))
         self.stage.actors.append(self.condition_description_label)
@@ -218,10 +224,13 @@ class WeatherApp(AppModule):
                 self.condition_long_desc = self.conditions_and_forecast['current']['weather'][0]['description']
                 forecast_date_time = datetime.fromtimestamp(self.conditions_and_forecast['daily'][0]['dt'])
                 self.is_daytime = None
-                self.other_condition_short_desc = [item['main'] for item in
-                                                   self.conditions_and_forecast['current']['weather'][1:]]
-                self.other_condition_long_desc = [item['description'] for item in
-                                                   self.conditions_and_forecast['current']['weather'][1:]]
+                self.condition_short_desc_list = [item['main'] for item in
+                                                  self.conditions_and_forecast['current']['weather']]
+                self.condition_long_desc_list = [item['description'] for item in
+                                                 self.conditions_and_forecast['current']['weather']]
+                self.combined_short_desc = ', '.join(self.condition_short_desc_list)
+                self.combined_long_desc = ', '.join(self.condition_long_desc_list)
+                self.need_to_update_condition_desc_animation = True
 
                 self.moon_phase_num = self.conditions_and_forecast['daily'][0]['moon_phase']
                 self.moonrise = self.conditions_and_forecast['daily'][0]['moonrise']
@@ -229,20 +238,20 @@ class WeatherApp(AppModule):
                 self.is_moon_out = None
 
                 # log
-                self.logger.debug(f" Condition code : {self.condition_code}")
-                self.logger.debug(f"     Short desc : {self.condition_short_desc}")
-                self.logger.debug(f"      Long desc : {self.condition_long_desc}")
-                for desc in self.other_condition_long_desc:
-                    self.logger.debug(f"     Addtl desc : {desc}")
-                self.logger.debug(f"    Temperature : {self.temperature_str}")
-                self.logger.debug(f"    Feels like  : {self.feels_like_str}")
-                self.logger.debug(f"    Dewpoint    : {self.dewpoint_str}")
-                self.logger.debug(f"    Humidity    : {self.humidity_str}")
-                self.logger.debug(f"    Low temp    : {self.low_temp_str}")
-                self.logger.debug(f"    High temp   : {self.high_temp_str}")
-                self.logger.debug(f" Forecast date  : {forecast_date_time}")
-                self.logger.debug(f" Moonrise       : {self.format_epoch_time(self.moonrise)}")
-                self.logger.debug(f" Moonset        : {self.format_epoch_time(self.moonset)}")
+                self.logger.debug(f"      Condition code : {self.condition_code}")
+                self.logger.debug(f"    First short desc : {self.condition_short_desc}")
+                self.logger.debug(f"     First long desc : {self.condition_long_desc}")
+                self.logger.debug(f" Combined short desc : {self.combined_long_desc}")
+                self.logger.debug(f"  Combined long desc : {self.combined_long_desc}")
+                self.logger.debug(f"         Temperature : {self.temperature_str}")
+                self.logger.debug(f"         Feels like  : {self.feels_like_str}")
+                self.logger.debug(f"         Dewpoint    : {self.dewpoint_str}")
+                self.logger.debug(f"         Humidity    : {self.humidity_str}")
+                self.logger.debug(f"         Low temp    : {self.low_temp_str}")
+                self.logger.debug(f"         High temp   : {self.high_temp_str}")
+                self.logger.debug(f"      Forecast date  : {forecast_date_time}")
+                self.logger.debug(f"      Moonrise       : {self.format_epoch_time(self.moonrise)}")
+                self.logger.debug(f"      Moonset        : {self.format_epoch_time(self.moonset)}")
 
             else:
                 self.logger.error("Call to get weather data failed")
@@ -267,7 +276,42 @@ class WeatherApp(AppModule):
         self.humidity_label.set_text(self.humidity_str)
         self.low_temp_label.set_text(self.low_temp_str)
         self.high_temp_label.set_text(self.high_temp_str)
-        self.condition_description_label.set_text(self.condition_long_desc)
+        if self.need_to_update_condition_desc_animation:
+            self.condition_description_label.set_text(self.combined_long_desc)
+            self.stage.clear_animations_for(self.condition_description_label)
+            self.condition_description_label.set_position(self.condition_description_label_position)
+            if self.condition_description_label.size[0] > self.stage.size[0]:
+                scroll_distance = self.condition_description_label.size[0] - self.stage.size[0]
+                # scroll duration: 6 seconds per full width
+                scroll_duration = 6.0 * scroll_distance / self.stage.size[0]
+                pause_duration = 10.0
+                self.logger.debug(f"Adding scroll animation for condition text. "
+                                  f"Text width: {self.condition_description_label.size[0]} px, "
+                                  f"scroll distance: {scroll_distance}")
+
+                pause_1 = Still(name='Condition-pause-1', actor=self.condition_description_label,
+                                duration=pause_duration)
+
+                scroll_left = StraightMove(name='Condition-scroll-left', actor=self.condition_description_label,
+                                           duration=scroll_duration, distance=(-scroll_distance, 0),
+                                           easing=Easing.LINEAR)
+
+                pause_2 = Still(name='Condition-pause-2', actor=self.condition_description_label,
+                                duration=pause_duration)
+
+                scroll_right = StraightMove(name='Condition-scroll-right', actor=self.condition_description_label,
+                                            duration=scroll_duration, distance=(scroll_distance, 0),
+                                            easing=Easing.LINEAR)
+
+                condition_sequence = Sequence(name='Condition-scroll-sequence', actor=self.condition_description_label,
+                                              animations=[pause_1, scroll_left, pause_2, scroll_right],
+                                              repeat=True)
+
+                self.stage.add_animation(condition_sequence)
+            else:
+                self.logger.debug(f"Not adding scroll animation for condition text. "
+                                  f"Text width: {self.condition_description_label.size[0]} px")
+            self.need_to_update_condition_desc_animation = False
 
         # figure out whether it is day or night
         # time_of_day = time.strftime(timestamp_format, time.localtime())
