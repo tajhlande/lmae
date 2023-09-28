@@ -656,58 +656,11 @@ class WeatherApp(AppModule):
 
 
 # get environment variables
-
-# Visual Crossing
-# api_key = os.environ.get('VX_API_KEY')
-
-# OpenWeather
-api_key = os.environ.get('OW_API_KEY')
-
-if not api_key:
-    # VX
-    # api_key = config['visual.crossing']['vx_api_key']
-
-    # OpenWeather
-    try:
-        api_key = app_runner.env_config['openweather']['ow_api_key']
-    except:
-        print("Unable to find weather API key. Set environment variable OW_API_KEY or env.ini [openweather] ow_api_key")
-        sys.exit(-1)
-
-latitude = os.environ.get('LATITUDE')
-if not latitude:
-    try:
-        latitude = app_runner.env_config['location']['latitude']
-    except:
-        print("Unable to find latitude/longitude. Set environment variables LATITUDE,LONGITUDE or "
-              "env.ini [location] latitude/longitude")
-        sys.exit(-1)
-
-
-longitude = os.environ.get('LONGITUDE')
-if not longitude:
-    try:
-        longitude = app_runner.env_config['location']['longitude']
-    except:
-        print("Unable to find latitude/longitude. Set environment variables LATITUDE,LONGITUDE or "
-              "env.ini [location] latitude/longitude")
-        sys.exit(-1)
-
-
-# time to wait before refreshing weather data, in seconds
-refresh_time = None
-try:
-    refresh_time = int(os.environ.get('REFRESH_TIME'))
-except:
-    pass
-
-if not refresh_time:
-    try:
-        refresh_time = int(app_runner.env_config['settings']['refresh_time'])
-    except:
-        # dont need an error because we have a default set below
-        refresh_time = 60 * 15 # default to 15 minutes
-
+api_key = app_runner.get_env_parameter('OW_API_KEY', 'openweather', 'ow_api_key')
+latitude = app_runner.get_env_parameter('LATITUDE', 'location', 'latitude')
+longitude = app_runner.get_env_parameter('LONGITUDE', 'location', 'longitude')
+refresh_time = int(app_runner.get_env_parameter('REFRESH_TIME', 'settings', 'refresh_time',
+                                                default=60 * 15))  # default to 15 minutes
 
 app_runner.app_setup()
 wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude, refresh_time=refresh_time)
