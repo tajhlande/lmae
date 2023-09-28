@@ -1,0 +1,3 @@
+
+class VirtualRGBMatrix:
+    pass
