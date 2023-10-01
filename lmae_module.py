@@ -1,11 +1,19 @@
 import asyncio
+import logging
 import time
+
 from abc import ABCMeta, abstractmethod
 from lmae_core import Stage, Actor, Animation
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
-import logging
 from threading import Lock
 from typing import Callable
+
+# hackity hackington to determine whether we're going to use virtual bindings or not
+import platform
+os_name = platform.system()
+if os_name == 'Linux':
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions
+else:  # Windows or Darwin aka macOS
+    from lmae_display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
 
 
 class AppModule(metaclass=ABCMeta):

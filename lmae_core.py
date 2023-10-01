@@ -7,7 +7,14 @@ from typing import List
 from PIL import Image, ImageDraw
 
 # sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
+
+# hackity hackington to determine whether we're going to use virtual bindings or not
+import platform
+os_name = platform.system()
+if os_name == 'Linux':
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions
+else:  # Windows or Darwin aka macOS
+    from lmae_display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
 
 logger = logging.getLogger("lmae_core")
 logger.setLevel(logging.DEBUG)
@@ -327,6 +334,8 @@ class Stage(LMAEObject):
         self.post_render()
 
 
+virtual_leds = False
+
 def parse_matrix_options_command_line():
     """
     Parse the command line options and construct a RGBMatrixOptions object
@@ -377,6 +386,9 @@ def parse_matrix_options_command_line():
                         help="Needed to initialize special panels. Supported: 'FM6126A'", default="", type=str)
     parser.add_argument("--led-no-drop-privs", dest="drop_privileges",
                         help="Don't drop privileges from 'root' after initializing the hardware.", action='store_false')
+    parser.add_argument("-v", "--virtual-leds", action="store_true", dest="virtual_leds",
+                        help="Draw to virtual LED display on screen instead of real LED panel.",
+                        default=False)
     parser.set_defaults(drop_privileges=True)
 
     args = parser.parse_args()
@@ -395,6 +407,9 @@ def parse_matrix_options_command_line():
     options.led_rgb_sequence = args.led_rgb_sequence
     options.pixel_mapper_config = args.led_pixel_mapper
     options.panel_type = args.led_panel_type
+    global virtual_leds
+    virtual_leds = args.virtual_leds
+
 
     if args.led_show_refresh:
         options.show_refresh_rate = 1
