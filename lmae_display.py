@@ -9,6 +9,7 @@ from typing import Optional
 class PixelShape(Enum):
     ROUND = auto()
     SQUARE = auto()
+    ROUND_RECT = auto()
 
 
 class VirtualRGBMatrixOptions:
@@ -44,7 +45,7 @@ class WindowSpecs:
                       self.led_pixel_spacing)
         self.height = (self.matrix_options.rows * (self.led_pixel_size + self.led_pixel_spacing) +
                        self.led_pixel_spacing)
-        self.pixel_shape = PixelShape.ROUND
+        self.pixel_shape = PixelShape.ROUND_RECT
         self.brightness_adjustment = 1.5
 
 
@@ -135,6 +136,8 @@ class VirtualRGBMatrix:
                 if pixel_shape == PixelShape.ROUND:
                     pygame.draw.circle(surface, colors, (offset_x + half_pixel, offset_y + half_pixel),
                                        pix_radius)
+                elif pixel_shape == PixelShape.ROUND_RECT:
+                    pygame.draw.rect(surface, colors, (offset_x, offset_y, pix_size, pix_size), border_radius=3)
                 else:  # pixel_shape == PixelShape.SQUARE
                     pygame.draw.rect(surface, colors, (offset_x, offset_y, pix_size, pix_size))
 
