@@ -38,13 +38,14 @@ class WindowSpecs:
     def __init__(self, matrix_options: Optional[VirtualRGBMatrixOptions]):
         self.matrix_options = matrix_options
         # make sure pixel size is odd, else circle drawing of LEDs will be off
-        self.led_pixel_size = 9
+        self.led_pixel_size = 11
         self.led_pixel_spacing = 1
         self.width = (self.matrix_options.cols * (self.led_pixel_size + self.led_pixel_spacing) +
                       self.led_pixel_spacing)
         self.height = (self.matrix_options.rows * (self.led_pixel_size + self.led_pixel_spacing) +
                        self.led_pixel_spacing)
         self.pixel_shape = PixelShape.ROUND
+        self.brightness_adjustment = 1.5
 
 
 # noinspection PyPep8Naming
@@ -104,6 +105,12 @@ class VirtualRGBMatrix:
         frame_canvas = VirtualFrameCanvas()
         return frame_canvas
 
+    @staticmethod
+    def adjust_brightness(colors: tuple[int, int, int], adjustment: float) -> tuple[int, int, int]:
+        def adjust_fn(x): return max(0, min(255, 255 - int((255 - x) / adjustment)))
+        new_colors = (adjust_fn(colors[0]), adjust_fn(colors[1]), adjust_fn(colors[2]))
+        return new_colors
+
     def SwapOnVSync(self, frame_canvas: VirtualFrameCanvas) -> VirtualFrameCanvas:
         # draw the frame canvas to the window
         image = frame_canvas.image
@@ -111,8 +118,8 @@ class VirtualRGBMatrix:
         spacing = self.window_specs.led_pixel_spacing
         pix_size = self.window_specs.led_pixel_size
         pixel_shape = self.window_specs.pixel_shape
-        half_pixel = pix_size / 2 + 1
-        pix_radius = half_pixel
+        half_pixel = pix_size / 2
+        pix_radius = pix_size - half_pixel
 
         # clear surface
         surface.fill((0, 0, 0))
@@ -123,12 +130,13 @@ class VirtualRGBMatrix:
             offset_y = (pix_size + spacing) * y + spacing
             for x in range(0, self.matrix_options.cols):
                 offset_x = (pix_size + spacing) * x + spacing
-                colors = image.getpixel((x, y))
+                colors = self.adjust_brightness(colors=image.getpixel((x, y)),
+                                                adjustment=self.window_specs.brightness_adjustment)
                 if pixel_shape == PixelShape.ROUND:
                     pygame.draw.circle(surface, colors, (offset_x + half_pixel, offset_y + half_pixel),
                                        pix_radius)
                 else:  # pixel_shape == PixelShape.SQUARE
-                    pygame.draw.rect(surface, colors, (offset_x, offset_y, offset_x + pix_size))
+                    pygame.draw.rect(surface, colors, (offset_x, offset_y, pix_size, pix_size))
 
         # swap it over
         pygame.event.get()  # discarding these for now
