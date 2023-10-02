@@ -4,7 +4,7 @@ from pilmoji.source import AppleEmojiSource
 from PIL import Image, ImageFont
 
 from lmae_actor import StillImage, Text, EmojiText
-from lmae_animation import StraightMove
+from lmae_animation import StraightMove, Sequence
 from lmae_module import SingleStageRenderLoopAppModule
 import app_runner
 
@@ -14,7 +14,9 @@ logger.setLevel(logging.DEBUG)
 print("LED Matrix Rendering Test")
 
 kirby = StillImage(name='Kirby', position=(-22, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
-kirby_movement = StraightMove(name="Moving Kirby", actor=kirby, duration=2.0, distance=(86, 0), repeat=True)
+kirby_movement = StraightMove(name="Moving Kirby", actor=kirby, duration=2.0, distance=(86, 0))
+kirby_reset = StraightMove(name="Reset Kirby", actor=kirby, duration=0.1, distance=(-86, 0))
+kirby_sequence = Sequence(name="Kirby Sequence", actor=kirby, repeat=True, animations=[kirby_movement, kirby_reset])
 trees = StillImage(name='Trees', image=Image.open("images/trees-composite.png").convert('RGBA'))
 grass = StillImage(name='Grass', image=Image.open("images/grass.png").convert('RGBA'))
 words = Text(name='Text', text="Hello,\nworld!", position=(5, 5),
@@ -40,7 +42,7 @@ app_runner.app_setup()
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 sample_app.add_actors(trees, emoji_words, kirby, grass)
-sample_app.add_animations(kirby_movement)
+sample_app.add_animations(kirby_sequence)
 
 app_runner.start_app(sample_app)
 
