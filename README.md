@@ -10,10 +10,10 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
 <!-- TOC -->
 * [LMAE - LED Matrix Animation Engine for RPi and Python](#lmae---led-matrix-animation-engine-for-rpi-and-python)
   * [Table of Contents](#table-of-contents)
-  * [Prerequisites](#prerequisites)
   * [LMAE Basics](#lmae-basics)
-    * [Library structure](#library-structure)
+    * [Prerequisites](#prerequisites)
     * [Getting started](#getting-started)
+    * [Library structure](#library-structure)
 * [Weather app](#weather-app)
       * [OpenWeather API bookmarks](#openweather-api-bookmarks)
       * [Visual crossings bookmarks](#visual-crossings-bookmarks)
@@ -27,7 +27,9 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
   * [Virtual LED Display](#virtual-led-display)
 <!-- TOC -->
 
-## Prerequisites
+## LMAE Basics
+
+### Prerequisites
 
 This library is built on top of the RGB LED display driver
 written by Henner Zeller, found here: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)
@@ -36,7 +38,33 @@ You'll need to build that first, as this library depends on it for access to the
 Some of the python pieces of that library are here, because they need to be present for this code to run.
 But you should build that library to get all of the needed binaries, which are not checked into source.
 
-## LMAE Basics
+### Getting started
+`render_test.py` is an example program that test the basics of the core
+library. You should create a virtual environment using `venv`:
+
+    python -m venv venv
+
+Activate your environment:
+
+    source venv/bin/activate
+
+Install the required libraries:
+
+    pip install -r requirements.txt
+
+Run the first example in a virtual LED window:
+
+    python render_test.py -v
+
+Press "return" on the app console to end the test. To run on the Raspberry Pi
+with the real LED matrix hardware:
+
+    sudo venv/bin/python render_test.py
+
+The `sudo` is necessary to allow the LED matrix code to run with
+the elevated privileges necessary to achieve best GPIO timing performance.
+And because `sudo` doesn't use the user's path, the usual means to activating
+the virtual environment doesn't work.
 
 ### Library structure
 
@@ -75,29 +103,6 @@ This is meant to encapsulate complex animation behavior.
 The "module" module, along with the app runner module, provide tools for the
 construction and execution of apps.
 
-### Getting started
-`render_test.py` is an example program that test the basics of the core
-library. You should create a virtual environment using `venv`:
-
-    python -m venv venv
-
-install the required libraries:
-
-    pip install -r requirements.txt
-
-and then you can run the first example in a virtual LED window:
-
-    python render_test.py -v
-
-Press "return" on the app console to end the test. To run on the Raspberry Pi
-with the real LED matrix hardware:
-
-    sudo venv/bin/python render_test.py
-
-The `sudo` is necessary to allow the LED matrix code to run with
-the elevated privileges necessary to achieve best GPIO timing performance.
-And because `sudo` doesn't use the user's path, the usual means to activating
-the virtual environment doesn't work.
 
 
 # Weather app
@@ -123,15 +128,17 @@ Alternatively, you could create an `env.ini` file in this directory with the fol
     [openweather]
     ow_api_key=0123456789abcdef0123456789abcdef
 
-To run the weather app on a virtual LED display in your developtment environment:
+To run the weather app on a virtual LED display in your venv-activated developtment environment:
 
-    sudo venv/bin/python weather_app.py -v
+    python weather_app.py -v
 
 If successful, you should see something like the following, depending on current conditions:
 
 ![Weather app screenshot](images/doc/weather_app_screenshot.png)
 
-To run it on the real LED display, omit the `-v` parameter.
+To run it on the real LED display:
+
+    sudo venv/bin/python weather_app.py
 
 --------
 A previous iteration of the weather app used the Visual Crossing API, and the VX API client
