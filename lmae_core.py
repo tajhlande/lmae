@@ -336,6 +336,7 @@ class Stage(LMAEObject):
 
 virtual_leds = False
 
+
 def parse_matrix_options_command_line():
     """
     Parse the command line options and construct a RGBMatrixOptions object

@@ -1,14 +1,25 @@
 # LMAE - LED Matrix Animation Engine for RPi and Python
 
-A library for building little applications
-that can display themselves on a LED matrix.
+A library for building little applications  that can run on a Raspberry Pi and
+display interesting things on a LED matrix.
 The matrix I have is from Adafruit and it is
-64 x 32, 3mm pitch.
+[64 x 32, 3mm pitch](https://www.adafruit.com/product/2279).
+I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafruit.com/product/3211).
 
-## Core library stuff
+## Prerequisites
+
+This library is built on top of the RGB LED display driver
+written by Henner Zeller, found here: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)
+You'll need to build that first, as this library depends on it for access to the LED matrix.
+
+Some of the python pieces of that library are here, because they need to be present for this code to run.
+But you should build that library to get all of the needed binaries, which are not checked into source.
+
+## LMAE Core library
 
 The core stuff is basic elements you might find in a game engine:
-there is a stage and there are actors. To display a scene,
+there is a stage and there are actors, and animations that
+modify those actors. To display a scene,
 you create a stage, attach a matrix object to it, and
 tell it to render a frame.
 
@@ -21,167 +32,133 @@ library. You should create a virtual environment using `venv`:
 
     python -m venv venv
 
-and then you can run the example:
+install the required libraries:
+
+    pip install -r requirements.txt
+
+and then you can run the first example:
 
     sudo venv/bin/python render_test.py
 
 The `sudo` is necessary to allow the LED matrix code to run with
-the elevated privileges necessary to achieve best timing performance.
+the elevated privileges necessary to achieve best GPIO timing performance.
 And because `sudo` doesn't use the user's path, the usual means to activating
 the virtual environment doesn't work.
 
-## Weather stuff
 
+## Weather app
 
-### Visual crossings bookmarks
+The first app is a weather conditions display app.
+It relies on the [OpenWeather One Call API](https://openweathermap.org/api/one-call-api)
+to get currrent weather conditions for a given latitude & longitude.
+
+To run it:
+
+    sudo venv/bin/python weather_app.py
+
+A previous iteration of the weather app used the Visual Crossing API, and the VX API client
+module remains in case anyone wants to use it.
+
+#### OpenWeather API bookmarks
+
+* [List of weather condition codes](https://openweathermap.org/weather-conditions)
+
+#### Visual crossings bookmarks
 * [Weather data API Documentation](https://www.visualcrossing.com/resources/documentation/weather-api/timeline-weather-api/)
 * [ Weather Data Services and URL Builder](https://www.visualcrossing.com/weather/weather-data-services)
 * [Weather Condition Translations and ID list](https://docs.google.com/spreadsheets/d/1cc-jQIap7ZToVaEgiXEk_Aa6YVYjSObLV9PMe4oHrFg/edit#gid=1769797687)
 
-Python bindings for RGB Matrix library
-======================================
+# Creating new apps
 
-Building
---------
+## Important classes
 
-If you have a different than the standard wiring (for instance if you have an
-Adafruit HAT), you can edit the [../../lib/Makefile](../../lib/Makefile#L26) first to choose
-the hardware in question (see below for setting it via command line argument).
+#### Core classes
+Important `lmae_core` classes include:
 
-Then, in the root directory for the matrix library simply type:
+* `LMAEObject` - the parent of all other library classes
+* `Canvas` - onto this actors draw themselves
+* `Actor` - an entity that can draw itself and that is positioned on a stage
+* `CompositeActor` - an actor that applies a drawing effect to another actor when rendering
+* `Animation` - a time based way of updating an actor's position or state
+* `Stage` – a complete view that can draw itself to the matrix, containing actors and current animations on them
 
-### Python 2
+The core also contains a method used by the app runner to parse command line matrix options (almost all of which
+are the same as those used in the
+[hzeller library](https://github.com/hzeller/rpi-rgb-led-matrix#changing-parameters-via-command-line-flags)
+to configure the LED display driver).
 
-```shell
-sudo apt-get update && sudo apt-get install python2.7-dev python-pillow -y
-make build-python
-sudo make install-python
-```
+#### Actor classes
+Specific actor classes are in `lmae_actor` :
 
-### Python 3
-You can also build for Python 3:
+* `StillImage` - A static image, typically loaded from an image file
+* `SpriteImage` - A sprite, drawn as a crop of a sprite sheet. A sprite sheet can contain many distinct images
+    that can be diplayed one at a time.
+* `Text` – An actor that renders text, with a given font. Some free pixel font files are included in the `fonts` folder.
+* `EmojiText` – An actor that can render full color emoji glyphs inline with text. This is quite slow, and care must be
+    exercised with its use
+* `Rectangle` - An actor that draws a rectangle, optionally filled, with options for colors and line thickness.
+* `Line` - An actor that draws a line segment from one point to another, with options for color and line thickness.
+* `CropMask` - A composite actor that crops another actor into a rectangular viewing area
 
-```shell
-sudo apt-get update && sudo apt-get install python3-dev python3-pillow -y
-make build-python PYTHON=$(command -v python3)
-sudo make install-python PYTHON=$(command -v python3)
-```
+Note that all these actors render themselves with full alpha channel support.
 
-### PyPy
-The cython binding to PyPy seems to be somewhat working but extremely slow (20x
-slower even than the regular Python binding, 160x slower than C++), so this is
-not recommended.
+#### Animation classes
+Specific animation classes are in `lmae_animation`:
 
-So Cython is not good together with PyPy which works best with a
-[CFFI](https://cffi.readthedocs.io/) binding. @Duality4Y did an experiment here
-https://github.com/Duality4Y/rgb-matrix-cffi which works well with PyPy and is
-about twice as fast as running Python3+cython (but Python3+cffi is slower than
-Python3+cython, so we can't just replace everything with cffi).
+* `Still` - An animation that does nothing for a defined period of time. Useful to pause in sequences.
+* `Easing` - A helper class for specifying a motion easing method. Currently supports linear, quadratic, Bézier,
+    parametric, back, and custom easing motions.
+* `StraightMove` - Move an actor in a straight line a certain distance over a certain period of time.
+* `Sequence` - A composite animation that applies a series of animations, one at a time, to a given actor.
 
-Of course, it would be nice to have the fastest possible binding to all kinds
-of Python interpreters. If anyone wants to work on that, this would certainly
-be a welcome pull request.
+Note that animations are largely composable, meaning that multiple animations can apply to one actor at the same
+time and they will all have a cumulative effect.   Animations can optionally be set to repeat once they end,
+to enable animation effects of indefinite length.
 
-Performance
------------
-The simplicity of scripting comes at a price: Python is slower than C++ of
-course.
-If you have to do a lot of pixel updates in your demo, this can be too slow
-depending on what you do. Here are some rough numbers for calling `SetPixel()`
-in a tight loop:
+#### Component classes
+Components are actors that know how to construct their own animation sequences.
+There is only one component at this point:
 
-  * On a Pi-2 and Pi-3, a Python script will be about 1/8 of the speed compared
-    to the corresponding C++ program (pushing ~0.43 Megapixels/s Python
-    vs. ~3.5 Megapixels/s C++ on a Pi-3 for instance)
-  * On a Pi-1/Pi Zero, the difference is even worse: 1/24 of the speed to the
-    corresponding C++ program. Given that this Pi is already about 1/10 the
-    speed of a Pi-3, this almost makes Python unusable on a Pi-1
-    (~0.015 Megapixels/s Python vs. ~0.36 Megapixels/s C++)
-  * Also interesting: Python3 is a little bit slower than Python2.7.
-    So if you can, stick with Python2.7 for now.
-  * The good news is, that this is due to overhead per function call. If you
-    can do more per function call, then this is less problematic. For instance
-    if you have an image to be displayed with `SetImage()`, that will much
-    faster per pixel (internally this then copies the pixels natively).
+* `Carousel` - a composite actor that slides several actors through a crop window, one at a time, with configurable
+    pause time and motion time, and that resets
 
-The ~0.015 Megapixels/s on a Pi-1 means that you can update a 32x32 matrix
-at most with ~15fps. If you have chained 5, then you barely reach 3fps.
-In a Pi-3, you get about 400fps update rate (85fps for 5-chain) with a Python
-program (while with C++, you can do the same thing with a comfortable 3500fps
-(700fps for 5)). Keep in mind that this is if all you do is just calling
-`SetPixel()`, it does not include any time of what you actually want to do in
-your demo - so anything in addition to that will drop your update rate.
+## App framework
 
-If you can prepare the animation you want to show, then you can either prepare
-images and then use the much faster call to `SetImage()`, or can fill
-entire offscreen-frames (create with `CreateFrameCanvas()`) and then
-swap with `SwapOnVSync()` (this is the fastest method).
+To support easily writing small apps that use the display to do interesting things,
+there is the `lmae_module` module.  In it, there is a class called `AppModule`, which
+your app can extend to get access to a basic app running framework.
+Your app just needs to know how to `prepare()` itself, how to `run()`, and how to
+`stop()`.
 
-Using the library
------------------
+To run the app, `app_runner.py` contains a few helper methods that can get your app
+running:
 
-Be aware of the fact that using the full performance of the RGBMatrix requires root privileges.
-Therefore you should run all you python scripts as using `sudo`.
+    app_runner.app_setup()
 
-You may find examples in the [samples/](./samples) subdirectory.
-The examples all use the [samplebase.py](./samples/samplebase.py) that provides
-some basic capabilities to all example programs, such as command-line parsing: all
-sample-programs accept `--led-rows`, `--led-chain` and `--led-parallel` as
-command line options to adapt to your configuration
+then set the matrix on your app:
 
-```bash
-cd samples
-sudo ./runtext.py --led-chain=4
-```
+    my_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 
-To use different wiring without recompiling the library to change the default,
-you can use `--led-gpio-mapping` (or `-m`). For example, to use Adafruit HAT:
-```bash
-sudo ./runtext.py --led-gpio-mapping=adafruit-hat
-```
+then start your app:
 
-Here is a complete example showing how to write an image viewer:
-```python
-#!/usr/bin/env python
-import time
-import sys
+    app_runner.start_app(my_app)
 
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
-from PIL import Image
+The app runner waits for a `return` keypress before exiting the app.
 
-if len(sys.argv) < 2:
-    sys.exit("Require an image argument")
-else:
-    image_file = sys.argv[1]
+The `app_runner` module also includes a helper method to get environmental
+properties, set either as `env` variables or in an `env.ini` file: `app_runner.get_env_parameter()`.
+Note that the env variable and the env.ini property don't have to have exactly the same name.
 
-image = Image.open(image_file)
+### Virtual LED Display
 
-# Configuration for the matrix
-options = RGBMatrixOptions()
-options.rows = 32
-options.chain_length = 1
-options.parallel = 1
-options.hardware_mapping = 'regular'  # If you have an Adafruit HAT: 'adafruit-hat'
+To make it easier to develop and iterate apps without having to push every change to the RPi,
+there is a command line option to enable a virtual LED display via a window on your
+development environment.  The option is `-v` or `--virtual-leds`.  This will trigger
+the code to draw to the virtual display window rather than looking for a real
+Raspberry Pi LED display. This feature is built with Pygame, hence the dependency on it.
 
-matrix = RGBMatrix(options = options)
+I have only tested this on a Mac, though in theory it should also work in Windows.
+It probably will not work in a Linux development environment, because the code is using
+the operating system name to manage the implementation class substitution. This might be
+fixed in the future, but it works for me now.
 
-# Make image fit our screen.
-image.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
-
-matrix.SetImage(image.convert('RGB'))
-
-try:
-    print("Press CTRL-C to stop.")
-    while True:
-        time.sleep(100)
-except KeyboardInterrupt:
-    sys.exit(0)
-```
-
-## API
-
-The source of truth for what is available in the Python bindings may be found [here](rgbmatrix/core.pyx) (RGBMatrix, FrameCanvas, RGBMatrixOptions) and [here](rgbmatrix/graphics.pyx) (graphics).  The underlying implementation's ground truth documentation may be found [here](../../include), specifically for [RGBMatrix, RGBMatrixOptions, and FrameCanvas](../../include/led-matrix.h), [Canvas](../../include/canvas.h) (base class of RGBMatrix), and [graphics methods and Font](../../include/graphics.h).
-
-### User
-
-As noted in the Performance section above, Python programs not run as `root` will not be as high-performance as those run as `root`.  When running as `root`, be aware of a potentially-unexpected behavior: to reduce the security attack surface, initializing an RGBMatrix as `root` changes the user from `root` to `daemon` (see [#1170](https://github.com/hzeller/rpi-rgb-led-matrix/issues/1170) for more information) by default.  This means, for instance, that some file operations possible before initializing the RGBMatrix will not be possible after initialization.  To disable this behavior, set `drop_privileges=False` in RGBMatrixOptions, but be aware that doing so will reduce security.

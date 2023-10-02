@@ -16,8 +16,6 @@ Example response:
   "country": "US"
 }
 
-Our lat long: 39.0158678,-77.0734945
-
 OneCall API
 https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units={units}&exclude={part}&appid={API key}
 units can be standard, metric, or imperial
