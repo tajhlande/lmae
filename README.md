@@ -6,6 +6,25 @@ The matrix I have is from Adafruit and it is
 [64 x 32, 3mm pitch](https://www.adafruit.com/product/2279).
 I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafruit.com/product/3211).
 
+## Table of Contents
+<!-- TOC -->
+* [LMAE - LED Matrix Animation Engine for RPi and Python](#lmae---led-matrix-animation-engine-for-rpi-and-python)
+  * [Table of Contents](#table-of-contents)
+  * [Prerequisites](#prerequisites)
+  * [LMAE Core library](#lmae-core-library)
+  * [Weather app](#weather-app)
+      * [OpenWeather API bookmarks](#openweather-api-bookmarks)
+      * [Visual crossings bookmarks](#visual-crossings-bookmarks)
+* [Creating new apps](#creating-new-apps)
+  * [Important classes](#important-classes)
+      * [Core classes](#core-classes)
+      * [Actor classes](#actor-classes)
+      * [Animation classes](#animation-classes)
+      * [Component classes](#component-classes)
+  * [App framework](#app-framework)
+  * [Virtual LED Display](#virtual-led-display)
+<!-- TOC -->
+
 ## Prerequisites
 
 This library is built on top of the RGB LED display driver
@@ -149,7 +168,7 @@ The `app_runner` module also includes a helper method to get environmental
 properties, set either as `env` variables or in an `env.ini` file: `app_runner.get_env_parameter()`.
 Note that the env variable and the env.ini property don't have to have exactly the same name.
 
-### Virtual LED Display
+## Virtual LED Display
 
 To make it easier to develop and iterate apps without having to push every change to the RPi,
 there is a command line option to enable a virtual LED display via a window on your
