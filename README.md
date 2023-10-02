@@ -85,7 +85,12 @@ install the required libraries:
 
     pip install -r requirements.txt
 
-and then you can run the first example:
+and then you can run the first example in a virtual LED window:
+
+    python render_test.py -v
+
+Press "return" on the app console to end the test. To run on the Raspberry Pi
+with the real LED matrix hardware:
 
     sudo venv/bin/python render_test.py
 
