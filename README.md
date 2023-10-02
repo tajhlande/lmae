@@ -11,8 +11,10 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
 * [LMAE - LED Matrix Animation Engine for RPi and Python](#lmae---led-matrix-animation-engine-for-rpi-and-python)
   * [Table of Contents](#table-of-contents)
   * [Prerequisites](#prerequisites)
-  * [LMAE Core library](#lmae-core-library)
-  * [Weather app](#weather-app)
+  * [LMAE Basics](#lmae-basics)
+    * [Library structure](#library-structure)
+    * [Getting started](#getting-started)
+* [Weather app](#weather-app)
       * [OpenWeather API bookmarks](#openweather-api-bookmarks)
       * [Visual crossings bookmarks](#visual-crossings-bookmarks)
 * [Creating new apps](#creating-new-apps)
@@ -34,18 +36,46 @@ You'll need to build that first, as this library depends on it for access to the
 Some of the python pieces of that library are here, because they need to be present for this code to run.
 But you should build that library to get all of the needed binaries, which are not checked into source.
 
-## LMAE Core library
+## LMAE Basics
 
-The core stuff is basic elements you might find in a game engine:
-there is a stage and there are actors, and animations that
-modify those actors. To display a scene,
+### Library structure
+
+The core of the library are classes for basic elements
+that you might find in a game engine:
+there is a stage and there are actors on the stage,
+and animations that modify those actors. To display a scene,
 you create a stage, attach a matrix object to it, and
 tell it to render a frame.
 
-Frames are numbered, and actors can decide how to render
-themselves on the stage. Some basic actors are provided
-for still images, moving images, and text rendering.
+Actors can decide how to render themselves on the stage.
+Some basic actors are provided for still images, moving images, and text rendering.
+Actors generally are expected to know their size and position, their current
+visibility, whether or not they have been modified in any way that would change
+the rendering outcome.  On a stage, actors are rendered in the order that they appear
+in the actor list, so the first actor has bottom Z order, the last actor has top Z order,
+and so on for the actors in between.
 
+Composite actors are actors that modify the rendering behavior of other actors.
+For example, a crop actor limits the rendered visibility of an actor to a rectangular window.
+
+Animations are instructions for modifying an actor – so far,
+mainly for changing its position via movement over time.
+Animations are designed to be independent of frame rate, so they have a
+duration and a destination, and will get there whether that renders in 10
+frames or 100 frames.
+
+To make animations happen, they are assigned to an actor and added to the stage,
+where they take effect immediately upon the next rendering of the stage.
+Animations may be set to repeat once completed.
+If they are not set to repeat, they are removed from the stage on completion.
+
+Components are actors that know how to generate their own animations.
+This is meant to encapsulate complex animation behavior.
+
+The "module" module, along with the app runner module, provide tools for the
+construction and execution of apps.
+
+### Getting started
 `render_test.py` is an example program that test the basics of the core
 library. You should create a virtual environment using `venv`:
 
@@ -65,18 +95,43 @@ And because `sudo` doesn't use the user's path, the usual means to activating
 the virtual environment doesn't work.
 
 
-## Weather app
+# Weather app
 
 The first app is a weather conditions display app.
 It relies on the [OpenWeather One Call API](https://openweathermap.org/api/one-call-api)
-to get currrent weather conditions for a given latitude & longitude.
+to get current weather conditions for a given latitude & longitude.
 
-To run it:
+You need to set the following environment variables:
 
-    sudo venv/bin/python weather_app.py
+* `OW_API_KEY` - Your OpenWeather API key
+* `LATITUDE` - The latitude of the location for which you wish to get weather conditions
+* `LONGITUDE` - The longitude of the location for which you wish to get weather conditions
+* `REFRESH_TIME` - Optionally, the number of seconds between refreshing weather data.
+    Defaults to 600 seconds, which is the suggested shortest refresh time in the OpenWeather API documentation.
 
+Alternatively, you could create an `env.ini` file in this directory with the following structure:
+
+    [location]
+    latitude=XXX.XXXXXX
+    longitude=YYY.YYYYYY
+
+    [openweather]
+    ow_api_key=0123456789abcdef0123456789abcdef
+
+To run the weather app on a virtual LED display in your developtment environment:
+
+    sudo venv/bin/python weather_app.py -v
+
+If successful, you should see something like the following, depending on current conditions:
+
+![Weather app screenshot](images/doc/weather_app_screenshot.png)
+
+To run it on the real LED display, omit the `-v` parameter.
+
+--------
 A previous iteration of the weather app used the Visual Crossing API, and the VX API client
-module remains in case anyone wants to use it.
+module remains in case anyone wants to use it.  There's also a weather.gov client, though
+it doesn't furnish current conditions, only forecast predictions.
 
 #### OpenWeather API bookmarks
 
