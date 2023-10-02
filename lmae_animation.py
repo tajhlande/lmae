@@ -165,6 +165,32 @@ class StraightMove(Animation):
         self.set_update_time(current_time)
 
 
+class _SetVisibility(Animation):
+
+    def __init__(self, name: str = None, actor: Actor = None, visible: bool = True):
+        name = name or _get_sequential_name("_SetVisibility")
+        super().__init__(name=name, actor=actor, duration=0.001)  # pretty sure if this was 0.0, bad things would happen
+        self.visible = visible
+
+    def is_finished(self) -> bool:
+        return self.get_simulated_time() > self.duration
+
+    def update_actor(self, current_time: float):
+        self.actor.set_visible(self.visible)
+
+
+class Show(_SetVisibility):
+    def __init__(self, name: str = None, actor: Actor = None):
+        name = name or _get_sequential_name(f"Show {actor.name}")
+        super().__init__(name=name, actor=actor, visible=True)
+
+
+class Hide(_SetVisibility):
+    def __init__(self, name: str = None, actor: Actor = None):
+        name = name or _get_sequential_name(f"Hide {actor.name}")
+        super().__init__(name=name, actor=actor, visible=False)
+
+
 class Sequence(Animation):
 
     def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False, animations: list[Animation] = None):
