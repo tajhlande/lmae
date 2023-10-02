@@ -176,7 +176,10 @@ class _SetVisibility(Animation):
         return self.get_simulated_time() > self.duration
 
     def update_actor(self, current_time: float):
-        self.actor.set_visible(self.visible)
+        if self.visible != self.actor.visible:
+            self.actor.set_visible(self.visible)
+            self.actor.changes_since_last_render = True
+        self.set_update_time(current_time)
 
 
 class Show(_SetVisibility):
