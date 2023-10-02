@@ -169,7 +169,7 @@ class _SetVisibility(Animation):
 
     def __init__(self, name: str = None, actor: Actor = None, visible: bool = True):
         name = name or _get_sequential_name("_SetVisibility")
-        super().__init__(name=name, actor=actor, duration=0.01)  # pretty sure if this was 0.0, bad things would happen
+        super().__init__(name=name, actor=actor, duration=0.001)  # pretty sure if this was 0.0, bad things would happen
         self.visible = visible
 
     def is_finished(self) -> bool:
