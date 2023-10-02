@@ -56,6 +56,7 @@ Run the first example in a virtual LED window:
 
     python render_test.py -v
 
+If all is successful, you will see a surprise animation demo!
 Press "return" on the app console to end the test. To run on the Raspberry Pi
 with the real LED matrix hardware:
 
