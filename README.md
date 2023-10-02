@@ -146,11 +146,11 @@ A previous iteration of the weather app used the Visual Crossing API, and the VX
 module remains in case anyone wants to use it.  There's also a weather.gov client, though
 it doesn't furnish current conditions, only forecast predictions.
 
-#### OpenWeather API bookmarks
+### OpenWeather API bookmarks
 
 * [List of weather condition codes](https://openweathermap.org/weather-conditions)
 
-#### Visual crossings bookmarks
+### Visual crossings bookmarks
 * [Weather data API Documentation](https://www.visualcrossing.com/resources/documentation/weather-api/timeline-weather-api/)
 * [ Weather Data Services and URL Builder](https://www.visualcrossing.com/weather/weather-data-services)
 * [Weather Condition Translations and ID list](https://docs.google.com/spreadsheets/d/1cc-jQIap7ZToVaEgiXEk_Aa6YVYjSObLV9PMe4oHrFg/edit#gid=1769797687)
