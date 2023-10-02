@@ -197,7 +197,7 @@ class Sequence(Animation):
         name = name or _get_sequential_name("Sequence")
         super().__init__(name=name, actor=actor, repeat=repeat)
         self.animations = animations or list()
-        # self.logger.debug(f"We have {len(self.animations)} animations in this sequence")
+        self.logger.debug(f"We have {len(self.animations)} animations in this sequence")
         self.seq_index = -1
         self.seq_start_time = 0
         self._compute_duration()
@@ -245,13 +245,13 @@ class Sequence(Animation):
             current_anim = self.animations[self.seq_index]
 
         if not current_anim.is_started():
-            # if current_anim:
-            #     if current_anim.actor:
-            #         self.logger.debug(f"Starting animation {self.seq_index} ({current_anim.name}) for {current_anim.actor.name}")
-            #     else:
-            #         self.logger.warning(f"Starting animation {self.seq_index} ({current_anim.name}) for None actor")
-            # else:
-            #     self.logger.warning(f"Starting animation {self.seq_index} (None)")
+            if current_anim:
+                if current_anim.actor:
+                    self.logger.debug(f"Starting animation {self.seq_index} ({current_anim.name}) for {current_anim.actor.name}")
+                else:
+                    self.logger.warning(f"Starting animation {self.seq_index} ({current_anim.name}) for None actor")
+            else:
+                self.logger.warning(f"Starting animation {self.seq_index} (None)")
 
             current_anim.start(current_time)
             self.seq_start_time = current_time
