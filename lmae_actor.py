@@ -119,7 +119,7 @@ class Text(Actor):
         self.logger = logging.getLogger(name)
         self.has_warned_about_image_mode = False
         self.rendered_text: Image = None
-        self.text: str = None
+        self.text: str or None = None
         if text:
             self.set_text(text)
 
@@ -273,7 +273,7 @@ class Rectangle(Actor):
         draw = canvas.image_draw
         opposite_corner = tuple(map(lambda i, j: i + j, self.position, self.size))
         self.logger.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
-                      f"outline_color {self.outline_color} and outline_width {self.outline_width}")
+                          f"outline_color {self.outline_color} and outline_width {self.outline_width}")
         draw.rectangle(self.position + opposite_corner, fill=self.color, outline=self.outline_color,
                        width=self.outline_width)
 
@@ -406,3 +406,72 @@ class CropMask(CompositeActor):
             # self.logger.warning("No child to render")
             pass
         self.changes_since_last_render = False
+
+
+class GradientRectangle(Actor):
+    """
+    A filled rectangle drawn as a gradient shaded from top to bottom.
+    """
+    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), size: tuple[int, int] = (63, 31),
+                 top_color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 255, 255, 255),
+                 bottom_color: tuple[int, int, int] or tuple[int, int, int, int] = (0, 0, 0, 0)):
+        """
+
+        :param name: Optional name for this actor. If not set, a name will be automatically generated.
+        :param position: The position of the upper left corner
+        :param size: The size of the rectangle
+        :param top_color: The color at the top of the rectangle. Can be RGB or RGBA/
+        :param bottom_color: The color at the bottom of the rectangle.
+        """
+        name = name or _get_sequential_name("GradientRectangle")
+        super().__init__(name, position)
+        self.size = size
+        self.top_color = top_color
+        self.bottom_color = bottom_color
+
+    def set_top_color(self, new_color: tuple[int, int, int] or tuple[int, int, int, int]):
+        if self.top_color != new_color:
+            self.changes_since_last_render = True
+        self.top_color = new_color
+
+    def set_bottom_color(self, new_color: tuple[int, int, int] or tuple[int, int, int, int]):
+        if self.bottom_color != new_color:
+            self.changes_since_last_render = True
+        self.bottom_color = new_color
+
+    def render(self, canvas: Canvas):
+        draw = canvas.image_draw
+        y_start = self.position[1]
+        y_end = self.position[1] + self.size[1]
+        x_start = self.position[0]
+        x_end = self.position[0] + self.size[0]
+
+        for y in range(y_start, y_end):
+            gradient_factor = y * 1.0 / self.size[1]
+            color = self.interpolate_color(self.top_color, self.bottom_color, gradient_factor)
+            draw.line((x_start, y, x_end, y), fill=color, width=1)
+
+        self.changes_since_last_render = False
+
+    @staticmethod
+    def interpolate_color(start_color: tuple[int, int, int] or tuple[int, int, int, int],
+                          end_color: tuple[int, int, int] or tuple[int, int, int, int],
+                          blend_factor: float) -> tuple[int, int, int, int]:
+        """
+        Interpolate two RGB or RGBA colors
+        :param start_color: The color to start with.
+        :param end_color: The color to end with.
+        :param blend_factor: Between 0.0 and 1.0, how much of start and end colors to blend.
+        0.0 is 100% of start, 0% of end.
+        0.5 is 50% of start, 50% of end.
+        1.0 is 0% of start, 100% of end.
+        :return: The blended RGBA color
+        """
+        inv_blend_factor = 1.0 - blend_factor
+        blend_red = int(start_color[0] * inv_blend_factor + end_color[0] * blend_factor)
+        blend_green = int(start_color[1] * inv_blend_factor + end_color[1] * blend_factor)
+        blend_blue = int(start_color[2] * inv_blend_factor + end_color[2] * blend_factor)
+        start_alpha = start_color[3] if len(start_color) == 4 else 255
+        end_alpha = end_color[3] if len(end_color) == 4 else 255
+        blend_alpha = int(start_alpha * inv_blend_factor + end_alpha * inv_blend_factor)
+        return blend_red, blend_green, blend_blue, blend_alpha

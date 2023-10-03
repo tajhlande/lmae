@@ -1,4 +1,6 @@
 import logging
+
+from colorsys import rgb_to_hsv, hsv_to_rgb
 from enum import auto, Enum
 from typing import Callable
 
@@ -152,7 +154,7 @@ class StraightMove(Animation):
         x = self.actor.position[0] + net_d_x
         y = self.actor.position[1] + net_d_y
         self.actor.position = (x, y)
-        #self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
+        # self.logger.debug(f"gross interp mvmt: {(d_x, d_y)}, accum mvmt: {self.accumulated_movement}, "
         #                  f"net mvmt: {(net_d_x, net_d_y)}, actor at {self.actor.position}")
 
         # account for movement
@@ -261,4 +263,50 @@ class Sequence(Animation):
 
         current_anim.update_actor(current_time)
 
+        self.set_update_time(current_time)
+
+
+class HueRotate(Animation):
+    """
+    Cycle a color around the hue wheel in HSV space. This animation can be applied to any
+    actor that has color settings, but because they are different (some have one color setting,
+    some have multiple), the mechanism here to update the actor is through a callback function
+    that the user must provide.
+    """
+    def __init__(self, name: str = None, actor: Actor = None, initial_color: tuple[int, int, int] = (255, 255, 255),
+                 duration: float = 10.0, callback: Callable[[tuple[int, int, int]], None] = None,
+                 repeat: bool = False):
+        """
+
+        :param name: Optional name for this animation
+        :param actor: The actor to which this animation applies
+        :param initial_color: The starting color.  When the animation finishes, this will be the finish color as well.
+        :param duration: How long it takes to cycle around the wheel, in seconds
+        :param callback: A function that applies the color argument to the actor
+        :param repeat: Whether or not this animation should repeat.
+        """
+        name = name or _get_sequential_name("HueRotate")
+        super().__init__(name=name, actor=actor, duration=duration, repeat=repeat)
+        self.logger.debug(f"Repeat: {self.repeat}")
+        self.initial_hsv = rgb_to_hsv(initial_color[0] / 255.0, initial_color[1] / 255.0, initial_color[2] / 255.0)
+        self.color_set_callback: Callable[[tuple[int, int, int]], None] = callback
+
+    def is_finished(self) -> bool:
+        return self.get_simulated_time() > self.duration
+
+    def update_actor(self, current_time: float):
+        #  all times relative to start
+        elapsed_time = self.get_elapsed_time(current_time)
+        action_time = elapsed_time
+        if elapsed_time > self.duration:
+            action_time = self.duration
+        duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
+
+        adjusted_hue = self.initial_hsv[0] + duration_fraction
+        while adjusted_hue >= 1.0:
+            adjusted_hue = adjusted_hue - 1.0
+
+        float_rgb_color = hsv_to_rgb(adjusted_hue, self.initial_hsv[1], self.initial_hsv[2])
+        rgb_color = round(float_rgb_color[0] * 255), round(float_rgb_color[1] * 255), round(float_rgb_color[2] * 255)
+        self.color_set_callback(rgb_color)
         self.set_update_time(current_time)
