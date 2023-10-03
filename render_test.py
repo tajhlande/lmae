@@ -80,7 +80,6 @@ ll_4_seq = Sequence(actor=lmae_long_4, repeat=True, animations=[
     StraightMove(actor=lmae_long_4, distance=(-43, 0), duration=3.0, easing=Easing.BACK),
 ])
 
-
 app_runner.app_setup()
 sample_app = SingleStageRenderLoopAppModule()
 sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)

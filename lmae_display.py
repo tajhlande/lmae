@@ -41,10 +41,11 @@ class WindowSpecs:
         # make sure pixel size is odd, else circle drawing of LEDs will be off
         self.led_pixel_size = 11
         self.led_pixel_spacing = 1
+        self.border_size = 1
         self.width = (self.matrix_options.cols * (self.led_pixel_size + self.led_pixel_spacing) +
-                      self.led_pixel_spacing)
+                      self.led_pixel_spacing) + self.border_size * 2
         self.height = (self.matrix_options.rows * (self.led_pixel_size + self.led_pixel_spacing) +
-                       self.led_pixel_spacing)
+                       self.led_pixel_spacing) + self.border_size * 2
         self.pixel_shape = PixelShape.ROUND_RECT
         self.brightness_adjustment = 1.0  # 1.5
 
@@ -128,9 +129,9 @@ class VirtualRGBMatrix:
 
         # draw LED equivalents of image pixels
         for y in range(0, self.matrix_options.rows):
-            offset_y = (pix_size + spacing) * y + spacing
+            offset_y = (pix_size + spacing) * y + spacing + self.window_specs.border_size
             for x in range(0, self.matrix_options.cols):
-                offset_x = (pix_size + spacing) * x + spacing
+                offset_x = (pix_size + spacing) * x + spacing + self.window_specs.border_size
                 colors = self.adjust_brightness(colors=image.getpixel((x, y)),
                                                 adjustment=self.window_specs.brightness_adjustment)
                 if pixel_shape == PixelShape.ROUND:
