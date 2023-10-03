@@ -139,7 +139,7 @@ ll_1_seq = Sequence(actor=lmae_long_1, repeat=True, animations=[
 
 lmae_long_2 = Text(name='LMAE long 1', text="LED Matrix Animation Engine", position=(-14, 9),
                    font=ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5),
-                   color=(0, 0, 0, 0), stroke_width=0)
+                   color=(0, 0, 0, 255), stroke_width=0)
 
 ll_2_seq = Sequence(actor=lmae_long_2, repeat=True, animations=[
     StraightMove(actor=lmae_long_2, distance=(-30, 0), duration=2.0, easing=Easing.LINEAR),
@@ -149,7 +149,7 @@ ll_2_seq = Sequence(actor=lmae_long_2, repeat=True, animations=[
 
 lmae_long_3 = Text(name='LMAE long 1', text="LED Matrix Animation Engine", position=(-29, 17),
                    font=ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5),
-                   color=(0, 0, 0, 0), stroke_width=0)
+                   color=(0, 0, 0, 255), stroke_width=0)
 
 ll_3_seq = Sequence(actor=lmae_long_3, repeat=True, animations=[
     StraightMove(actor=lmae_long_3, distance=(-14, 0), duration=1.0, easing=Easing.LINEAR),
