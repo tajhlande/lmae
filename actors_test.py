@@ -9,9 +9,9 @@ from lmae_module import SingleStageRenderLoopAppModule
 import app_runner
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
-logger = logging.getLogger("render_test")
+logger = logging.getLogger("actor_test")
 logger.setLevel(logging.DEBUG)
-print("LED Matrix Rendering Test")
+print("Actors Test")
 
 kirby = StillImage(name='Kirby', position=(-22, 12), image=Image.open("images/kirby_22.png").convert('RGBA'))
 

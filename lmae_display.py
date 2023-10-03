@@ -46,7 +46,7 @@ class WindowSpecs:
         self.height = (self.matrix_options.rows * (self.led_pixel_size + self.led_pixel_spacing) +
                        self.led_pixel_spacing)
         self.pixel_shape = PixelShape.ROUND_RECT
-        self.brightness_adjustment = 1.5
+        self.brightness_adjustment = 1.0  # 1.5
 
 
 # noinspection PyPep8Naming
