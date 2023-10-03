@@ -103,7 +103,7 @@ class HueRotate(Animation):
 
 gradient_block = GradientRectangle(top_color=(128, 0, 0), bottom_color=(0, 0, 0))
 
-gradient_hue_rotate = HueRotate(name="Gradient hue rotation", actor=gradient_block, duration=10.0, repeat=True,
+gradient_hue_rotate = HueRotate(name="Gradient hue rotation", actor=gradient_block, duration=9.0, repeat=True,
                                 initial_color=gradient_block.top_color,
                                 callback=lambda rgb: gradient_block.set_top_color(rgb))
 
@@ -113,10 +113,10 @@ lmae_main_text = Text(name='LMAE main text', text="LMAE", position=(0, 0),
 
 lmae_shadow_text_1 = Text(name='LMAE shadow text 1', text="LMAE", position=(-1, 1),
                           font=ImageFont.truetype("fonts/Roboto/Roboto-Thin.ttf", 24),
-                          color=(100, 100, 255, 255), stroke_width=0)
+                          color=(0, 0, 255, 255), stroke_width=0)
 
 lmae_shadow_text_1_hue_rotate = HueRotate(name="LMAE shadow text 1 hue rotation", actor=lmae_shadow_text_1,
-                                          duration=10.0, repeat=True, initial_color=lmae_shadow_text_1.color,
+                                          duration=9.0, repeat=True, initial_color=lmae_shadow_text_1.color,
                                           callback=lambda rgb: lmae_shadow_text_1.set_color(rgb))
 
 lmae_shadow_text_2 = Text(name='LMAE shadow text 1', text="LMAE", position=(1, 1),
@@ -124,7 +124,7 @@ lmae_shadow_text_2 = Text(name='LMAE shadow text 1', text="LMAE", position=(1, 1
                           color=(0, 255, 0, 255), stroke_width=0)
 
 lmae_shadow_text_2_hue_rotate = HueRotate(name="LMAE shadow text 2 hue rotation", actor=lmae_shadow_text_2,
-                                          duration=10.0, repeat=True, initial_color=lmae_shadow_text_2.color,
+                                          duration=9.0, repeat=True, initial_color=lmae_shadow_text_2.color,
                                           callback=lambda rgb: lmae_shadow_text_2.set_color(rgb))
 
 
