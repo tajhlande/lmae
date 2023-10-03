@@ -99,7 +99,9 @@ class HueRotate(Animation):
         self.set_update_time(current_time)
 
 
-gradient_block = GradientRectangle(top_color=(255, 0, 0), bottom_color=(0, 0, 0))
+# actor and animation setup
+
+gradient_block = GradientRectangle(top_color=(128, 0, 0), bottom_color=(0, 0, 0))
 
 gradient_hue_rotate = HueRotate(name="Gradient hue rotation", actor=gradient_block, duration=10.0, repeat=True,
                                 initial_color=gradient_block.top_color,
