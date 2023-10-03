@@ -1,11 +1,13 @@
+from colorsys import rgb_to_hsv, hsv_to_rgb
 import logging
-from typing import Union
+from typing import Union, Callable
 
 from PIL import Image, ImageFont
 
+
 from lmae_core import _get_sequential_name, Canvas
 from lmae_actor import Actor, Text, EmojiText
-from lmae_animation import Hide, Show, StraightMove, Sequence, Easing
+from lmae_animation import Animation, Hide, Show, StraightMove, Sequence, Easing
 from lmae_module import SingleStageRenderLoopAppModule
 import app_runner
 
@@ -66,7 +68,42 @@ class GradientRectangle(Actor):
         return blend_red, blend_green, blend_blue, blend_alpha
 
 
+class HueRotate(Animation):
+    def __init__(self, name: str = None, actor: Actor = None, initial_color: tuple[int, int, int] = (255, 255, 255),
+                 duration: float = 10.0, callback: Callable[[tuple[int, int, int]], None] = None,
+                 repeat: bool = False):
+        name = name or _get_sequential_name("HueRotate")
+        super().__init__(name=name, actor=actor, duration=duration, repeat=repeat)
+        self.logger.debug(f"Repeat: {self.repeat}")
+        self.initial_hsv = rgb_to_hsv(initial_color[0] / 255.0, initial_color[1] / 255.0, initial_color[2] / 255.0)
+        self.color_set_callback: Callable[[tuple[int, int, int]], None] = callback
+
+    def is_finished(self) -> bool:
+        return self.get_simulated_time() > self.duration
+
+    def update_actor(self, current_time: float):
+        #  all times relative to start
+        elapsed_time = self.get_elapsed_time(current_time)
+        action_time = elapsed_time
+        if elapsed_time > self.duration:
+            action_time = self.duration
+        duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
+
+        adjusted_hue = self.initial_hsv[0] + duration_fraction
+        while adjusted_hue >= 1.0:
+            adjusted_hue = adjusted_hue - 1.0
+
+        float_rgb_color = hsv_to_rgb(adjusted_hue, self.initial_hsv[1], self.initial_hsv[2])
+        rgb_color = round(float_rgb_color[0] * 255), round(float_rgb_color[1] * 255), round(float_rgb_color[2] * 255)
+        self.color_set_callback(rgb_color)
+        self.set_update_time(current_time)
+
+
 gradient_block = GradientRectangle(top_color=(255, 0, 0), bottom_color=(0, 0, 0))
+
+gradient_hue_rotate = HueRotate(name="Gradient hue rotation", actor=gradient_block, duration=10.0, repeat=True,
+                                initial_color=gradient_block.top_color,
+                                callback=lambda rgb: gradient_block.set_top_color(rgb))
 
 lmae_main_text = Text(name='LMAE main text', text="LMAE", position=(0, 0),
                       font=ImageFont.truetype("fonts/Roboto/Roboto-Thin.ttf", 24),
@@ -76,9 +113,18 @@ lmae_shadow_text_1 = Text(name='LMAE shadow text 1', text="LMAE", position=(-1, 
                           font=ImageFont.truetype("fonts/Roboto/Roboto-Thin.ttf", 24),
                           color=(100, 100, 255, 255), stroke_width=0)
 
+lmae_shadow_text_1_hue_rotate = HueRotate(name="LMAE shadow text 1 hue rotation", actor=lmae_shadow_text_1,
+                                          duration=10.0, repeat=True, initial_color=lmae_shadow_text_1.color,
+                                          callback=lambda rgb: lmae_shadow_text_1.set_color(rgb))
+
 lmae_shadow_text_2 = Text(name='LMAE shadow text 1', text="LMAE", position=(1, 1),
                           font=ImageFont.truetype("fonts/Roboto/Roboto-Thin.ttf", 24),
                           color=(0, 255, 0, 255), stroke_width=0)
+
+lmae_shadow_text_2_hue_rotate = HueRotate(name="LMAE shadow text 2 hue rotation", actor=lmae_shadow_text_2,
+                                          duration=10.0, repeat=True, initial_color=lmae_shadow_text_2.color,
+                                          callback=lambda rgb: lmae_shadow_text_2.set_color(rgb))
+
 
 lmae_long_1 = Text(name='LMAE long 1', text="LED Matrix Animation Engine", position=(0, 1),
                    font=ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5),
@@ -125,7 +171,8 @@ sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 sample_app.add_actors(gradient_block,
                       lmae_long_1, lmae_long_2, lmae_long_3, lmae_long_4,
                       lmae_shadow_text_1, lmae_shadow_text_2, lmae_main_text)
-sample_app.add_animations(ll_1_seq, ll_2_seq, ll_3_seq, ll_4_seq)
+sample_app.add_animations(ll_1_seq, ll_2_seq, ll_3_seq, ll_4_seq,
+                          gradient_hue_rotate, lmae_shadow_text_1_hue_rotate, lmae_shadow_text_2_hue_rotate)
 
 app_runner.start_app(sample_app)
 

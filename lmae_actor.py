@@ -123,27 +123,35 @@ class Text(Actor):
         if text:
             self.set_text(text)
 
+    def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
+        if self.color != color:
+            self.color = color
+            self._prerender_text()
+            self.changes_since_last_render = True
+
+    def _prerender_text(self):
+        # measure size of text
+        image = Image.new('RGBA', (64, 32), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(image)
+        # assume font is TTF for now, because the doc for this function says that is required
+        text_bbox = draw.textbbox(xy=(0, 0), text=self.text, font=self.font, stroke_width=self.stroke_width)
+        self.size = text_bbox[2:4]
+        # self.logger.debug(f"Measured rendered text size at {self.size}. text(len {len(self.text)}): <{self.text}>")
+
+        # account for stroke width
+        self.size = (self.size[0] + self.stroke_width * 2, self.size[1] + self.stroke_width * 2)
+
+        # render into the image we'll keep
+        self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(self.rendered_text)
+        draw.text((self.stroke_width, self.stroke_width), self.text, fill=self.color, font=self.font,
+                  stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+
     def set_text(self, text: str):
         if text != self.text:
-            self.changes_since_last_render = True
             self.text = text
-
-            # measure size of text
-            image = Image.new('RGBA', (64, 32), (0, 0, 0, 0))
-            draw = ImageDraw.Draw(image)
-            # assume font is TTF for now, because the doc for this function says that is required
-            text_bbox = draw.textbbox(xy=(0, 0), text=self.text, font=self.font, stroke_width=self.stroke_width)
-            self.size = text_bbox[2:4]
-            # self.logger.debug(f"Measured rendered text size at {self.size}. text(len {len(self.text)}): <{self.text}>")
-
-            # account for stroke width
-            self.size = (self.size[0] + self.stroke_width * 2, self.size[1] + self.stroke_width * 2)
-
-            # render into the image we'll keep
-            self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
-            draw = ImageDraw.Draw(self.rendered_text)
-            draw.text((self.stroke_width, self.stroke_width), self.text, fill=self.color, font=self.font,
-                      stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
+            self._prerender_text()
+            self.changes_since_last_render = True
 
     def render(self, canvas: Canvas):
         if self.text:
