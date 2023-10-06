@@ -1,5 +1,6 @@
 # LMAE - LED Matrix Animation Engine for RPi and Python
 
+<!--suppress CheckImageSize -->
 <img alt="LMAE demo image" height="259" src="images/doc/lmae_demo_image.png" title="LMAE demo image" width="515"/>
 
 A library for building little applications  that can run on a Raspberry Pi and

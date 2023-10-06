@@ -447,8 +447,9 @@ class WeatherApp(AppModule):
             elif 700 <= self.condition_code <= 799:
                 support_condition_sprite_1 = 'foggy'
             elif 800 <= self.condition_code <= 802:
-                main_condition_sprite = 'cloudy'
+                # main_condition_sprite = 'cloudy'
                 # support_condition_sprite_1 = 'sunny'
+                pass
             elif 803 <= self.condition_code <= 899:
                 support_condition_sprite_1 = 'cloudy'
 
