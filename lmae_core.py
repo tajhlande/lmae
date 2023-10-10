@@ -16,6 +16,8 @@ import platform
 os_name = platform.system()
 if os_name == 'Linux':
     # dynamically point to real path for rgbmatrix module
+    rgb_matrix_path_value = os.environ.get(RGB_MATRIX_PY_PATH_KEY)
+    print(f"Got RGB matrix path from ENV: {rgb_matrix_path_value}")
     rgb_matrix_path = os.path.abspath(os.environ.get(RGB_MATRIX_PY_PATH_KEY))
     print(f"Appending RGB matrix path to sys path: {rgb_matrix_path}")
     sys.path.append(rgb_matrix_path)
