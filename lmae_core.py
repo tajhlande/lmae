@@ -1,10 +1,13 @@
 # Core classes for LED Matrix Animation Engine
 import argparse
 import logging
+import os.path
+import sys
 import time
 from abc import ABCMeta, abstractmethod
 from typing import List
 from PIL import Image, ImageDraw
+from lmae_env_keys import RGB_MATRIX_PY_PATH_KEY
 
 # sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
 
@@ -12,6 +15,8 @@ from PIL import Image, ImageDraw
 import platform
 os_name = platform.system()
 if os_name == 'Linux':
+    # dynamically point to real path for rgbmatrix module
+    sys.path.append(os.path.abspath(os.environ.get(RGB_MATRIX_PY_PATH_KEY)))
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
     from lmae_display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions

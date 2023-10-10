@@ -1,8 +1,14 @@
 import asyncio
 import logging
+import os
 import sys
 
 from PIL import Image, ImageFont
+from lmae_env_keys import RGB_MATRIX_PY_PATH_KEY
+
+# dynamically point to real path for rgbmatrix module
+sys.path.append(os.path.abspath(os.environ.get(RGB_MATRIX_PY_PATH_KEY)))
+
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 from lmae_core import parse_matrix_options_command_line
