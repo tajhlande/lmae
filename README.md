@@ -37,11 +37,8 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
 This library is built on top of the RGB LED display driver
 written by Henner Zeller, found here: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)
 You'll need to build that first, as this library depends on it for access to the LED matrix.
-
-Some of the python pieces of that library are here, because they need to be present for this code to run.
-But you should build that library to get all of the needed binaries, which are not checked into source.
-
-Follow the instructions there to build and install the python 3 binding.
+In particular, you need to `make install` the python 3 bindings to get all of the needed binaries,
+which are not included in this project.
 
 On my Pi with the latest version of the library, I also had to follow the guidance to
 switch off on-board sound (`dtparam=audio=off` in `/boot/config.txt`)
