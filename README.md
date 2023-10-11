@@ -41,6 +41,18 @@ You'll need to build that first, as this library depends on it for access to the
 Some of the python pieces of that library are here, because they need to be present for this code to run.
 But you should build that library to get all of the needed binaries, which are not checked into source.
 
+Follow the instructions there to build and install the python 3 binding.
+
+On my Pi with the latest version of the library, I also had to follow the guidance to
+switch off on-board sound (`dtparam=audio=off` in `/boot/config.txt`)
+and blacklist the `snd_bcm2835` kernel module by adding a file `/etc/modprobe.d/blacklist-rgb-matrix.conf`
+with the following contents:
+
+    blacklist snd_bcm2835
+
+The alternative, if you don't want to do this, is to disable hardware pin-pulse generation with the command line
+option `--led-no-hardware-pulse 1`. This will also let you avoid having to run with `sudo`. See below for more details.
+
 ### Getting started
 `render_test.py` is an example program that test the basics of the core
 library. You should create a virtual environment using `venv`:
@@ -55,6 +67,11 @@ Install the required libraries:
 
     pip install -r requirements.txt
 
+Set an environment variable that contains the path to the python binding directory in `rpi-rgb-led-matrix`,
+something like:
+
+    export RGB_MATRIX_PY_PATH=~/rpi-rgb-led-matrix/bindings/python
+
 Run the first example in a virtual LED window:
 
     python render_test.py -v
@@ -63,12 +80,16 @@ If all is successful, you will see a surprise animation demo!
 Press "return" on the app console to end the test. To run on the Raspberry Pi
 with the real LED matrix hardware:
 
-    sudo venv/bin/python render_test.py
+    sudo -E venv/bin/python render_test.py
 
 The `sudo` is necessary to allow the LED matrix code to run with
 the elevated privileges necessary to achieve best GPIO timing performance.
 And because `sudo` doesn't use the user's path, the usual means to activating
-the virtual environment doesn't work.
+the virtual environment doesn't work. If you don't like taking the risk of sharing
+all your environment variables with the `root` account, you can set the environment
+variable in the `sudo` command, like:
+
+    sudo RGB_MATRIX_PY_PATH=/home/myuser/rpi-rgb-led-matrix/bindings/python venv/bin/python render_test.py
 
 ### Library structure
 
