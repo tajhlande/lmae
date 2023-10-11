@@ -88,6 +88,12 @@ variable in the `sudo` command, like:
 
     sudo RGB_MATRIX_PY_PATH=/home/myuser/rpi-rgb-led-matrix/bindings/python venv/bin/python render_test.py
 
+*IDE Note:*  In order to get your IDE to find the `rgbmatrix` module so all your syntax highlighting
+will be nice and clean, you'll need to add the python bindings path (the same as what you set in the
+`RGB_MATRIX_PY_PATH` variable above) to your IDE's Python sys.path or PYTHONPATH settings.
+
+Instructions for JetBrains IDEs can be found [here](https://www.jetbrains.com/help/idea/installing-uninstalling-and-reloading-interpreter-paths.html).
+
 ### Library structure
 
 The core of the library are classes for basic elements
