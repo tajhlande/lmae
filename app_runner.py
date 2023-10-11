@@ -5,16 +5,17 @@ import asyncio
 import logging
 import configparser
 from lmae.app import App
-from lmae.core import parse_matrix_options_command_line, virtual_leds
-from lmae.display import VirtualRGBMatrix
+from lmae.core import parse_matrix_options_command_line
 
 # hackity hackington to determine whether we're going to use virtual bindings or not
 import platform
 os_name = platform.system()
+virtual_leds = False
 if os_name == 'Linux':
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
     from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
+    virtual_leds = True
 
 matrix: RGBMatrix
 logger: logging.Logger
@@ -71,10 +72,9 @@ def app_setup():
     global matrix
     if virtual_leds:
         logger.info("Initializing virtual LED matrix")
-        matrix = VirtualRGBMatrix(options=matrix_options)
     else:
         logger.info("Initializing real LED matrix")
-        matrix = RGBMatrix(options=matrix_options)
+    matrix = RGBMatrix(options=matrix_options)
 
 
 # borrowed from StackOverflow:
