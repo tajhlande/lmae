@@ -1,21 +1,16 @@
 import asyncio
 import logging
-import os
-import sys
 import time
 
 from abc import ABCMeta, abstractmethod
 from lmae_core import Stage, Actor, Animation
 from threading import Lock
 from typing import Callable
-from lmae_env_keys import RGB_MATRIX_PY_PATH_KEY
 
 # hackity hackington to determine whether we're going to use virtual bindings or not
 import platform
 os_name = platform.system()
 if os_name == 'Linux':
-    # dynamically point to real path for rgbmatrix module
-    sys.path.append(os.path.abspath(os.environ.get(RGB_MATRIX_PY_PATH_KEY)))
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
     from lmae_display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
