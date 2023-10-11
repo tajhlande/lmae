@@ -366,7 +366,7 @@ def parse_matrix_options_command_line():
                         help="Bits used for PWM. Something between 1..11. Default: 11", default=11, type=int)
     parser.add_argument("-b", "--led-brightness", action="store",
                         help="Sets brightness level. Default: 100. Range: 1..100", default=100, type=int)
-    parser.add_argument("-m", "--led-gpio-mapping",
+    parser.add_argument("-m", "--led-gpio-mapping", default='adafruit-hat',
                         help="Hardware Mapping: regular, adafruit-hat, adafruit-hat-pwm",
                         choices=['regular', 'regular-pi1', 'adafruit-hat', 'adafruit-hat-pwm'], type=str)
     parser.add_argument("--led-scan-mode", action="store",
