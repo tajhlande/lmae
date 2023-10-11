@@ -66,9 +66,9 @@ Install the required library modules:
 
     pip install -r requirements.txt
 
-Run the first example in a virtual LED window:
+Run the first example in a virtual LED window on your laptop:
 
-    python render_test.py -v
+    python render_test.py
 
 If all is successful, you will see a surprise animation demo!
 Press "return" on the app console to end the test.
@@ -105,9 +105,8 @@ Instructions for JetBrains IDEs can be found [here](https://www.jetbrains.com/he
 ### Virtual LED Display
 
 To make it easier to develop and iterate apps without having to push every change to the RPi,
-there is a command line option to enable a virtual LED display via a window on your
-development environment.  The option is `-v` or `--virtual-leds`.  This will trigger
-the code to draw to the virtual display window rather than looking for a real
+running the code on a Windows or Mac computer will trigger
+the code to draw to a virtual display window rather than looking for a real
 Raspberry Pi LED display. This feature is built with Pygame, hence the dependency on it.
 
 I have only tested this on a Mac, though in theory it should also work in Windows.
@@ -180,7 +179,7 @@ Alternatively, you could create an `env.ini` file in this directory with the fol
 
 To run the weather app on a virtual LED display in your venv-activated developtment environment:
 
-    python weather_app.py -v
+    python weather_app.py
 
 If successful, you should see something like the following, depending on current conditions:
 
@@ -209,7 +208,7 @@ it doesn't furnish current conditions, only forecast predictions.
 ## Important classes
 
 #### Core classes
-Important `lmae_core` classes include:
+Important `lmae.core` classes include:
 
 * `LMAEObject` - the parent of all other library classes
 * `Canvas` - onto this actors draw themselves
@@ -224,7 +223,7 @@ are the same as those used in the
 to configure the LED display driver).
 
 #### Actor classes
-Specific actor classes are in `lmae_actor` :
+Specific actor classes are in `lmae.actor` :
 
 * `StillImage` - A static image, typically loaded from an image file
 * `SpriteImage` - A sprite, drawn as a crop of a sprite sheet. A sprite sheet can contain many distinct images
@@ -239,7 +238,7 @@ Specific actor classes are in `lmae_actor` :
 Note that all these actors render themselves with full alpha channel support.
 
 #### Animation classes
-Specific animation classes are in `lmae_animation`:
+Specific animation classes are in `lmae.animation`:
 
 * `Still` - An animation that does nothing for a defined period of time. Useful to pause in sequences.
 * `Easing` - A helper class for specifying a motion easing method. Currently supports linear, quadratic, Bézier,
@@ -252,7 +251,7 @@ time and they will all have a cumulative effect.   Animations can optionally be 
 to enable animation effects of indefinite length.
 
 #### Component classes
-Components are actors that know how to construct their own animation sequences.
+Components are actors in `lmae.component` that know how to construct their own animation sequences.
 There is only one component at this point:
 
 * `Carousel` - a composite actor that slides several actors through a crop window, one at a time, with configurable
@@ -261,7 +260,7 @@ There is only one component at this point:
 ## App framework
 
 To support easily writing small apps that use the display to do interesting things,
-there is the `lmae_module` module.  In it, there is a class called `AppModule`, which
+there is the `lmae.app` module.  In it, there is a class called `App`, which
 your app can extend to get access to a basic app running framework.
 Your app just needs to know how to `prepare()` itself, how to `run()`, and how to
 `stop()`.

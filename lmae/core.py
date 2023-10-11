@@ -16,7 +16,7 @@ if os_name == 'Linux':
 else:  # Windows or Darwin aka macOS
     from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
 
-logger = logging.getLogger("lmae_core")
+logger = logging.getLogger("lmae.core")
 logger.setLevel(logging.DEBUG)
 
 _current_sequence = dict()
