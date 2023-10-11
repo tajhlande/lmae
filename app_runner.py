@@ -1,12 +1,12 @@
 import os
 import sys
 
-from lmae_module import AppModule
 import asyncio
 import logging
 import configparser
-from lmae_core import parse_matrix_options_command_line, virtual_leds
-from lmae_display import VirtualRGBMatrix
+from lmae.app import App
+from lmae.core import parse_matrix_options_command_line, virtual_leds
+from lmae.display import VirtualRGBMatrix
 
 # hackity hackington to determine whether we're going to use virtual bindings or not
 import platform
@@ -14,7 +14,7 @@ os_name = platform.system()
 if os_name == 'Linux':
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
-    from lmae_display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
+    from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
 
 matrix: RGBMatrix
 logger: logging.Logger
@@ -84,14 +84,14 @@ async def async_input(string: str) -> str:
     return (await asyncio.to_thread(sys.stdin.readline)).rstrip('\n')
 
 
-async def stop_app(app: AppModule):
+async def stop_app(app: App):
     logger.info("***** Press return to stop the app *****")
     await async_input('')
     logger.debug("Return pressed")
     app.stop()
 
 
-async def run_app(app: AppModule):
+async def run_app(app: App):
     logger.debug("run_app() called")
     app.prepare()
 
@@ -106,7 +106,7 @@ async def run_app(app: AppModule):
     logger.debug("run_app() finished")
 
 
-def start_app(app: AppModule):
+def start_app(app: App):
     asyncio.run(run_app(app))
 
 

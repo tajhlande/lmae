@@ -3,8 +3,8 @@ import logging
 from PIL import ImageFont
 
 import app_runner
-from lmae_actor import SpriteImage, Text
-from lmae_module import SingleStageRenderLoopAppModule
+from lmae.actor import SpriteImage, Text
+from lmae.app import SingleStageRenderLoopApp
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
 logger = logging.getLogger("app_module_test")
@@ -85,7 +85,7 @@ def set_mario_sprite_frame():
 
 
 app_runner.app_setup()
-sample_app = SingleStageRenderLoopAppModule()
+sample_app = SingleStageRenderLoopApp()
 sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 sample_app.add_actors(mario_sprite, sprite_label)
 sample_app.set_pre_render_callback(set_mario_sprite_frame)

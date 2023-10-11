@@ -3,9 +3,9 @@ import logging
 from pilmoji.source import AppleEmojiSource
 from PIL import Image, ImageFont
 
-from lmae_actor import StillImage, Text, EmojiText
-from lmae_animation import Hide, Show, StraightMove, Sequence
-from lmae_module import SingleStageRenderLoopAppModule
+from lmae.actor import StillImage, Text, EmojiText
+from lmae.animation import Hide, Show, StraightMove, Sequence
+from lmae.app import SingleStageRenderLoopApp
 import app_runner
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
@@ -44,7 +44,7 @@ emoji_words = EmojiText(name='EmojiText', text="☀️🌤️⛈️🌗", positi
 
 
 app_runner.app_setup()
-sample_app = SingleStageRenderLoopAppModule()
+sample_app = SingleStageRenderLoopApp()
 sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 sample_app.add_actors(trees, emoji_words, words, kirby, grass)
 sample_app.add_animations(kirby_sequence)

@@ -1,7 +1,5 @@
 import asyncio
-import os
 import json
-import sys
 import time
 
 from datetime import datetime
@@ -10,14 +8,14 @@ from PIL import Image, ImageFont, ImageFilter, ImageEnhance
 import app_runner
 # from app_runner import matrix, matrix_options, start_app, env_config
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
-from lmae_core import Stage
-from lmae_module import AppModule
-from lmae_actor import StillImage, SpriteImage, Text, Line
-from lmae_animation import Easing, Sequence, Still, StraightMove
-from lmae_component import Carousel
+from lmae.core import Stage
+from lmae.app import App
+from lmae.actor import StillImage, SpriteImage, Text, Line
+from lmae.animation import Easing, Sequence, Still, StraightMove
+from lmae.component import Carousel
 
 
-class WeatherApp(AppModule):
+class WeatherApp(App):
     """
     Display the current weather
     """

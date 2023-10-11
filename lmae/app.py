@@ -3,7 +3,7 @@ import logging
 import time
 
 from abc import ABCMeta, abstractmethod
-from lmae_core import Stage, Actor, Animation
+from lmae.core import Stage, Actor, Animation
 from threading import Lock
 from typing import Callable
 
@@ -13,10 +13,10 @@ os_name = platform.system()
 if os_name == 'Linux':
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
-    from lmae_display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
+    from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
 
 
-class AppModule(metaclass=ABCMeta):
+class App(metaclass=ABCMeta):
     """
     An app module is a self-contained app that renders itself on the LED matrix.
     Apps that want to run should extend this class and implement the abstract methods.
@@ -66,7 +66,7 @@ class AppModule(metaclass=ABCMeta):
         self.running = False
 
 
-class SingleStageRenderLoopAppModule(AppModule):
+class SingleStageRenderLoopApp(App):
     """
     Using a single stage, render a loop of items
     """
