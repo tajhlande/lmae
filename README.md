@@ -61,7 +61,7 @@ Activate your environment:
 
     source venv/bin/activate
 
-Install the required libraries:
+Install the required library modules:
 
     pip install -r requirements.txt
 
@@ -70,32 +70,37 @@ Run the first example in a virtual LED window:
     python render_test.py -v
 
 If all is successful, you will see a surprise animation demo!
-Press "return" on the app console to end the test. To run on the Raspberry Pi
-with the real LED matrix hardware, set an environment variable that contains
-the path to the python binding directory in `rpi-rgb-led-matrix`,
-something like:
+Press "return" on the app console to end the test.
 
-    export RGB_MATRIX_PY_PATH=~/rpi-rgb-led-matrix/bindings/python
+To run on the Raspberry Pi with the real LED matrix hardware,
+you need to install the `rgbmatrix` library into the venv environment in development mode, referencing
+the path to the python bindings in your copy of the `rpi-rgb-led-matrix`, so after activating your
+virtual environmetn, run something like:
+
+    pip install -e ~/rpi-rgb-led-matrix/bindings/python
 
 And then run the example like this:
 
-    sudo -E venv/bin/python render_test.py
+    sudo venv/bin/python render_test.py
 
 The `sudo` is necessary to allow the LED matrix code to run with
 the elevated privileges necessary to achieve best GPIO timing performance.
 And because `sudo` doesn't use the user's path, the usual means to activating
-the virtual environment doesn't work. If you don't like taking the risk of sharing
-all your environment variables with the `root` account by setting `-E`, you can
-set the environment variable in the `sudo` command, like:
+the virtual environment doesn't work.
 
-    sudo RGB_MATRIX_PY_PATH=/home/myuser/rpi-rgb-led-matrix/bindings/python \
-         venv/bin/python render_test.py
+### Setting up your development environment
 
-replacing the path here with the correct path for your copy of the `rpi-rgb-led-matrix` project.
+The following assumes you want to develop on a Windows or Mac laptop.  If you have a Linux laptop, things
+might be somewhat more complicated, as the virtual LED matrix code path inspects the operating system type
+(one of Linux, Darwin i.e. Mac, or Windows) and uses that information to guide whether things should be virtual,
+though you still need to set the command line `-v` flag to be sure.
 
-*IDE Note:*  In order to get your IDE to find the `rgbmatrix` module so all your syntax highlighting
-will be nice and clean, you'll need to add the python bindings path (the same as what you set in the
-`RGB_MATRIX_PY_PATH` variable above) to your IDE's Python sys.path or PYTHONPATH settings.
+In order to get your IDE to find the `rgbmatrix` module so all your syntax highlighting
+will be nice and clean, you'll need to do one of the following:
+
+1.  `pip install -e ~/rpi-rgb-led-matrix/bindings/python` in your IDE's virtual environment.
+2.  Add the python bindings path (the same path as what you set in the
+    `pip -e` command above) to your IDE's Python sys.path or PYTHONPATH settings.
 
 Instructions for JetBrains IDEs can be found [here](https://www.jetbrains.com/help/idea/installing-uninstalling-and-reloading-interpreter-paths.html).
 
