@@ -16,6 +16,8 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
   * [LMAE Basics](#lmae-basics)
     * [Prerequisites](#prerequisites)
     * [Getting started](#getting-started)
+    * [Setting up your development environment](#setting-up-your-development-environment)
+    * [Virtual LED Display](#virtual-led-display)
     * [Library structure](#library-structure)
 * [Weather app](#weather-app)
     * [OpenWeather API bookmarks](#openweather-api-bookmarks)
@@ -27,7 +29,6 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
       * [Animation classes](#animation-classes)
       * [Component classes](#component-classes)
   * [App framework](#app-framework)
-  * [Virtual LED Display](#virtual-led-display)
 <!-- TOC -->
 
 ## LMAE Basics
@@ -75,7 +76,7 @@ Press "return" on the app console to end the test.
 To run on the Raspberry Pi with the real LED matrix hardware,
 you need to install the `rgbmatrix` library into the venv environment in development mode, referencing
 the path to the python bindings in your copy of the `rpi-rgb-led-matrix`, so after activating your
-virtual environmetn, run something like:
+virtual environment, run something like:
 
     pip install -e ~/rpi-rgb-led-matrix/bindings/python
 
@@ -90,10 +91,7 @@ the virtual environment doesn't work.
 
 ### Setting up your development environment
 
-The following assumes you want to develop on a Windows or Mac laptop.  If you have a Linux laptop, things
-might be somewhat more complicated, as the virtual LED matrix code path inspects the operating system type
-(one of Linux, Darwin i.e. Mac, or Windows) and uses that information to guide whether things should be virtual,
-though you still need to set the command line `-v` flag to be sure.
+The following assumes you want to develop on a Windows or Mac laptop, separate from the RPi.
 
 In order to get your IDE to find the `rgbmatrix` module so all your syntax highlighting
 will be nice and clean, you'll need to do one of the following:
@@ -103,6 +101,20 @@ will be nice and clean, you'll need to do one of the following:
     `pip -e` command above) to your IDE's Python sys.path or PYTHONPATH settings.
 
 Instructions for JetBrains IDEs can be found [here](https://www.jetbrains.com/help/idea/installing-uninstalling-and-reloading-interpreter-paths.html).
+
+### Virtual LED Display
+
+To make it easier to develop and iterate apps without having to push every change to the RPi,
+there is a command line option to enable a virtual LED display via a window on your
+development environment.  The option is `-v` or `--virtual-leds`.  This will trigger
+the code to draw to the virtual display window rather than looking for a real
+Raspberry Pi LED display. This feature is built with Pygame, hence the dependency on it.
+
+I have only tested this on a Mac, though in theory it should also work in Windows.
+It probably will not work in a Linux development environment, because the code is using
+the operating system name to manage the implementation class substitution. This might be
+fixed in the future, but it works for me now.
+
 
 ### Library structure
 
@@ -272,17 +284,4 @@ The app runner waits for a `return` keypress before exiting the app.
 The `app_runner` module also includes a helper method to get environmental
 properties, set either as `env` variables or in an `env.ini` file: `app_runner.get_env_parameter()`.
 Note that the env variable and the env.ini property don't have to have exactly the same name.
-
-## Virtual LED Display
-
-To make it easier to develop and iterate apps without having to push every change to the RPi,
-there is a command line option to enable a virtual LED display via a window on your
-development environment.  The option is `-v` or `--virtual-leds`.  This will trigger
-the code to draw to the virtual display window rather than looking for a real
-Raspberry Pi LED display. This feature is built with Pygame, hence the dependency on it.
-
-I have only tested this on a Mac, though in theory it should also work in Windows.
-It probably will not work in a Linux development environment, because the code is using
-the operating system name to manage the implementation class substitution. This might be
-fixed in the future, but it works for me now.
 
