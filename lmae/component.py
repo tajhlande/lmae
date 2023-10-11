@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from lmae_core import Actor, Animation, Canvas, _get_sequential_name
-from lmae_actor import CropMask
-from lmae_animation import Easing, Sequence, Still, StraightMove
+from lmae.core import Actor, Animation, Canvas, _get_sequential_name
+from lmae.actor import CropMask
+from lmae.animation import Easing, Sequence, Still, StraightMove
 
 
 class LMAEComponent(Actor, metaclass=ABCMeta):

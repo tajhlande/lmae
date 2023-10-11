@@ -14,7 +14,7 @@ os_name = platform.system()
 if os_name == 'Linux':
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
-    from lmae_display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
+    from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
 
 logger = logging.getLogger("lmae_core")
 logger.setLevel(logging.DEBUG)

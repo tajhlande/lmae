@@ -3,10 +3,9 @@ import logging
 from PIL import ImageFont
 
 import app_runner
-
-from lmae_actor import Text, GradientRectangle
-from lmae_animation import StraightMove, Sequence, Easing, HueRotate
-from lmae_module import SingleStageRenderLoopAppModule
+from lmae.actor import Text, GradientRectangle
+from lmae.animation import StraightMove, Sequence, Easing, HueRotate
+from lmae.app import SingleStageRenderLoopApp
 
 logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
 logger = logging.getLogger("render_test")
@@ -81,7 +80,7 @@ ll_4_seq = Sequence(actor=lmae_long_4, repeat=True, animations=[
 ])
 
 app_runner.app_setup()
-sample_app = SingleStageRenderLoopAppModule()
+sample_app = SingleStageRenderLoopApp()
 sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 sample_app.add_actors(gradient_block,
                       lmae_long_1, lmae_long_2, lmae_long_3, lmae_long_4,

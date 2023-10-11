@@ -5,7 +5,7 @@ from PIL import Image, ImageFont, ImageDraw
 from pilmoji import Pilmoji
 from pilmoji.source import EmojiCDNSource, MicrosoftEmojiSource
 
-from lmae_core import Actor, _get_sequential_name, Canvas, CompositeActor, logger
+from lmae.core import Actor, _get_sequential_name, Canvas, CompositeActor, logger
 
 
 class StillImage(Actor):
