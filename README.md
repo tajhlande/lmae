@@ -38,7 +38,8 @@ This library is built on top of the RGB LED display driver
 written by Henner Zeller, found here: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)
 You'll need to build that first, as this library depends on it for access to the LED matrix.
 In particular, you need to `make install` the python 3 bindings to get all of the needed binaries,
-which are not included in this project.
+which are not included in this project. The README for that project will explain that
+and many other things which are useful to know for getting things working.
 
 On my Pi with the latest version of the library, I also had to follow the guidance to
 switch off on-board sound (`dtparam=audio=off` in `/boot/config.txt`)
@@ -64,18 +65,19 @@ Install the required libraries:
 
     pip install -r requirements.txt
 
-Set an environment variable that contains the path to the python binding directory in `rpi-rgb-led-matrix`,
-something like:
-
-    export RGB_MATRIX_PY_PATH=~/rpi-rgb-led-matrix/bindings/python
-
 Run the first example in a virtual LED window:
 
     python render_test.py -v
 
 If all is successful, you will see a surprise animation demo!
 Press "return" on the app console to end the test. To run on the Raspberry Pi
-with the real LED matrix hardware:
+with the real LED matrix hardware, set an environment variable that contains
+the path to the python binding directory in `rpi-rgb-led-matrix`,
+something like:
+
+    export RGB_MATRIX_PY_PATH=~/rpi-rgb-led-matrix/bindings/python
+
+And then run the example like this:
 
     sudo -E venv/bin/python render_test.py
 
@@ -83,10 +85,13 @@ The `sudo` is necessary to allow the LED matrix code to run with
 the elevated privileges necessary to achieve best GPIO timing performance.
 And because `sudo` doesn't use the user's path, the usual means to activating
 the virtual environment doesn't work. If you don't like taking the risk of sharing
-all your environment variables with the `root` account, you can set the environment
-variable in the `sudo` command, like:
+all your environment variables with the `root` account by setting `-E`, you can
+set the environment variable in the `sudo` command, like:
 
-    sudo RGB_MATRIX_PY_PATH=/home/myuser/rpi-rgb-led-matrix/bindings/python venv/bin/python render_test.py
+    sudo RGB_MATRIX_PY_PATH=/home/myuser/rpi-rgb-led-matrix/bindings/python \
+         venv/bin/python render_test.py
+
+replacing the path here with the correct path for your copy of the `rpi-rgb-led-matrix` project.
 
 *IDE Note:*  In order to get your IDE to find the `rgbmatrix` module so all your syntax highlighting
 will be nice and clean, you'll need to add the python bindings path (the same as what you set in the
