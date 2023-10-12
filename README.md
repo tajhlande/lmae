@@ -149,7 +149,7 @@ If they are not set to repeat, they are removed from the stage on completion.
 Components are actors that know how to generate their own animations.
 This is meant to encapsulate complex animation behavior.
 
-The "module" module, along with the app runner module, provide tools for the
+The `lmae.app` module, along with the `app_runner` module, provide tools for the
 construction and execution of apps.
 
 
