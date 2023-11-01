@@ -1,10 +1,12 @@
 import logging
+from abc import abstractmethod
 
 from colorsys import rgb_to_hsv, hsv_to_rgb
 from enum import auto, Enum
 from typing import Callable
 
 from lmae.core import Actor, Animation, _get_sequential_name
+from lmae.actor import StillImage, SpriteImage
 
 
 class Still(Animation):
@@ -310,3 +312,141 @@ class HueRotate(Animation):
         rgb_color = round(float_rgb_color[0] * 255), round(float_rgb_color[1] * 255), round(float_rgb_color[2] * 255)
         self.color_set_callback(rgb_color)
         self.set_update_time(current_time)
+
+
+class FrameSequence(Animation):
+    """
+    A container for animated image sequence information. Frame count, frame list, with durations for each frame.
+    Repeat or not.
+    """
+    def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False):
+        name = name or _get_sequential_name("FrameSequence")
+        # we will update with true duration later
+        super().__init__(name=name, actor=actor, duration=1.0, repeat=repeat)
+        self.frames_info = []
+
+    def add_frame(self, frame_name: str, duration: float = 1.0/6, recompute: bool = True):
+        """
+        Add a single frame to this sequence.
+        :param frame_name: The name of the frame
+        :param duration: How long this frame should be shown. Defaults to 1/6 of a second.
+        :param recompute: whether or not to recompute aggregate times. Defaults to True.
+        """
+        self.add_frame_info({
+            "name": frame_name,
+            "duration": duration
+        }, recompute)
+
+    def reset_frame_info(self):
+        self.frames_info = []
+
+    def add_frame_info(self, frame_info: dict[str, float], recompute: bool = True):
+        """
+        Add a frame info dictionary to this sequence
+        :param frame_info: The frame info dictionary. Should have "name" and "duration" set as string and float.
+        :param recompute: whether or not to recompute aggregate times. Defaults to True.
+        """
+        self.frames_info.append(frame_info)
+        if recompute:
+            self.compute_aggregated_times()
+
+    def compute_aggregated_times(self):
+        """
+        Computes the offset start times for each frame in the sequence.
+        """
+        accum_duration = 0.0
+        for frame_info in self.frames_info:
+            frame_info["start_time"] = accum_duration
+            accum_duration += frame_info["duration"]
+            self.logger.debug(f"Starting frame {frame_info['name']} at {frame_info['start_time']} "
+                              f"with duration {frame_info['duration']}")
+        self.duration = accum_duration
+
+    @abstractmethod
+    def set_actor_frame(self, frame_name: str):
+        pass
+
+    def update_actor(self, current_time: float):
+        elapsed_time = self.get_elapsed_time(current_time)
+
+        # find frame that matches current elapsed time
+        # this might be made more efficient by recording the current frame somewhere and using that info to
+        # reduce what is examined, but these lists are generally short, so...
+        # self.logger.debug(f"elapsed time: {elapsed_time}, frame count: {len(self.frames_info)}")
+        frame_info = None
+        i = 0
+        while not frame_info and i < len(self.frames_info):
+            cf = self.frames_info[i]
+            cf_finish_time = cf['start_time'] + cf['duration']
+            # self.logger.debug(f"Checking frame: start time {cf['start_time']}, elapsed time {elapsed_time}, "
+            #                   f"finish time: {cf_finish_time}")
+            if cf['start_time'] <= elapsed_time < cf_finish_time:
+                frame_info = cf
+                # self.logger.debug(f"Found winner: {frame_info['name']}")
+            i = i + 1
+        if frame_info:
+            self.set_actor_frame(frame_info["name"])
+        else:
+            self.logger.warning(f"No matching frame found for elapsed time {elapsed_time}")
+        self.set_update_time(current_time)
+
+    def is_finished(self) -> bool:
+        return self.get_simulated_time() > self.duration
+
+    def reset(self):
+        super().reset()
+
+
+class SpriteSequence(FrameSequence):
+    """
+    An animation that can be used to set frames on a sprite.
+    """
+    def __init__(self,  name: str = None, sprite_image: SpriteImage = None, repeat: bool = False):
+        """
+        Create a sprite sequence animation for a sprite image actor.
+        :param name: The name for this animation
+        :param sprite_image: The sprite image actor
+        :param repeat: Whether or not to repeat this animation. Defaults to False.
+        """
+        name = name or _get_sequential_name("SpriteSequence")
+        # we will update with true duration later
+        super().__init__(name=name, actor=sprite_image, repeat=repeat)
+        self.sprite_image = sprite_image
+
+    def set_actor_frame(self, frame_name: str):
+        self.sprite_image.set_sprite(frame_name)
+
+
+class AnimatedImageSequence(FrameSequence):
+    """
+    An animation that can be used to set frames on an image actor containing a PIL image with an image sequence.
+    """
+    def __init__(self,  name: str = None, still_image: StillImage = None, repeat: bool = False):
+        """
+        Create an image sequence animation for a still image actor that contains a PIL image with an image sequence.
+        :param name: The name for this animation.
+        :param still_image: The still image actor for this animation.
+        :param repeat: Whether or not to repeat this animation. Defaults to False.
+        :raise Exception: if the PIL image in the actor does not have an `is_animated` attribute set to `true`
+        """
+        name = name or _get_sequential_name("AnimatedImageSequence")
+        # we will update with true duration later
+        super().__init__(name=name, actor=still_image, repeat=repeat)
+
+        # make sure the actor
+        if not getattr(still_image.image, "is_animated", False):
+            raise Exception("AnimatedImageSequence is expecting an actor with an image sequence")
+        self.still_image = still_image
+
+    def set_actor_frame(self, frame_name: str):
+        self.still_image.image.seek(int(frame_name))
+
+    def get_frames_from_image(self):
+        image = self.still_image.image
+        if image:
+
+            for i in range(0, image.n_frame):
+                image.seek(i)
+                self.add_frame(str(i), image.info['duration'], False)
+
+            self.compute_aggregated_times()
