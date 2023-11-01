@@ -2,8 +2,8 @@ from abc import ABCMeta, abstractmethod
 from typing import List
 
 from lmae.core import Actor, Animation, Canvas, _get_sequential_name
-from lmae.actor import CropMask
-from lmae.animation import Easing, Sequence, Still, StraightMove
+from lmae.actor import CropMask, StillImage, SpriteImage
+from lmae.animation import Easing, Sequence, Still, StraightMove, SpriteSequence, AnimatedImageSequence
 
 
 class LMAEComponent(Actor, metaclass=ABCMeta):
@@ -96,3 +96,87 @@ class Carousel(LMAEComponent):
         for actor in self.crop_actors:
             actor.render(canvas)
         self.changes_since_last_render = False
+
+
+class AnimatedSprite(LMAEComponent):
+    """
+    An animated sprite image. Repeats by default.
+    """
+
+    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0),
+                 sprite: SpriteImage = None, frames: list[str] = None, duration: float = 1.0,
+                 repeat: bool = True):
+        """
+        Initialize an animated sprite actor
+        :param name: The name of this image actor
+        :param position: The initial position
+        :param sprite: The sprite to animate
+        :param frames: A list of sprite names for the sprite
+        :param duration: The duration of the entire animation. Defaults to 1 second.
+        :param repeat: Whether or not to repeat the animation. Defaults to True.
+        """
+        name = name or _get_sequential_name("AnimatedSprite")
+        super().__init__(name=name, position=position)
+        self.sprite = sprite
+        self.sequence: SpriteSequence = SpriteSequence(name=name + "_Sequence", sprite_image=sprite, repeat=repeat)
+        if frames:
+            self.set_frame_sequence(frames, duration)
+
+    def set_frame_sequence(self, frames: list[str], duration: float):
+        """
+        Set the frames for the animation.  Will create an animation sequence with equal time per frame.
+
+        :param frames: A list of sprite selection names
+        :param duration: The duration for the entire sequence of frames
+        """
+        self.logger.debug(f"Setting frames from frame list of length {len(frames)}")
+        if not frames:
+            return
+        duration_per_frame = duration / len(frames)
+        for name in frames:
+            self.logger.debug(f"Adding frame {name} with duration {duration_per_frame}")
+            self.sequence.add_frame(name, duration_per_frame, False)
+        self.sequence.compute_aggregated_times()
+
+    def get_animations(self) -> List[Animation]:
+        return [self.sequence]
+
+    def render(self, canvas: Canvas):
+        if self.sprite:
+            self.sprite.render(canvas)
+
+    def needs_render(self):
+        return self.sprite.needs_render()
+
+
+class AnimatedImage(LMAEComponent):
+    """
+    An animated PIL image. Repeats by default.
+    """
+
+    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0),
+                 still_image: StillImage = None,
+                 repeat: bool = True):
+        """
+        Initialize an animated image actor
+        :param name: The name of this image actor
+        :param position: The initial position
+        :param still_image: The image actor. Should contain a PIL image with an image sequence in it.
+        :param repeat: Whether or not to repeat the animation. Defaults to True.
+        :raise Exception: if the PIL image in the actor does not have an `is_animated` attribute set to `true`
+        """
+        name = name or _get_sequential_name("AnimatedImage")
+        super().__init__(name=name, position=position)
+        self.still_image = still_image
+        self.sequence: AnimatedImageSequence = AnimatedImageSequence(name=name + "_Sequence", repeat=repeat)
+        self.sequence.get_frames_from_image()
+
+    def get_animations(self) -> List[Animation]:
+        return [self.sequence]
+
+    def render(self, canvas: Canvas):
+        if self.still_image:
+            self.still_image.render(canvas)
+
+    def needs_render(self):
+        return self.still_image.needs_render()
