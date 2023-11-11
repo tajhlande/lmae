@@ -5,6 +5,8 @@ from colorsys import rgb_to_hsv, hsv_to_rgb
 from enum import auto, Enum
 from typing import Callable
 
+from PIL import Image
+
 from lmae.core import Actor, Animation, _get_sequential_name
 from lmae.actor import StillImage, SpriteImage
 
@@ -421,31 +423,41 @@ class AnimatedImageSequence(FrameSequence):
     """
     An animation that can be used to set frames on an image actor containing a PIL image with an image sequence.
     """
-    def __init__(self,  name: str = None, still_image: StillImage = None, repeat: bool = False):
+    def __init__(self,  name: str = None, actor: Actor = None, pil_image: Image = None, repeat: bool = False):
         """
         Create an image sequence animation for a still image actor that contains a PIL image with an image sequence.
         :param name: The name for this animation.
-        :param still_image: The still image actor for this animation.
+        :param pil_image: The PIL image for this animation.
         :param repeat: Whether or not to repeat this animation. Defaults to False.
-        :raise Exception: if the PIL image in the actor does not have an `is_animated` attribute set to `true`
+        :raise Exception: if the PIL image does not have an `is_animated` attribute set to `true`
         """
         name = name or _get_sequential_name("AnimatedImageSequence")
         # we will update with true duration later
-        super().__init__(name=name, actor=still_image, repeat=repeat)
+        super().__init__(name=name, actor=actor, repeat=repeat)
 
-        # make sure the actor
-        if not getattr(still_image.image, "is_animated", False):
-            raise Exception("AnimatedImageSequence is expecting an actor with an image sequence")
-        self.still_image = still_image
+        self.pil_image: Image or None = None
+        if pil_image:
+            self.set_pil_image(pil_image)
+
+    def set_pil_image(self, pil_image: Image):
+        if pil_image:
+            if not getattr(pil_image, "is_animated", False):
+                is_animated = getattr(pil_image, 'is_animated')
+                msg = f"AnimatedImageSequence is expecting a PIL image with a sequence. " \
+                      f"is_animated must be True. It is {is_animated}"
+                raise Exception(msg)
+        self.pil_image = pil_image
 
     def set_actor_frame(self, frame_name: str):
-        self.still_image.image.seek(int(frame_name))
+        frame_number = int(frame_name)
+        self.logger.debug(f"Seeking to frame {frame_number}")
+        self.pil_image.seek(frame_number)
 
     def get_frames_from_image(self):
-        image = self.still_image.image
+        image = self.pil_image
         if image:
 
-            for i in range(0, image.n_frame):
+            for i in range(0, image.n_frames):
                 image.seek(i)
                 self.add_frame(str(i), image.info['duration'], False)
 

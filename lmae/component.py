@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
+from PIL import Image
+
 from lmae.core import Actor, Animation, Canvas, _get_sequential_name
 from lmae.actor import CropMask, StillImage, SpriteImage
 from lmae.animation import Easing, Sequence, Still, StraightMove, SpriteSequence, AnimatedImageSequence
@@ -155,28 +157,45 @@ class AnimatedImage(LMAEComponent):
     """
 
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0),
-                 still_image: StillImage = None,
+                 pil_image: Image = None,
                  repeat: bool = True):
         """
         Initialize an animated image actor
         :param name: The name of this image actor
         :param position: The initial position
-        :param still_image: The image actor. Should contain a PIL image with an image sequence in it.
+        :param pil_image: A PIL image with an image sequence in it.
         :param repeat: Whether or not to repeat the animation. Defaults to True.
         :raise Exception: if the PIL image in the actor does not have an `is_animated` attribute set to `true`
         """
         name = name or _get_sequential_name("AnimatedImage")
         super().__init__(name=name, position=position)
-        self.still_image = still_image
-        self.sequence: AnimatedImageSequence = AnimatedImageSequence(name=name + "_Sequence", repeat=repeat)
+        self.repeat = repeat
+        self.sequence: AnimatedImageSequence or None = None
+        self.pil_image: Image or None = None
+        if pil_image:
+            self.set_from_pil_image(pil_image)
+
+    def set_from_pil_image(self, pil_image: Image):
+        self.pil_image = pil_image
+        self.sequence: AnimatedImageSequence = AnimatedImageSequence(name=self.name + "_Sequence",
+                                                                     actor=self,
+                                                                     repeat=self.repeat)
+        self.sequence.set_pil_image(pil_image)
+        self.sequence.reset_frame_info()
         self.sequence.get_frames_from_image()
+
+    def set_from_file(self, file_name: str):
+        with Image.open(file_name) as image:
+            image.load()
+            self.set_from_pil_image(image)
 
     def get_animations(self) -> List[Animation]:
         return [self.sequence]
 
     def render(self, canvas: Canvas):
-        if self.still_image:
-            self.still_image.render(canvas)
+        if self.pil_image:
+            canvas.image.alpha_composite(self.pil_image, dest=self.position)
+            self.changes_since_last_render = False
 
     def needs_render(self):
-        return self.still_image.needs_render()
+        return self.needs_render()
