@@ -8,7 +8,7 @@ from typing import Callable
 from PIL import Image
 
 from lmae.core import Actor, Animation, _get_sequential_name
-from lmae.actor import StillImage, SpriteImage
+from lmae.actor import MultiFrameImage, SpriteImage
 
 
 class Still(Animation):
@@ -332,7 +332,7 @@ class FrameSequence(Animation):
         Add a single frame to this sequence.
         :param frame_name: The name of the frame
         :param duration: How long this frame should be shown. Defaults to 1/6 of a second.
-        :param recompute: whether or not to recompute aggregate times. Defaults to True.
+        :param recompute: whether to recompute aggregate times. Defaults to True.
         """
         self.add_frame_info({
             "name": frame_name,
@@ -346,7 +346,7 @@ class FrameSequence(Animation):
         """
         Add a frame info dictionary to this sequence
         :param frame_info: The frame info dictionary. Should have "name" and "duration" set as string and float.
-        :param recompute: whether or not to recompute aggregate times. Defaults to True.
+        :param recompute: whether to recompute aggregate times. Defaults to True.
         """
         self.frames_info.append(frame_info)
         if recompute:
@@ -423,42 +423,27 @@ class AnimatedImageSequence(FrameSequence):
     """
     An animation that can be used to set frames on an image actor containing a PIL image with an image sequence.
     """
-    def __init__(self,  name: str = None, actor: Actor = None, pil_image: Image = None, repeat: bool = False):
+    def __init__(self,  name: str = None, actor: MultiFrameImage = None, repeat: bool = False):
         """
-        Create an image sequence animation for a still image actor that contains a PIL image with an image sequence.
+        Create an image sequence animation for a multi frame image actor.
+
         :param name: The name for this animation.
-        :param pil_image: The PIL image for this animation.
-        :param repeat: Whether or not to repeat this animation. Defaults to False.
+        :param repeat: Whether to repeat this animation. Defaults to False.
         :raise Exception: if the PIL image does not have an `is_animated` attribute set to `true`
         """
         name = name or _get_sequential_name("AnimatedImageSequence")
         # we will update with true duration later
         super().__init__(name=name, actor=actor, repeat=repeat)
-
-        self.pil_image: Image or None = None
-        if pil_image:
-            self.set_pil_image(pil_image)
-
-    def set_pil_image(self, pil_image: Image):
-        if pil_image:
-            if not getattr(pil_image, "is_animated", False):
-                is_animated = getattr(pil_image, 'is_animated')
-                msg = f"AnimatedImageSequence is expecting a PIL image with a sequence. " \
-                      f"is_animated must be True. It is {is_animated}"
-                raise Exception(msg)
-        self.pil_image = pil_image
+        self.last_frame = -1
 
     def set_actor_frame(self, frame_name: str):
         frame_number = int(frame_name)
-        self.logger.debug(f"Seeking to frame {frame_number}")
-        self.pil_image.seek(frame_number)
+        if frame_number != self.last_frame:
+            self.logger.debug(f"Changing frame to {frame_number}")
+        # self.actor should always be an instance of MultiFrameImage
+        if self.actor:
+            self.actor.set_frame(frame_number)
+            self.last_frame = frame_number
+        else:
+            self.logger.warning("Asked to set actor frame but we have no actor")
 
-    def get_frames_from_image(self):
-        image = self.pil_image
-        if image:
-
-            for i in range(0, image.n_frames):
-                image.seek(i)
-                self.add_frame(str(i), image.info['duration'], False)
-
-            self.compute_aggregated_times()
