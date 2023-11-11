@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from PIL import Image
+from PIL import Image, ImageSequence
 
-from lmae.core import Actor, Animation, Canvas, _get_sequential_name
-from lmae.actor import CropMask, StillImage, SpriteImage
+from lmae.actor import CropMask, MultiFrameImage, SpriteImage
 from lmae.animation import Easing, Sequence, Still, StraightMove, SpriteSequence, AnimatedImageSequence
+from lmae.core import Actor, Animation, Canvas, _get_sequential_name
 
 
 class LMAEComponent(Actor, metaclass=ABCMeta):
@@ -85,7 +85,7 @@ class Carousel(LMAEComponent):
             sequence = Sequence(name=f"Carousel sequence for {actor.name}", actor=actor,
                                 animations=animations[actor.name], repeat=True)
             animation_sequences.append(sequence)
-            # self.logger.debug(f"   Constructed sequence anim with {len(animation_sequences)} animations for {actor.name}")
+
         return animation_sequences
 
     def needs_render(self):
@@ -115,7 +115,7 @@ class AnimatedSprite(LMAEComponent):
         :param sprite: The sprite to animate
         :param frames: A list of sprite names for the sprite
         :param duration: The duration of the entire animation. Defaults to 1 second.
-        :param repeat: Whether or not to repeat the animation. Defaults to True.
+        :param repeat: Whether to repeat the animation. Defaults to True.
         """
         name = name or _get_sequential_name("AnimatedSprite")
         super().__init__(name=name, position=position)
@@ -150,39 +150,65 @@ class AnimatedSprite(LMAEComponent):
     def needs_render(self):
         return self.sprite.needs_render()
 
+    def set_position(self, position: tuple[int, int]):
+        super().set_position(position)
+        if self.sprite:
+            self.sprite.set_position(position)
+
 
 class AnimatedImage(LMAEComponent):
     """
-    An animated PIL image. Repeats by default.
+    An animated image. Repeats by default. Can be set from an animated gif that is
+    loaded as a PIL image
     """
 
     def __init__(self, name: str = None, position: tuple[int, int] = (0, 0),
-                 pil_image: Image = None,
+                 pil_source_image: Image = None,
+                 multi_frame_image: MultiFrameImage = None,
                  repeat: bool = True):
         """
-        Initialize an animated image actor
+        Initialize an animated image actor.
+        Set either `multi_frame_image` or `pil_source_image`, but not both.
+
         :param name: The name of this image actor
         :param position: The initial position
-        :param pil_image: A PIL image with an image sequence in it.
-        :param repeat: Whether or not to repeat the animation. Defaults to True.
+        :param pil_source_image: A PIL image with an image sequence in it.
+        :param multi_frame_image: A MultiFrameImage that is already prepared.
+        :param repeat: Whether to repeat the animation. Defaults to True.
         :raise Exception: if the PIL image in the actor does not have an `is_animated` attribute set to `true`
         """
         name = name or _get_sequential_name("AnimatedImage")
         super().__init__(name=name, position=position)
         self.repeat = repeat
         self.sequence: AnimatedImageSequence or None = None
-        self.pil_image: Image or None = None
-        if pil_image:
-            self.set_from_pil_image(pil_image)
+        self.multi_frame_image: MultiFrameImage or None = multi_frame_image
+        if pil_source_image:
+            self.set_from_pil_image(pil_source_image)
 
     def set_from_pil_image(self, pil_image: Image):
-        self.pil_image = pil_image
         self.sequence: AnimatedImageSequence = AnimatedImageSequence(name=self.name + "_Sequence",
-                                                                     actor=self,
+                                                                     actor=self.multi_frame_image,
                                                                      repeat=self.repeat)
-        self.sequence.set_pil_image(pil_image)
+
+        images = []
+        index = 0
         self.sequence.reset_frame_info()
-        self.sequence.get_frames_from_image()
+        for frame in ImageSequence.Iterator(pil_image):
+            frame_image: Image = frame.copy()
+            duration: float = frame.info['duration']/1000.0 if frame.info['duration'] else 1.0/6  # default value
+            if not frame_image.mode == 'RGBA':
+                frame_image = frame_image.convert('RGBA')
+            images.append(frame_image)
+            # frame_image.save(f"frame_{index}.png")
+            self.sequence.add_frame(str(index), duration, False)
+            index = index + 1
+
+        self.sequence.compute_aggregated_times()
+
+        self.multi_frame_image = MultiFrameImage(name=self.name + "_MultiFrameImage",
+                                                 position=self.position,
+                                                 images=images)
+        self.sequence.actor = self.multi_frame_image
 
     def set_from_file(self, file_name: str):
         with Image.open(file_name) as image:
@@ -193,9 +219,14 @@ class AnimatedImage(LMAEComponent):
         return [self.sequence]
 
     def render(self, canvas: Canvas):
-        if self.pil_image:
-            canvas.image.alpha_composite(self.pil_image, dest=self.position)
+        if self.multi_frame_image:
+            self.multi_frame_image.render(canvas)
             self.changes_since_last_render = False
 
     def needs_render(self):
-        return self.needs_render()
+        return self.multi_frame_image.needs_render() if self.multi_frame_image else False
+
+    def set_position(self, position: tuple[int, int]):
+        super().set_position(position)
+        if self.multi_frame_image:
+            self.multi_frame_image.set_position(position)

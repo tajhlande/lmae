@@ -97,6 +97,30 @@ class SpriteImage(Actor):
         self.changes_since_last_render = False
 
 
+class MultiFrameImage(Actor):
+
+    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0), images: list[Image] = None):
+        name = name or _get_sequential_name("MultiFrameImage")
+        super().__init__(name=name, position=position)
+        self.images: list[Image] = images or []
+        self.current_frame: int = 0
+
+    def set_frame(self, frame_number: int):
+        if self.images and 0 <= frame_number < len(self.images):
+            if self.current_frame != frame_number:
+                self.logger.debug(f"Updating to frame {frame_number}")
+            self.current_frame = frame_number
+            self.changes_since_last_render = True
+        else:
+            self.logger.warning(f"Asked to set invalid frame number {frame_number}. "
+                                f"There are {len(self.images)} present.")
+
+    def render(self, canvas: Canvas):
+        if 0 <= self.current_frame < len(self.images):
+            canvas.image.alpha_composite(self.images[self.current_frame], dest=self.position)
+        self.changes_since_last_render = False
+
+
 class Text(Actor):
     """
     Text that renders on a stage
@@ -257,10 +281,6 @@ class Rectangle(Actor):
         self.outline_color = outline_color
         self.changes_since_last_render = True
 
-    def set_position(self, position: tuple[int, int]):
-        self.position = position
-        self.changes_since_last_render = True
-
     def set_size(self, size: tuple[int, int]):
         self.size = size
         self.changes_since_last_render = True
@@ -330,7 +350,7 @@ class CropMask(CompositeActor):
     """
     Composite actor that will crop another actor's rendering to a defined rectangle.
     Crop area is inclusive of those pixels.
-    Position and size here are for the entire croppable area, and crop_area is the part
+    Position and size here are for the entire crop-able area, and crop_area is the part
     you wish to be visible.
     Default crop area is a central 1/4 of the total image.
     """

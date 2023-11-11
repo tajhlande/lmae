@@ -1,8 +1,6 @@
 import logging
 
 import app_runner
-from lmae.actor import StillImage
-from lmae.animation import AnimatedImageSequence
 from lmae.app import SingleStageRenderLoopApp
 from lmae.component import AnimatedImage
 
@@ -23,4 +21,3 @@ sample_app.add_actors(kirby_gif_image)
 sample_app.add_animations(*kirby_animations)
 
 app_runner.start_app(sample_app)
-
