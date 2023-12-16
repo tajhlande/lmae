@@ -8,7 +8,7 @@ from PIL import ImageFont
 import app_runner
 from lmae.core import Stage
 from lmae.app import App
-from lmae.actor import StillImage, Text
+from lmae.actor import Rectangle, StillImage, Text
 
 
 class AdventApp(App):
@@ -30,13 +30,37 @@ class AdventApp(App):
                                     color=(192, 192, 192, 255))
         self.until_text_label = Text(font=self.small_font, name="days_until_text", position=(7, 25), text="until",
                                      color=(192, 192, 192, 255))
-        self.tree_image: StillImage = StillImage(name="tree", position=(37, 0))
+        self.tree_image = StillImage(name="tree", position=(37, 0))
         self.tree_image.set_from_file('images/pixel-tree-22x32-alpha.png')
         self.days_until_christmas = 0
+
+        self.lights_locations: list[tuple[int, int]] = list()
+        self.lights_list: list[Rectangle] = list()
+        self.find_the_tree_lights()
+
+    def find_the_tree_lights(self):
+        pil_image = self.tree_image.image
+        offset = self.tree_image.position
+        self.lights_locations.clear()
+        for y in range(0, self.tree_image.size[1]):
+            for x in range(0, self.tree_image.size[0]):
+                pixel_color = pil_image.getpixel((x, y))
+                if pixel_color == (255, 255, 255) or pixel_color == (255, 255, 255, 255):
+                    self.lights_locations.append((x + offset[0], y + offset[1]))
+
+        self.logger.debug(f"Found {len(self.lights_locations)} lights on tree")
+
+        self.lights_list.clear()
+        light_ctr = 0
+        for location in self.lights_locations:
+            light_ctr = light_ctr + 1
+            light = Rectangle(name=f"Light_{light_ctr}", position=location, size=(0, 0), color=(192, 192, 255, 255))
+            self.lights_list.append(light)
 
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
         self.stage.actors.extend((self.days_text_label, self.until_text_label, self.day_count_label, self.tree_image))
+        self.stage.actors.extend(self.lights_list)
 
     def update_day_counter(self):
         current_datetime = datetime.now()
@@ -67,6 +91,15 @@ class AdventApp(App):
 
     def update_view(self):
         self.day_count_label.set_text(str(self.days_until_christmas))
+        if self.days_until_christmas < 10:
+            self.day_count_label.set_position((12, 2))
+        else:
+            self.day_count_label.set_position((8, 2))
+
+        if self.days_until_christmas == 1:
+            self.days_text_label.set_text("day")
+        else:
+            self.days_text_label.set_text("days")
 
     def prepare(self):
         self.compose_view()

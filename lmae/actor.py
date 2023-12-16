@@ -292,8 +292,8 @@ class Rectangle(Actor):
     def render(self, canvas: Canvas):
         draw = canvas.image_draw
         opposite_corner = tuple(map(lambda i, j: i + j, self.position, self.size))
-        self.logger.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
-                          f"outline_color {self.outline_color} and outline_width {self.outline_width}")
+        # self.logger.debug(f"Drawing rect at {self.position}:{opposite_corner} with color {self.color},  "
+        #                   f"outline_color {self.outline_color} and outline_width {self.outline_width}")
         draw.rectangle(self.position + opposite_corner, fill=self.color, outline=self.outline_color,
                        width=self.outline_width)
 
