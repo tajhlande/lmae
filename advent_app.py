@@ -3,6 +3,7 @@ import datetime
 import time
 
 from datetime import datetime
+from freezegun import freeze_time
 from PIL import ImageFont
 
 import app_runner
@@ -24,15 +25,18 @@ class AdventApp(App):
         self.pre_render_callback = None
         self.refresh_time = refresh_time
         self.big_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 15)
-        self.day_count_label = Text(font=self.big_font, name="day_count", position=(8, 2))
+        self.counter_label = Text(font=self.big_font, name="counter", position=(8, 2))
         self.small_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
-        self.days_text_label = Text(font=self.small_font, name="days_until_text", position=(9, 18), text="days",
-                                    color=(192, 192, 192, 255))
-        self.until_text_label = Text(font=self.small_font, name="days_until_text", position=(7, 25), text="until",
-                                     color=(192, 192, 192, 255))
+        self.line_1_label = Text(font=self.small_font, name="line_1_text", position=(9, 18), text="days",
+                                 color=(192, 192, 192, 255))
+        self.line_2_label = Text(font=self.small_font, name="line_2_text", position=(7, 25), text="until",
+                                 color=(192, 192, 192, 255))
         self.tree_image = StillImage(name="tree", position=(37, 0))
         self.tree_image.set_from_file('images/pixel-tree-22x32-alpha.png')
         self.days_until_christmas = 0
+        self.hours_until_christmas = 0
+        self.minutes_until_christmas = 0
+        self.is_christmas = False
 
         self.lights_locations: list[tuple[int, int]] = list()
         self.lights_list: list[Rectangle] = list()
@@ -59,15 +63,16 @@ class AdventApp(App):
 
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
-        self.stage.actors.extend((self.days_text_label, self.until_text_label, self.day_count_label, self.tree_image))
+        self.stage.actors.extend((self.line_1_label, self.line_2_label, self.counter_label, self.tree_image))
         self.stage.actors.extend(self.lights_list)
 
-    def update_day_counter(self):
+    def update_countdown(self):
         current_datetime = datetime.now()
         current_day = current_datetime.day
         current_month = current_datetime.month
         current_year = current_datetime.year
         self.logger.debug(f"Current date: {current_year:04}-{current_month:02}-{current_day:02}")
+        self.is_christmas = current_month == 12 and current_day == 25
         christmas_has_passed = current_month == 12 and current_day > 25
         self.logger.debug(f"Has Christmas passed this year already? {'yes' if christmas_has_passed else 'no'}")
 
@@ -80,6 +85,9 @@ class AdventApp(App):
         if christmas_delta.seconds > 0:
             days_until = days_until + 1
         self.days_until_christmas = days_until
+        if self.days_until_christmas <= 1:
+            self.hours_until_christmas = 23 - current_datetime.hour
+            self.minutes_until_christmas = 60 - current_datetime.minute
         self.logger.debug(f"Counted {self.days_until_christmas} days until Christmas")
 
     @staticmethod
@@ -90,16 +98,33 @@ class AdventApp(App):
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
     def update_view(self):
-        self.day_count_label.set_text(str(self.days_until_christmas))
-        if self.days_until_christmas < 10:
-            self.day_count_label.set_position((12, 2))
-        else:
-            self.day_count_label.set_position((8, 2))
+        self.counter_label.set_text(str(self.days_until_christmas))
+        self.counter_label.show()
+        self.line_2_label.set_text("until")
+        if self.is_christmas:
+            self.counter_label.hide()
+            self.line_1_label.set_text("Merry")
+            self.line_2_label.set_text("")
+        elif self.days_until_christmas == 1:
+            if self.hours_until_christmas < 1:
+                if self.minutes_until_christmas == 1:
+                    self.line_1_label.set_text("min")
+                else:
+                    self.line_1_label.set_text("mins")
+                self.counter_label.set_text(str(self.minutes_until_christmas))
+            else:
+                if self.hours_until_christmas == 1:
+                    self.line_1_label.set_text("hour")
+                else:
+                    self.line_1_label.set_text("hours")
+                self.counter_label.set_text(str(self.hours_until_christmas))
+        else:  # days
+            self.line_1_label.set_text("days")
 
-        if self.days_until_christmas == 1:
-            self.days_text_label.set_text("day")
+        if len(self.counter_label.text) <= 1:
+            self.counter_label.set_position((12, 2))
         else:
-            self.days_text_label.set_text("days")
+            self.counter_label.set_position((8, 2))
 
     def prepare(self):
         self.compose_view()
@@ -114,7 +139,7 @@ class AdventApp(App):
         try:
             while self.running:
                 # get updated day count
-                self.update_day_counter()
+                self.update_countdown()
 
                 # update the view
                 self.update_view()
@@ -155,7 +180,6 @@ class AdventApp(App):
 
 
 # get environment variables
-
 app_runner.app_setup()
 advent_app = AdventApp()
 advent_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
