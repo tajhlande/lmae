@@ -38,6 +38,10 @@ class AdventApp(App):
         self.minutes_until_christmas = 0
         self.is_christmas = False
 
+        self.pattern_index = 0
+        self.colors_index = 0
+        self.twinkle = False
+
         self.lights_locations: list[tuple[int, int]] = list()
         self.lights_list: list[Rectangle] = list()
         self.find_the_tree_lights()
@@ -86,7 +90,7 @@ class AdventApp(App):
             days_until = days_until + 1
         self.days_until_christmas = days_until
         if self.days_until_christmas <= 1:
-            self.hours_until_christmas = 23 - current_datetime.hour
+            self.hours_until_christmas = 24 - current_datetime.hour
             self.minutes_until_christmas = 60 - current_datetime.minute
         self.logger.debug(f"Counted {self.days_until_christmas} days until Christmas")
 
@@ -97,7 +101,13 @@ class AdventApp(App):
             timestamp = float(timestamp)
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
+    def determine_light_patterns_and_color(self, hour_of_day: int):
+        self.pattern_index = int(hour_of_day / 8)
+        self.colors_index = int((hour_of_day / 2) % 4)
+        self.twinkle = int(hour_of_day % 2)
+
     def update_view(self):
+        # determine counter and text label values
         self.counter_label.set_text(str(self.days_until_christmas))
         self.counter_label.show()
         self.line_2_label.set_text("until")
@@ -106,7 +116,7 @@ class AdventApp(App):
             self.line_1_label.set_text("Merry")
             self.line_2_label.set_text("")
         elif self.days_until_christmas == 1:
-            if self.hours_until_christmas < 1:
+            if self.hours_until_christmas <= 1:
                 if self.minutes_until_christmas == 1:
                     self.line_1_label.set_text("min")
                 else:
@@ -121,10 +131,19 @@ class AdventApp(App):
         else:  # days
             self.line_1_label.set_text("days")
 
-        if len(self.counter_label.text) <= 1:
-            self.counter_label.set_position((12, 2))
-        else:
-            self.counter_label.set_position((8, 2))
+        # center labels
+        counter_x_offset = int((32 - self.counter_label.size[0]) / 2)
+        line_1_x_offset = int((32 - self.line_1_label.size[0]) / 2)
+        line_2_x_offset = int((32 - self.line_2_label.size[0]) / 2)
+        self.counter_label.set_position((counter_x_offset, 2))
+        self.line_1_label.set_position((line_1_x_offset, 18))
+        self.line_2_label.set_position((line_2_x_offset, 25))
+
+        # determine Christmas light pattern and colors
+        hour_of_day = datetime.now().hour
+        self.pattern_index = int(hour_of_day / 3)
+        self.colors_index = (hour_of_day / 2) % 4
+        self.twinkle = hour_of_day % 2
 
     def prepare(self):
         self.compose_view()
@@ -179,8 +198,9 @@ class AdventApp(App):
             self.logger.debug("Run stopped")
 
 
-# get environment variables
-app_runner.app_setup()
-advent_app = AdventApp()
-advent_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-app_runner.start_app(advent_app)
+if __name__ == "__main__":
+    # get environment variables
+    app_runner.app_setup()
+    advent_app = AdventApp()
+    advent_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
+    app_runner.start_app(advent_app)
