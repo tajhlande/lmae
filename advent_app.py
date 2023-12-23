@@ -162,19 +162,18 @@ class AdventApp(App):
             self.last_hour = hour_of_day
             self.stage.clear_animations_for_all(self.lights_list)
             self.determine_light_patterns_and_color(hour_of_day)
-            match self.colors_index:
-                case 0:  # 1 color:  white
-                    self.colors = [(255, 255, 255, 255)]
-                case 1:  # 2 colors: red blue
-                    self.colors = [(255, 0, 0, 255), (0, 0, 255, 255)]
-                case 2:  # 2 colors: red white
-                    self.colors = [(255, 0, 0, 255), (255, 255, 255, 255)]
-                case 3:  # 3 colors: red white blue
-                    self.colors = [(255, 0, 0, 255), (255, 255, 255, 255), (0, 0, 255, 255)]
-                case 4:  # 3 colors: purple, yellowish green, aqua
-                    self.colors = [(255, 0, 189, 255), (189, 255, 0, 255), (0, 189, 255, 255)]
-                case 5:  # 4 colors: red, green, blue purple
-                    self.colors = [(255, 0, 0, 255), (128, 255, 0, 255), (0, 255, 255, 255), (128, 0, 255, 255)]
+            if self.colors_index == 0:  # 1 color:  white
+                self.colors = [(255, 255, 255, 255)]
+            elif self.colors_index == 1:  # 2 colors: red blue
+                self.colors = [(255, 0, 0, 255), (0, 0, 255, 255)]
+            elif self.colors_index == 2:  # 2 colors: red white
+                self.colors = [(255, 0, 0, 255), (255, 255, 255, 255)]
+            elif self.colors_index == 3:  # 3 colors: red white blue
+                self.colors = [(255, 0, 0, 255), (255, 255, 255, 255), (0, 0, 255, 255)]
+            elif self.colors_index == 4:  # 3 colors: purple, yellowish green, aqua
+                self.colors = [(255, 0, 189, 255), (189, 255, 0, 255), (0, 189, 255, 255)]
+            elif self.colors_index == 5:  # 4 colors: red, green, blue purple
+                self.colors = [(255, 0, 0, 255), (128, 255, 0, 255), (0, 255, 255, 255), (128, 0, 255, 255)]
 
             self.logger.debug(f"Using color option {self.colors_index} with {len(self.colors)} colors")
             self.logger.debug(f"Twinkle is set to {self.twinkle}")
