@@ -253,6 +253,14 @@ class Stage(LMAEObject):
         self.logger.debug(f"Cleared animations for actor {actor.name}. Total anims before: {size_before}, "
                           f"after: {size_after}")
 
+    def clear_animations_for_all(self, actors: list[Actor]):
+        """
+        Remove animations for a list of actors
+        :param actors: a list of actors for which we should remove animations
+        """
+        for actor in actors:
+            self.clear_animations_for(actor)
+
     def prepare_frame(self):
         """
         Prepare for a frame to be rendered

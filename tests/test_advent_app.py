@@ -165,4 +165,4 @@ class TestAdventApp(TestCase):
                          f"Twinkle: {advent_app.twinkle}")
             distinct_patterns.add((advent_app.pattern_index, advent_app.colors_index, advent_app.twinkle))
 
-        self.assertEqual(len(distinct_patterns), 24)
+        self.assertEqual(12, len(distinct_patterns))

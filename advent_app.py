@@ -3,11 +3,11 @@ import datetime
 import time
 
 from datetime import datetime
-from freezegun import freeze_time
 from PIL import ImageFont
 
 import app_runner
-from lmae.core import Stage
+from lmae.animation import Sequence, HueFade
+from lmae.core import Stage, Animation
 from lmae.app import App
 from lmae.actor import Rectangle, StillImage, Text
 
@@ -38,9 +38,18 @@ class AdventApp(App):
         self.minutes_until_christmas = 0
         self.is_christmas = False
 
+        self.was_it_christmas = None
+        self.last_days_until_christmas = -1
+        self.last_hours_until_christmas = -1
+        self.last_minutes_until_christmas = -1
+
         self.pattern_index = 0
         self.colors_index = 0
         self.twinkle = False
+        self.last_hour = -1
+
+        self.colors = []
+        self.pattern = []
 
         self.lights_locations: list[tuple[int, int]] = list()
         self.lights_list: list[Rectangle] = list()
@@ -102,8 +111,8 @@ class AdventApp(App):
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
     def determine_light_patterns_and_color(self, hour_of_day: int):
-        self.pattern_index = int(hour_of_day / 8)
-        self.colors_index = int((hour_of_day / 2) % 4)
+        self.pattern_index = int(hour_of_day / 6) % 2
+        self.colors_index = int(hour_of_day % 6)
         self.twinkle = int(hour_of_day % 2)
 
     def update_view(self):
@@ -111,39 +120,115 @@ class AdventApp(App):
         self.counter_label.set_text(str(self.days_until_christmas))
         self.counter_label.show()
         self.line_2_label.set_text("until")
-        if self.is_christmas:
-            self.counter_label.hide()
-            self.line_1_label.set_text("Merry")
-            self.line_2_label.set_text("")
-        elif self.days_until_christmas == 1:
-            if self.hours_until_christmas <= 1:
-                if self.minutes_until_christmas == 1:
-                    self.line_1_label.set_text("min")
+        if (self.was_it_christmas != self.is_christmas or self.last_days_until_christmas != self.days_until_christmas or
+                self.last_hours_until_christmas != self.hours_until_christmas or
+                self.last_minutes_until_christmas != self.minutes_until_christmas):
+            if self.is_christmas:
+                self.counter_label.hide()
+                self.line_1_label.set_text("Merry")
+                self.line_2_label.set_text("")
+            elif self.days_until_christmas == 1:
+                if self.hours_until_christmas <= 1:
+                    if self.minutes_until_christmas == 1:
+                        self.line_1_label.set_text("min")
+                    else:
+                        self.line_1_label.set_text("mins")
+                    self.counter_label.set_text(str(self.minutes_until_christmas))
                 else:
-                    self.line_1_label.set_text("mins")
-                self.counter_label.set_text(str(self.minutes_until_christmas))
-            else:
-                if self.hours_until_christmas == 1:
-                    self.line_1_label.set_text("hour")
-                else:
-                    self.line_1_label.set_text("hours")
-                self.counter_label.set_text(str(self.hours_until_christmas))
-        else:  # days
-            self.line_1_label.set_text("days")
+                    if self.hours_until_christmas == 1:
+                        self.line_1_label.set_text("hour")
+                    else:
+                        self.line_1_label.set_text("hours")
+                    self.counter_label.set_text(str(self.hours_until_christmas))
+            else:  # days
+                self.line_1_label.set_text("days")
 
-        # center labels
-        counter_x_offset = int((32 - self.counter_label.size[0]) / 2)
-        line_1_x_offset = int((32 - self.line_1_label.size[0]) / 2)
-        line_2_x_offset = int((32 - self.line_2_label.size[0]) / 2)
-        self.counter_label.set_position((counter_x_offset, 2))
-        self.line_1_label.set_position((line_1_x_offset, 18))
-        self.line_2_label.set_position((line_2_x_offset, 25))
+            # center labels
+            counter_x_offset = int((32 - self.counter_label.size[0]) / 2)
+            line_1_x_offset = int((32 - self.line_1_label.size[0]) / 2)
+            line_2_x_offset = int((32 - self.line_2_label.size[0]) / 2)
+            self.counter_label.set_position((counter_x_offset, 2))
+            self.line_1_label.set_position((line_1_x_offset, 18))
+            self.line_2_label.set_position((line_2_x_offset, 25))
+
+        self.was_it_christmas = self.is_christmas
+        self.last_days_until_christmas = self.days_until_christmas
+        self.last_hours_until_christmas = self.hours_until_christmas
+        self.last_minutes_until_christmas = self.minutes_until_christmas
 
         # determine Christmas light pattern and colors
         hour_of_day = datetime.now().hour
-        self.pattern_index = int(hour_of_day / 3)
-        self.colors_index = (hour_of_day / 2) % 4
-        self.twinkle = hour_of_day % 2
+        if hour_of_day != self.last_hour:
+            self.last_hour = hour_of_day
+            self.stage.clear_animations_for_all(self.lights_list)
+            self.determine_light_patterns_and_color(hour_of_day)
+            match self.colors_index:
+                case 0:  # 1 color:  white
+                    self.colors = [(255, 255, 255, 255)]
+                case 1:  # 2 colors: red blue
+                    self.colors = [(255, 0, 0, 255), (0, 0, 255, 255)]
+                case 2:  # 2 colors: red white
+                    self.colors = [(255, 0, 0, 255), (255, 255, 255, 255)]
+                case 3:  # 3 colors: red white blue
+                    self.colors = [(255, 0, 0, 255), (255, 255, 255, 255), (0, 0, 255, 255)]
+                case 4:  # 3 colors: purple, yellowish green, aqua
+                    self.colors = [(255, 0, 189, 255), (189, 255, 0, 255), (0, 189, 255, 255)]
+                case 5:  # 4 colors: red, green, blue purple
+                    self.colors = [(255, 0, 0, 255), (128, 255, 0, 255), (0, 255, 255, 255), (128, 0, 255, 255)]
+
+            self.logger.debug(f"Using color option {self.colors_index} with {len(self.colors)} colors")
+            self.logger.debug(f"Twinkle is set to {self.twinkle}")
+
+            tree_color = (65, 167, 66, 255)
+            light_duration = 1.0  # seconds
+            light_sequences: list[Animation] = []
+            match self.pattern_index:
+                case 0:  # on/off  (alt with tree green, alt every other)
+                    self.logger.debug("Using pattern 0: alternate on/off")
+                    ci = 0  # color offset index
+                    li = 0  # light index
+                    for light in self.lights_list:
+                        sequence = Sequence(name=f"Light_{li}_sequence", actor=light, repeat=True)
+                        if li % 2 == 0:  # start off vs start on
+                            start_color = tree_color
+                            end_color = self.colors[ci] if self.twinkle else tree_color
+                        else:
+                            start_color = self.colors[ci]
+                            end_color = tree_color if self.twinkle else self.colors[ci]
+
+                        hue_fade = HueFade(name=f"Light{li}_fade_0", actor=light, initial_color=start_color,
+                                           final_color=end_color, callback=light.set_color, duration=light_duration)
+                        sequence.add_animations(hue_fade)
+
+                        if li % 2 == 0:  # start off vs start on
+                            start_color = self.colors[ci]
+                            end_color = tree_color if self.twinkle else self.colors[ci]
+                        else:
+                            start_color = tree_color
+                            end_color = self.colors[ci] if self.twinkle else tree_color
+
+                        hue_fade = HueFade(name=f"Light{li}_fade_1", actor=light, initial_color=start_color,
+                                           final_color=end_color, callback=light.set_color, duration=light_duration)
+                        sequence.add_animations(hue_fade)
+
+                        ci = ci + 1 % len(self.colors)
+                        li = li + 1
+                        light_sequences.append(sequence)
+                case _:  # chase
+                    self.logger.debug("Using pattern 1: color chase")
+                    li = 0  # light index
+                    for light in self.lights_list:
+                        sequence = Sequence(name=f"Light_{li}_sequence", actor=light, repeat=True)
+                        for i in range(0, len(self.colors)):
+                            ci = (li + i) % len(self.colors)
+                            start_color = self.colors[ci]
+                            end_color = self.colors[(ci + 1) % len(self.colors)] if self.twinkle else start_color
+                            hue_fade = HueFade(name=f"Light{li}_fade_{i}", actor=light, initial_color=start_color,
+                                               final_color=end_color, callback=light.set_color, duration=light_duration)
+                            sequence.add_animations(hue_fade)
+                        li = li + 1
+                        light_sequences.append(sequence)
+            self.stage.add_animations(light_sequences)
 
     def prepare(self):
         self.compose_view()

@@ -5,8 +5,6 @@ from colorsys import rgb_to_hsv, hsv_to_rgb
 from enum import auto, Enum
 from typing import Callable
 
-from PIL import Image
-
 from lmae.core import Actor, Animation, _get_sequential_name
 from lmae.actor import MultiFrameImage, SpriteImage
 
@@ -27,50 +25,64 @@ class Still(Animation):
         return self.get_simulated_time() > self.duration
 
 
-class Easing(Enum):
+class Easing:
     """
     Easing function variations
     """
-    LINEAR = auto()
-    QUADRATIC = auto()
-    BEZIER = auto()
-    PARAMETRIC = auto()
-    BACK = auto()
-    CUSTOM = auto()
+
+    # constants for back easing
+    _eb_c1: float = 1.70158
+    _eb_c2: float = 1.70158 * 1.525
+
+    def __init__(self, value):
+        self.function_name = value
+        self.apply: Callable[[float], float]
+        if self.function_name == "QUADRATIC":
+            self.apply = self._quadratic_easing
+        elif self.function_name == "BEZIER":
+            self.apply = self._bezier_easing
+        elif self.function_name == "PARAMETRIC":
+            self.apply = self._parametric_easing
+        elif self.function_name == "BACK":
+            self.apply = self._back_easing
+        else:
+            self.apply = self._linear_easing
+
+    @staticmethod
+    def _linear_easing(t: float):
+        return t
+
+    @staticmethod
+    def _quadratic_easing(t: float):
+        if t <= 0.5:
+            return 2.0 * t * t
+        t -= 0.5
+        return 2.0 * t * (1.0 - t) + 0.5
+
+    @staticmethod
+    def _bezier_easing(t: float):
+        return t * t * (3.0 - 2.0 * t)
+
+    @staticmethod
+    def _parametric_easing(t: float):
+        square_t = t * t
+        return square_t / (2.0 * (square_t - t) + 1.0)
 
 
-def _linear_easing(t: float):
-    return t
+    @staticmethod
+    def _back_easing(self, t: float):
+        c2 = self._eb_c2
+        if t < 0.5:
+            return (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
+        else:
+            return (pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2
 
 
-def _quadratic_easing(t: float):
-    if t <= 0.5:
-        return 2.0 * t * t
-    t -= 0.5
-    return 2.0 * t * (1.0 - t) + 0.5
-
-
-def _bezier_easing(t: float):
-    return t * t * (3.0 - 2.0 * t)
-
-
-def _parametric_easing(t: float):
-    square_t = t * t
-    return square_t / (2.0 * (square_t - t) + 1.0)
-
-
-# constants for back easing
-_eb_c1 = 1.70158
-_eb_c2 = _eb_c1 * 1.525
-
-
-def _back_easing(t: float):
-    # c1 = StraightMove._eb_c1
-    c2 = _eb_c2
-    if t < 0.5:
-        return (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
-    else:
-        return (pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2
+Easing.LINEAR = Easing("LINEAR")
+Easing.QUADRATIC = Easing("QUADRATIC")
+Easing.BEZIER = Easing("BEZIER")
+Easing.PARAMETRIC = Easing("PARAMETRIC")
+Easing.BACK = Easing("BACK")
 
 
 class StraightMove(Animation):
@@ -90,37 +102,8 @@ class StraightMove(Animation):
         super().__init__(name=name, actor=actor, repeat=repeat, duration=duration)
         self.distance = distance or (0, 0)
         self.accumulated_movement = (0, 0)
-        self.easing = None
-        self.easing_function = None
-        self.set_easing(easing)
+        self.easing = easing
         self.logger = logging.getLogger(name)
-
-    def set_easing(self, easing: Easing):
-        """
-        Set the easing method for this motion.
-        :param easing: The easing enum value
-        """
-        self.easing = easing
-        if self.easing == Easing.QUADRATIC:
-            self.set_easing_function(_quadratic_easing, easing=easing)
-        elif self.easing == Easing.BEZIER:
-            self.set_easing_function(_bezier_easing, easing=easing)
-        elif self.easing == Easing.PARAMETRIC:
-            self.set_easing_function(_parametric_easing, easing=easing)
-        elif self.easing == Easing.BACK:
-            self.set_easing_function(_back_easing, easing=easing)
-        else:
-            self.set_easing_function(_linear_easing, easing=easing)
-
-    def set_easing_function(self, easing_function: Callable[[float], float], easing: Easing = Easing.CUSTOM):
-        """
-        To set a custom function for easing
-        :param easing_function: A function that takes a float t: 0 <= t <= 1 and returns a float t: 0 <= t <= 1
-        :param easing: If setting a provided easing function, set this to the matching enum value
-        """
-        # self.logger.debug(f"Setting easing to {easing.name}")
-        self.easing_function = easing_function
-        self.easing = easing
 
     def reset(self):
         super().reset()
@@ -140,7 +123,7 @@ class StraightMove(Animation):
         if elapsed_time > self.duration:
             action_time = self.duration
         duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
-        easing_fraction = self.easing_function(duration_fraction)
+        easing_fraction = self.easing.apply(duration_fraction)
 
         # self.logger.debug(f"Updating animation {self.name} on actor {self.actor.name} at {current_time:.3f}. "
         #                   f"simulated: {simulated_time:.3f}s, elapsed: {elapsed_time:.3f}s, "
@@ -211,8 +194,12 @@ class Sequence(Animation):
         self.seq_start_time = 0
         self._compute_duration()
 
-    def add_animations(self, *args: Animation):
-        self.animations.extend(args)
+    def add_animation(self, animation):
+        self.animations.append(animation)
+        self._compute_duration()
+
+    def add_animations(self, *animations: Animation):
+        self.animations.extend(animations)
         self._compute_duration()
 
     def _compute_duration(self):
@@ -270,6 +257,59 @@ class Sequence(Animation):
         self.set_update_time(current_time)
 
 
+class HueFade(Animation):
+    """
+    Set a color that fades through HSV space to another color. This animation can be applied to any
+    actor that has color settings, but because they are different (some have one color setting,
+    some have multiple), the mechanism here to update the actor is through a callback function
+    that the user must provide.
+    """
+    def __init__(self, name: str = None, actor: Actor = None,
+                 initial_color: tuple[int, int, int] or tuple[int, int, int, int] = (255, 0, 0),
+                 final_color: tuple[int, int, int] or tuple[int, int, int, int] = (0, 255, 255),
+                 easing: Easing = Easing.LINEAR, duration: float = 10.0,
+                 callback: Callable[[tuple[int, int, int]], None] = None, repeat: bool = False):
+        """
+        Initialize the hue fade
+
+        :param name: Optional name for this animation
+        :param actor: The actor to which this animation applies
+        :param initial_color: The starting color.
+        :param final_color: The finishing color.
+        :param easing: The easing function to apply to the transition
+        :param duration: How long it takes to transition to the final color, in seconds
+        :param callback: A function that applies the color argument to the actor
+        :param repeat: Whether this animation should repeat.
+        """
+        name = name or _get_sequential_name("HueFade")
+        super().__init__(name=name, actor=actor, duration=duration, repeat=repeat)
+        self.initial_hsv = rgb_to_hsv(initial_color[0] / 255.0, initial_color[1] / 255.0, initial_color[2] / 255.0)
+        self.final_hsv = rgb_to_hsv(final_color[0] / 255.0, final_color[1] / 255.0, final_color[2] / 255.0)
+        self.easing = easing
+        self.color_set_callback: Callable[[tuple[int, int, int]], None] = callback
+
+    def is_finished(self) -> bool:
+        return self.get_simulated_time() > self.duration
+
+    def update_actor(self, current_time: float):
+        #  all times relative to start
+        elapsed_time = self.get_elapsed_time(current_time)
+        action_time = elapsed_time
+        if elapsed_time > self.duration:
+            action_time = self.duration
+        duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
+        easing_fraction = self.easing.apply(duration_fraction)
+
+        adjusted_hue = self.initial_hsv[0] * easing_fraction + self.final_hsv[0] * (1.0 - easing_fraction)
+        adjusted_sat = self.initial_hsv[1] * easing_fraction + self.final_hsv[1] * (1.0 - easing_fraction)
+        adjusted_val = self.initial_hsv[2] * easing_fraction + self.final_hsv[2] * (1.0 - easing_fraction)
+
+        float_rgb_color = hsv_to_rgb(adjusted_hue, adjusted_sat, adjusted_val)
+        rgb_color = round(float_rgb_color[0] * 255), round(float_rgb_color[1] * 255), round(float_rgb_color[2] * 255)
+        self.color_set_callback(rgb_color)
+        self.set_update_time(current_time)
+
+
 class HueRotate(Animation):
     """
     Cycle a color around the hue wheel in HSV space. This animation can be applied to any
@@ -281,13 +321,14 @@ class HueRotate(Animation):
                  duration: float = 10.0, callback: Callable[[tuple[int, int, int]], None] = None,
                  repeat: bool = False):
         """
+        Initialize the hue rotation
 
         :param name: Optional name for this animation
         :param actor: The actor to which this animation applies
         :param initial_color: The starting color.  When the animation finishes, this will be the finish color as well.
         :param duration: How long it takes to cycle around the wheel, in seconds
         :param callback: A function that applies the color argument to the actor
-        :param repeat: Whether or not this animation should repeat.
+        :param repeat: Whether this animation should repeat.
         """
         name = name or _get_sequential_name("HueRotate")
         super().__init__(name=name, actor=actor, duration=duration, repeat=repeat)
