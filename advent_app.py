@@ -209,7 +209,7 @@ class AdventApp(App):
                                        final_color=end_color, callback=light.set_color, duration=light_duration)
                     sequence.add_animations(hue_fade)
 
-                    ci = ci + 1 % len(self.colors)
+                    ci = (ci + 1) % len(self.colors)
                     li = li + 1
                     light_sequences.append(sequence)
             else:  # chase

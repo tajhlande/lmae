@@ -68,7 +68,6 @@ class Easing:
         square_t = t * t
         return square_t / (2.0 * (square_t - t) + 1.0)
 
-
     @staticmethod
     def _back_easing(self, t: float):
         c2 = self._eb_c2
