@@ -182,52 +182,51 @@ class AdventApp(App):
             tree_color = (65, 167, 66, 255)
             light_duration = 1.0  # seconds
             light_sequences: list[Animation] = []
-            match self.pattern_index:
-                case 0:  # on/off  (alt with tree green, alt every other)
-                    self.logger.debug("Using pattern 0: alternate on/off")
-                    ci = 0  # color offset index
-                    li = 0  # light index
-                    for light in self.lights_list:
-                        sequence = Sequence(name=f"Light_{li}_sequence", actor=light, repeat=True)
-                        if li % 2 == 0:  # start off vs start on
-                            start_color = tree_color
-                            end_color = self.colors[ci] if self.twinkle else tree_color
-                        else:
-                            start_color = self.colors[ci]
-                            end_color = tree_color if self.twinkle else self.colors[ci]
+            if self.pattern_index == 0:  # on/off  (alt with tree green, alt every other)
+                self.logger.debug("Using pattern 0: alternate on/off")
+                ci = 0  # color offset index
+                li = 0  # light index
+                for light in self.lights_list:
+                    sequence = Sequence(name=f"Light_{li}_sequence", actor=light, repeat=True)
+                    if li % 2 == 0:  # start off vs start on
+                        start_color = tree_color
+                        end_color = self.colors[ci] if self.twinkle else tree_color
+                    else:
+                        start_color = self.colors[ci]
+                        end_color = tree_color if self.twinkle else self.colors[ci]
 
-                        hue_fade = HueFade(name=f"Light{li}_fade_0", actor=light, initial_color=start_color,
+                    hue_fade = HueFade(name=f"Light{li}_fade_0", actor=light, initial_color=start_color,
+                                       final_color=end_color, callback=light.set_color, duration=light_duration)
+                    sequence.add_animations(hue_fade)
+
+                    if li % 2 == 0:  # start off vs start on
+                        start_color = self.colors[ci]
+                        end_color = tree_color if self.twinkle else self.colors[ci]
+                    else:
+                        start_color = tree_color
+                        end_color = self.colors[ci] if self.twinkle else tree_color
+
+                    hue_fade = HueFade(name=f"Light{li}_fade_1", actor=light, initial_color=start_color,
+                                       final_color=end_color, callback=light.set_color, duration=light_duration)
+                    sequence.add_animations(hue_fade)
+
+                    ci = ci + 1 % len(self.colors)
+                    li = li + 1
+                    light_sequences.append(sequence)
+            else:  # chase
+                self.logger.debug("Using pattern 1: color chase")
+                li = 0  # light index
+                for light in self.lights_list:
+                    sequence = Sequence(name=f"Light_{li}_sequence", actor=light, repeat=True)
+                    for i in range(0, len(self.colors)):
+                        ci = (li + i) % len(self.colors)
+                        start_color = self.colors[ci]
+                        end_color = self.colors[(ci + 1) % len(self.colors)] if self.twinkle else start_color
+                        hue_fade = HueFade(name=f"Light{li}_fade_{i}", actor=light, initial_color=start_color,
                                            final_color=end_color, callback=light.set_color, duration=light_duration)
                         sequence.add_animations(hue_fade)
-
-                        if li % 2 == 0:  # start off vs start on
-                            start_color = self.colors[ci]
-                            end_color = tree_color if self.twinkle else self.colors[ci]
-                        else:
-                            start_color = tree_color
-                            end_color = self.colors[ci] if self.twinkle else tree_color
-
-                        hue_fade = HueFade(name=f"Light{li}_fade_1", actor=light, initial_color=start_color,
-                                           final_color=end_color, callback=light.set_color, duration=light_duration)
-                        sequence.add_animations(hue_fade)
-
-                        ci = ci + 1 % len(self.colors)
-                        li = li + 1
-                        light_sequences.append(sequence)
-                case _:  # chase
-                    self.logger.debug("Using pattern 1: color chase")
-                    li = 0  # light index
-                    for light in self.lights_list:
-                        sequence = Sequence(name=f"Light_{li}_sequence", actor=light, repeat=True)
-                        for i in range(0, len(self.colors)):
-                            ci = (li + i) % len(self.colors)
-                            start_color = self.colors[ci]
-                            end_color = self.colors[(ci + 1) % len(self.colors)] if self.twinkle else start_color
-                            hue_fade = HueFade(name=f"Light{li}_fade_{i}", actor=light, initial_color=start_color,
-                                               final_color=end_color, callback=light.set_color, duration=light_duration)
-                            sequence.add_animations(hue_fade)
-                        li = li + 1
-                        light_sequences.append(sequence)
+                    li = li + 1
+                    light_sequences.append(sequence)
             self.stage.add_animations(light_sequences)
 
     def prepare(self):
