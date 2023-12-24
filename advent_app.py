@@ -84,14 +84,14 @@ class AdventApp(App):
         current_day = current_datetime.day
         current_month = current_datetime.month
         current_year = current_datetime.year
-        self.logger.debug(f"Current date: {current_year:04}-{current_month:02}-{current_day:02}")
+        # self.logger.debug(f"Current date: {current_year:04}-{current_month:02}-{current_day:02}")
         self.is_christmas = current_month == 12 and current_day == 25
         christmas_has_passed = current_month == 12 and current_day > 25
-        self.logger.debug(f"Has Christmas passed this year already? {'yes' if christmas_has_passed else 'no'}")
+        # self.logger.debug(f"Has Christmas passed this year already? {'yes' if christmas_has_passed else 'no'}")
 
         christmas_datetime = datetime(current_year + 1 if christmas_has_passed else current_year, 12, 25, 0, 0)
-        self.logger.debug(f"Date of Christmas: {christmas_datetime.year:04}-"
-                          f"{christmas_datetime.month:02}-{christmas_datetime.day:02}")
+        # self.logger.debug(f"Date of Christmas: {christmas_datetime.year:04}-"
+        #                   f"{christmas_datetime.month:02}-{christmas_datetime.day:02}")
 
         christmas_delta = christmas_datetime - current_datetime
         days_until = christmas_delta.days

@@ -2,7 +2,6 @@ import logging
 from abc import abstractmethod
 
 from colorsys import rgb_to_hsv, hsv_to_rgb
-from enum import auto, Enum
 from typing import Callable
 
 from lmae.core import Actor, Animation, _get_sequential_name
@@ -481,8 +480,10 @@ class AnimatedImageSequence(FrameSequence):
         if frame_number != self.last_frame:
             self.logger.debug(f"Changing frame to {frame_number}")
         # self.actor should always be an instance of MultiFrameImage
-        if self.actor:
-            self.actor.set_frame(frame_number)
+        if self.actor and self.actor is MultiFrameImage:
+            assert self.actor is MultiFrameImage  # should always be true, but just in case...
+            multi_frame_actor: MultiFrameImage = self.actor
+            multi_frame_actor.set_frame(frame_number)
             self.last_frame = frame_number
         else:
             self.logger.warning("Asked to set actor frame but we have no actor")
