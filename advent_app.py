@@ -117,9 +117,6 @@ class AdventApp(App):
 
     def update_view(self):
         # determine counter and text label values
-        self.counter_label.set_text(str(self.days_until_christmas))
-        self.counter_label.show()
-        self.line_2_label.set_text("until")
         if (self.was_it_christmas != self.is_christmas or self.last_days_until_christmas != self.days_until_christmas or
                 self.last_hours_until_christmas != self.hours_until_christmas or
                 self.last_minutes_until_christmas != self.minutes_until_christmas):
