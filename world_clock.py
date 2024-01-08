@@ -1,14 +1,75 @@
 import asyncio
 import datetime
+import math
 import time
 
 from datetime import datetime
+from math import sin, cos, asin, atan2, radians, degrees, pi
 from PIL import ImageFont
 
 import app_runner
 from lmae.core import Stage
 from lmae.app import App
 from lmae.actor import StillImage
+
+
+def normalize_radians(rads):
+    while rads > pi:
+        rads = rads - pi
+    while rads < -pi:
+        rads = rads + pi
+    return rads
+
+def normalize_degrees(degs):
+    while degs > 180:
+        degs = degs - 180
+    while degs < -180:
+        degs = degs + 180
+    return degs
+
+def compute_sun_declination(day_of_year):
+    """
+    From https://www.aa.quae.nl/en/antwoorden/zonpositie.html#v526
+    Compute the declination of the sun on a given day.
+
+    :param day_of_year: number of days since (the beginning of) the most recent December 31st (i.e., for midnight
+                        at the beginning of January 1st, for January 2nd, and so on).
+    :return: The declination of the sun on that day, in degrees.
+             The declination is the coordinate in the equatorial coordinate system in the sky that is similar to
+             latitude on Earth. It ranges between −90 degrees at the southern celestial pole and +90 degrees at
+             the northern celestial pole and is zero at the celestial equator. The other equatorial coordinate is
+             the right ascension.
+    """
+    M = -3.6 + 0.9856 * day_of_year
+    nu = M + 1.9 * sin(radians(M))
+    rad_lambda = radians(nu + 102.9)
+    sin_lambda = sin(rad_lambda)
+    delta = -22.8 * sin_lambda + 0.6 * pow(sin_lambda, 3)
+    return delta
+
+
+def compute_terminator_for_declination_and_angle(declination, hour_of_day, angle):
+    """
+    Given a declination angle of the sun and an angle around the terminator, compute the
+    corresponding latitude and longitude.
+
+    :param declination: Declination of the sun on the given day, in degrees
+    :param hour_of_day: UTC hours of the day
+    :param angle: An angle around the circle of the terminator, in degrees
+    :return: A pair (L, B) that is a north latitude and east longitude on the terminator, in degrees
+    """
+    b = declination
+    l = normalize_degrees(180 - 15 * hour_of_day)
+    # psi = angle
+    rad_b = radians(b)
+    rad_l = radians(l)
+    rad_psi = radians(angle)
+    B = asin(cos(rad_b) * sin(rad_psi))
+    x = -cos(rad_l) * sin(rad_b) * sin(rad_psi) - sin(rad_l) * cos(rad_psi)
+    y = -sin(rad_l) * sin(rad_b) * sin(rad_psi) + cos(rad_l) * cos(rad_psi)
+    L = atan2(y, x)
+
+    return degrees(B), degrees(L)
 
 
 class WorldClock(App):
@@ -33,6 +94,8 @@ class WorldClock(App):
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
         self.stage.actors.extend((self.daytime_map, self.nighttime_map))
+
+    @staticmethod
 
     def update_clock(self):
         self.current_datetime = datetime.now()
