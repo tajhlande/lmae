@@ -496,7 +496,7 @@ class WeatherApp(App):
         # OW interpretation
         self.background_image.set_from_image(None)
         if self.is_daytime:
-            if 200 <= self.condition_code <= 299:
+            if 200 <= self.condition_code <= 299 or 600 <= self.condition_code <= 699:
                 self.background_image.set_from_image(self.cloudy_image)
             elif 300 <= self.condition_code <= 399:
                 self.background_image.set_from_image(self.cloudy_image)
@@ -522,7 +522,7 @@ class WeatherApp(App):
             elif 804 <= self.condition_code <= 899:
                 self.background_image.set_from_image(self.cloudy_image)
         else:
-            if 200 <= self.condition_code <= 299:
+            if 200 <= self.condition_code <= 299 or 600 <= self.condition_code <= 699:
                 self.background_image.set_from_image(self.dark_clouds_image)
             elif 300 <= self.condition_code <= 399:
                 self.background_image.set_from_image(self.dark_clouds_image)
