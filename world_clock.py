@@ -1,11 +1,10 @@
 import asyncio
 import datetime
-import math
 import time
 
 from datetime import datetime
-from math import sin, cos, asin, atan2, radians, degrees, pi
-from PIL import ImageFont
+from math import sin, cos, asin, atan2, radians, degrees, pi, sqrt, isclose, floor, ceil
+from PIL import Image, ImageDraw, ImageFont
 
 import app_runner
 from lmae.core import Stage
@@ -20,12 +19,14 @@ def normalize_radians(rads):
         rads = rads + pi
     return rads
 
+
 def normalize_degrees(degs):
     while degs > 180:
         degs = degs - 180
     while degs < -180:
         degs = degs + 180
     return degs
+
 
 def compute_sun_declination(day_of_year):
     """
@@ -70,6 +71,105 @@ def compute_terminator_for_declination_and_angle(declination, hour_of_day, angle
     L = atan2(y, x)
 
     return degrees(B), degrees(L)
+
+
+def find_terminator_intersection(longitude: float, terminator_tuple_list: list[tuple[float, tuple[float, float]]]):
+    size = len(terminator_tuple_list)
+    offset = size / 2
+
+    pass
+
+
+gall_peters_radius = 34.4 / pi
+root_2 = sqrt(2)
+root_2_x_180 = root_2 * 180
+
+
+def half_round_up(value: float) -> float:
+    return floor(value + 0.5)
+
+
+def gall_peters_projection(lat_long: tuple[float, float]) -> tuple[int, int]:
+    # Gall-Peters projection onto X, Y screen coords.
+    # north and east are positive lat and long
+    # X, Y (0, 0) is upper left corner of screen
+    # aspect ratio adjusted to 2:1 (from default pi / 2:1)
+    # a few tweaks via multiplication parameters to get the projection to exactly match the screen in integers
+    x = int(half_round_up((gall_peters_radius * lat_long[1]) * 4 / root_2_x_180) * 1.03 + 32)
+    y = int(-(half_round_up(gall_peters_radius * root_2 * sin(radians(lat_long[0])))) * 1.05 + 16)
+    return x, y
+
+
+def is_equinox(declination):
+    """
+    Given a solar declination, decide if it is the equinox
+    :param declination: solar declination in degrees
+    :return: True if equinox, False otherwise
+    """
+    return isclose(declination, 0.0, abs_tol=0.20)
+
+
+WHITE = (255, 255, 255, 255)
+BLACK = (0, 0, 0, 255)
+
+
+def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
+    """
+    Given a declination and an hour of the day, compute and draw day and night
+    as white and black for an image with 64 longitudes, and 32 latitudes,
+    in Gall-Peters projection.
+
+    :param declination: angle to the sun, in degrees
+    :param hour_of_day: hour of the day, in UTC
+    :return: A list of tuples, where the index in the list is the x coordinate,
+             the first int is the y coordinate, and the second int is latitudinally pointing to daylight
+            (+1 for northern sunlight or -1 for southern sunlight)
+    """
+    image = Image.new("RGBA", (64, 32), BLACK)
+    image_draw = ImageDraw.Draw(image)
+
+    # check for equinoxes
+    if is_equinox(declination):
+        # compute the terminator just at the east and west extremes
+        right_terminator = compute_terminator_for_declination_and_angle(hour_of_day, declination, 0)
+        left_terminator = compute_terminator_for_declination_and_angle(hour_of_day, declination, 180)
+        right_term_xy = gall_peters_projection(right_terminator)
+        left_term_xy = gall_peters_projection(left_terminator)
+        if right_terminator[1] > left_terminator[1]:
+            # sun zone is contained entirely within the map
+            image_draw.rectangle(((left_term_xy[0], 0), (right_term_xy[0], 31)), fill=WHITE)
+        else:
+            # sun zone is split on left and right edges of the map
+            image_draw.rectangle(((0, 0), (right_term_xy[0], 31)), fill=WHITE)
+            image_draw.rectangle(((left_term_xy[0], 0), (63, 31)), fill=WHITE)
+
+    else:
+        # not an equinox, so let's draw the sun curve
+        term_angle = 0
+        first_term_pt = None
+        last_term_pt = None
+        last_term_pt_xy = None
+        while term_angle < 360:
+            terminator_pt = compute_terminator_for_declination_and_angle(declination, hour_of_day, term_angle)
+            term_pt_xy = gall_peters_projection(terminator_pt)
+            if not first_term_pt:
+                first_term_pt = terminator_pt
+            if last_term_pt:
+                # draw a quadrilateral
+                if abs(terminator_pt[1] - last_term_pt[1]) > 90:
+                    # we probably wrapped around, so draw two separate lines
+                    pass
+                if declination > 0:
+                    # sun is above terminator, northern hemisphere summer
+                    image_draw.polygon()
+                else:
+                    # sun is below terminator, southern hemisphere summer
+                    pass
+            last_term_pt = terminator_pt
+            last_term_pt_xy = term_pt_xy
+            term_angle = term_angle + 5
+
+    return image
 
 
 class WorldClock(App):
