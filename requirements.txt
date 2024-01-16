@@ -7,4 +7,5 @@ Pillow==10.0.1
 pilmoji==2.0.3
 pygame==2.5.1
 requests==2.31.0
+sqlite3-cache==0.2.1
 urllib3==2.0.6
