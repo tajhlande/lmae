@@ -155,19 +155,30 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
             if not first_term_pt:
                 first_term_pt = terminator_pt
             if last_term_pt:
+                # compute map boundary points
+                if declination > 0:
+                    # sun is in northern hemisphere
+                    # TODO
+                    pass
+                else:
+                    # sun is in southern hemisphere
+                    # TODO
+                    pass
+
                 # draw a quadrilateral
                 if abs(terminator_pt[1] - last_term_pt[1]) > 90:
-                    # we probably wrapped around, so draw two separate lines
-                    pass
-                if declination > 0:
-                    # sun is above terminator, northern hemisphere summer
+                    # we probably wrapped around, so draw two separate quads
+                    # TODO
                     image_draw.polygon()
+                    image_draw.polygon()
+                    pass
                 else:
-                    # sun is below terminator, southern hemisphere summer
+                    # draw one quadrilateral
+                    image_draw.polygon()
                     pass
             last_term_pt = terminator_pt
             last_term_pt_xy = term_pt_xy
-            term_angle = term_angle + 5
+            term_angle = term_angle + 5   # a guess at what accuracy is good enough for a 64 bit screen
 
     return image
 
