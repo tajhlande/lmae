@@ -29,9 +29,6 @@ class Easing:
     Easing function variations
     """
 
-    # constants for back easing
-    _eb_c1: float = 1.70158
-    _eb_c2: float = 1.70158 * 1.525
 
     def __init__(self, value):
         self.function_name = value
@@ -68,8 +65,11 @@ class Easing:
         return square_t / (2.0 * (square_t - t) + 1.0)
 
     @staticmethod
-    def _back_easing(self, t: float):
-        c2 = self._eb_c2
+    def _back_easing(t: float):
+        # constants for back easing
+        c1: float = 1.70158
+        c2: float = 1.70158 * 1.525
+
         if t < 0.5:
             return (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
         else:
