@@ -1,5 +1,5 @@
 import unittest
-from lmae.animation import Easing, BACK_EASING
+from lmae.animation import Easing
 
 
 class EasingTest(unittest.TestCase):
@@ -36,7 +36,7 @@ class EasingTest(unittest.TestCase):
         self.assertEqual(1.0, easing.apply(1.0))
 
     def test_back_easing_invocation(self):
-        easing = BACK_EASING
+        easing = Easing.BACK
         self.assertEqual(0.0, easing.apply(0.0))
         self.assertEqual(-0.09968184375, easing.apply(0.25))
         self.assertEqual(0.5, easing.apply(0.5))

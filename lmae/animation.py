@@ -75,6 +75,12 @@ class Easing:
         else:
             return (pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2
 
+    LINEAR = None
+    QUADRATIC = None
+    BEZIER = None
+    PARAMETRIC = None
+    BACK = None
+
 
 Easing.LINEAR = Easing("LINEAR")
 Easing.QUADRATIC = Easing("QUADRATIC")
@@ -480,8 +486,7 @@ class AnimatedImageSequence(FrameSequence):
         if frame_number != self.last_frame:
             self.logger.debug(f"Changing frame to {frame_number}")
         # self.actor should always be an instance of MultiFrameImage
-        if self.actor and self.actor is MultiFrameImage:
-            assert self.actor is MultiFrameImage  # should always be true, but just in case...
+        if self.actor and isinstance(self.actor, MultiFrameImage):
             multi_frame_actor: MultiFrameImage = self.actor
             multi_frame_actor.set_frame(frame_number)
             self.last_frame = frame_number
