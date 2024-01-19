@@ -71,8 +71,9 @@ class SingleStageRenderLoopApp(App):
     Using a single stage, render a loop of items
     """
 
-    def __init__(self):
+    def __init__(self, size: tuple[int, int] = (64, 32)):
         super().__init__()
+        self.size = size
         self.lock = Lock()
         self.stage = None
         self.actors = list()
@@ -94,7 +95,7 @@ class SingleStageRenderLoopApp(App):
         self.pre_render_callback = pre_render_callback
 
     def prepare(self):
-        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options,
+        self.stage = Stage(size=self.size, matrix=self.matrix, matrix_options=self.matrix_options,
                            actors=self.actors, animations=self.animations)
 
     async def run(self):
