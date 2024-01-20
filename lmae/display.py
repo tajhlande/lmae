@@ -113,6 +113,13 @@ class VirtualRGBMatrix:
         new_colors = (adjust_fn(colors[0]), adjust_fn(colors[1]), adjust_fn(colors[2]))
         return new_colors
 
+    @staticmethod
+    def _get_image_pixel(image: Image, x: int, y: int) -> tuple[int, int, int] | tuple[int, int, int, int]:
+        if 0 <= x < image.size[0] and 0 <= y < image.size[1]:
+            return image.getpixel((x, y))
+        else:
+            return 0, 0, 0
+
     def SwapOnVSync(self, frame_canvas: VirtualFrameCanvas) -> VirtualFrameCanvas:
         # draw the frame canvas to the window
         image = frame_canvas.image
@@ -132,7 +139,7 @@ class VirtualRGBMatrix:
             offset_y = (pix_size + spacing) * y + spacing + self.window_specs.border_size
             for x in range(0, self.matrix_options.cols):
                 offset_x = (pix_size + spacing) * x + spacing + self.window_specs.border_size
-                colors = self.adjust_brightness(colors=image.getpixel((x, y)),
+                colors = self.adjust_brightness(colors=self._get_image_pixel(image, x, y),
                                                 adjustment=self.window_specs.brightness_adjustment)
                 if pixel_shape == PixelShape.ROUND:
                     pygame.draw.circle(surface, colors, (offset_x + half_pixel, offset_y + half_pixel),
