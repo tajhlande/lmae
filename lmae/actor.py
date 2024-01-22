@@ -30,6 +30,7 @@ class StillImage(Actor):
             if not self.image.mode == 'RGBA':
                 self.image = self.image.convert('RGBA')
             self.size = self.image.size
+            self.changes_since_last_render = True
         else:
             self.size = (0, 0)
 
