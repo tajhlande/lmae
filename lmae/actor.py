@@ -30,9 +30,9 @@ class StillImage(Actor):
             if not self.image.mode == 'RGBA':
                 self.image = self.image.convert('RGBA')
             self.size = self.image.size
-            self.changes_since_last_render = True
         else:
             self.size = (0, 0)
+        self.changes_since_last_render = True
 
     def set_from_file(self, filename: str):
         self.set_from_image(Image.open(filename))
