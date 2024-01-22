@@ -1,10 +1,9 @@
 import asyncio
 import datetime
-import logging
 import time
 
-from datetime import datetime
-from math import sin, cos, asin, atan2, radians, degrees, pi, sqrt, isclose, floor, ceil
+from datetime import datetime, timezone
+from math import sin, cos, asin, atan2, radians, degrees, pi, sqrt, isclose, floor
 from PIL import Image, ImageDraw, ImageFont
 
 import app_runner
@@ -12,9 +11,9 @@ from lmae.core import Stage
 from lmae.app import App
 from lmae.actor import StillImage
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
-logger = logging.getLogger("world_clock")
-logger.setLevel(logging.DEBUG)
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
+# logger = logging.getLogger("world_clock")
+# logger.setLevel(logging.DEBUG)
 
 
 def normalize_radians(rads):
@@ -84,16 +83,9 @@ def compute_terminator_for_declination_and_angle(declination, hour_of_day, angle
     return degrees(B), degrees(L)
 
 
-def find_terminator_intersection(longitude: float, terminator_tuple_list: list[tuple[float, tuple[float, float]]]):
-    size = len(terminator_tuple_list)
-    offset = size / 2
-
-    pass
-
-
-gall_peters_radius = 34.4 / pi
-root_2 = sqrt(2)
-root_2_x_180 = root_2 * 180
+_gall_peters_radius = 34.4 / pi
+_root_2 = sqrt(2)
+_root_2_x_180 = _root_2 * 180
 
 
 def half_round_up(value: float) -> float:
@@ -106,8 +98,8 @@ def gall_peters_projection(lat_long: tuple[float, float]) -> tuple[int, int]:
     # X, Y (0, 0) is upper left corner of screen
     # aspect ratio adjusted to 2:1 (from default pi / 2:1)
     # a few tweaks via multiplication parameters to get the projection to exactly match the screen in integers
-    x = int(half_round_up((gall_peters_radius * lat_long[1]) * 4 / root_2_x_180) * 1.03 + 32)
-    y = int(-(half_round_up(gall_peters_radius * root_2 * sin(radians(lat_long[0])))) * 1.05 + 16)
+    x = int(half_round_up((_gall_peters_radius * lat_long[1]) * 4 / _root_2_x_180) * 1.03 + 32)
+    y = int(-(half_round_up(_gall_peters_radius * _root_2 * sin(radians(lat_long[0])))) * 1.05 + 16)
     return x, y
 
 
@@ -120,8 +112,8 @@ def is_equinox(declination):
     return isclose(declination, 0.0, abs_tol=0.20)
 
 
-WHITE = (255, 255, 255, 255)
-BLACK = (0, 0, 0, 255)
+_WHITE = 255  # (255, 255, 255, 255)
+_BLACK = 0  # (0, 0, 0, 255)
 
 
 def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
@@ -136,33 +128,33 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
              the first int is the y coordinate, and the second int is latitudinally pointing to daylight
             (+1 for northern sunlight or -1 for southern sunlight)
     """
-    image = Image.new("RGBA", (64, 32), BLACK)
+    image = Image.new("L", (64, 32), _BLACK)
     image_draw = ImageDraw.Draw(image)
-    logger.debug(f"Declination: {declination:0.3f}, hour: {hour_of_day}")
+    # logger.debug(f"Declination: {declination:0.3f}, hour: {hour_of_day}")
 
     # check for equinoxes
     if is_equinox(declination):
         # compute the terminator just at the east and west extremes
-        logger.debug(f"It's an equinox!")
+        # logger.debug(f"It's an equinox!")
         right_terminator = compute_terminator_for_declination_and_angle(declination, hour_of_day, 0)
         left_terminator = compute_terminator_for_declination_and_angle(declination, hour_of_day, 180)
         left_term_xy = gall_peters_projection(left_terminator)
         right_term_xy = gall_peters_projection(right_terminator)
-        logger.debug(f"Left and right terminators: {left_terminator}, {right_terminator} and xy: "
-                     f"{left_term_xy}, {right_term_xy} at hour {hour_of_day}")
+        # logger.debug(f"Left and right terminators: {left_terminator}, {right_terminator} and xy: "
+        #              f"{left_term_xy}, {right_term_xy} at hour {hour_of_day}")
         if right_term_xy[0] > left_term_xy[0]:
             # sun zone is contained entirely within the map
             xy = ((left_term_xy[0], 0), (right_term_xy[0], 31))
-            logger.debug(f"Drawing rect at {xy}")
-            image_draw.rectangle(xy, fill=WHITE)
+            # logger.debug(f"Drawing rect at {xy}")
+            image_draw.rectangle(xy, fill=_WHITE)
         else:
             # sun zone is split on left and right edges of the map
             xy = ((0, 0), (right_term_xy[0], 31))
-            logger.debug(f"Drawing rect 1 at {xy}")
-            image_draw.rectangle(xy, fill=WHITE)
+            # logger.debug(f"Drawing rect 1 at {xy}")
+            image_draw.rectangle(xy, fill=_WHITE)
             xy = ((left_term_xy[0], 0), (63, 31))
-            logger.debug(f"Drawing rect 2 at {xy}")
-            image_draw.rectangle(xy, fill=WHITE)
+            # logger.debug(f"Drawing rect 2 at {xy}")
+            image_draw.rectangle(xy, fill=_WHITE)
 
     else:
         # not an equinox, so let's draw the sun curve
@@ -173,7 +165,7 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
         while term_angle < 360:
             terminator_pt = compute_terminator_for_declination_and_angle(declination, hour_of_day, term_angle)
             term_pt_xy = gall_peters_projection(terminator_pt)
-            logger.debug(f"Terminator at {term_angle}º: {terminator_pt}, xy: {term_pt_xy}")
+            # logger.debug(f"Terminator at {term_angle}º: {terminator_pt}, xy: {term_pt_xy}")
             if not first_term_pt:
                 first_term_pt = terminator_pt
             if last_term_pt:
@@ -197,16 +189,16 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
                         ob1x = 63
                         ob2x = 0
                     xy = [outer_boundary_pt_1, (ob1x, outer_boundary_pt_2[1]), (ob1x, term_pt_xy[1]), last_term_pt_xy]
-                    logger.debug(f"Polygon 1 xy: {xy}")
-                    image_draw.polygon(xy, fill=WHITE)
+                    # logger.debug(f"Polygon 1 xy: {xy}")
+                    image_draw.polygon(xy, fill=_WHITE)
                     xy = [outer_boundary_pt_2, (ob2x, outer_boundary_pt_1[1]), (ob2x, last_term_pt_xy[1]), term_pt_xy]
-                    logger.debug(f"Polygon 2 xy: {xy}")
-                    image_draw.polygon(xy, fill=WHITE)
+                    # logger.debug(f"Polygon 2 xy: {xy}")
+                    image_draw.polygon(xy, fill=_WHITE)
                 else:
                     # draw one quadrilateral
                     xy = [outer_boundary_pt_1, outer_boundary_pt_2, term_pt_xy, last_term_pt_xy]
-                    logger.debug(f"Polygon xy: {xy}")
-                    image_draw.polygon(xy, fill=WHITE)
+                    # logger.debug(f"Polygon xy: {xy}")
+                    image_draw.polygon(xy, fill=_WHITE)
             last_term_pt = terminator_pt
             last_term_pt_xy = term_pt_xy
             term_angle = term_angle + 5   # a guess at what accuracy is good enough for a 64 bit screen
@@ -227,32 +219,42 @@ class WorldClock(App):
         self.pre_render_callback = None
         self.refresh_time = refresh_time
         self.big_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 15)
-        self.daytime_map = StillImage(name="daytime-map")
-        self.daytime_map.set_from_file("images/visible-earth/world-topo-bathy.png")
-        self.nighttime_map = StillImage(name="nighttime-map")
-        self.nighttime_map.set_from_file("images/visible-earth/black-marble.png")
-        self.current_datetime = None
+        self.daytime_map_image = Image.open("images/visible-earth/world-topo-bathy.png")
+        self.nighttime_map_image = Image.open("images/visible-earth/black-marble.png")
+        self.composite_map = StillImage(name="composite-map")
+        self.current_datetime_utc: datetime = None
+        self.last_view_update_datetime_utc: datetime = None
 
     def compose_view(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
-        self.stage.actors.extend((self.daytime_map, self.nighttime_map))
+        self.stage.actors.append(self.composite_map)
 
-    @staticmethod
-
-    def update_clock(self):
-        self.current_datetime = datetime.now()
-
-    @staticmethod
-    def format_epoch_time(timestamp):
-        timestamp_format = "%H:%M:%S"
-        if timestamp is str:
-            timestamp = float(timestamp)
-        return time.strftime(timestamp_format, time.localtime(timestamp))
+    def time_to_update(self):
+        self.current_datetime_utc = datetime.now(timezone.utc)
+        return (not self.last_view_update_datetime_utc or
+                (self.current_datetime_utc - self.last_view_update_datetime_utc).total_seconds() > (60 * 60))
 
     def update_view(self):
-        # determine counter and text label values
-        self.daytime_map.hide()
-        self.nighttime_map.show()
+        # see if we need to update the map
+        if self.time_to_update():
+            self.logger.debug(f"Updating view")
+
+            current_timetuple = self.current_datetime_utc.timetuple()
+            day_of_year = current_timetuple[7]
+            self.logger.info(f"Day of year: {day_of_year}")
+
+            declination = compute_sun_declination(day_of_year)
+            self.logger.info(f"Declination of sun: {declination:.3f}")
+
+            hour_of_day = current_timetuple[3]
+            self.logger.info(f"UTC hour of day: {hour_of_day}")
+
+            day_night_mask_image = draw_day_night_mask(declination, hour_of_day)
+            # composite_image = Image.new("RGBA", (64, 32), _BLACK)
+            composite_image = Image.composite(self.daytime_map_image, self.nighttime_map_image, day_night_mask_image)
+            self.composite_map.set_from_image(composite_image)
+
+            self.last_view_update_datetime_utc = self.current_datetime_utc
 
     def prepare(self):
         self.compose_view()
@@ -266,9 +268,6 @@ class WorldClock(App):
 
         try:
             while self.running:
-                # get updated day count
-                self.update_clock()
-
                 # update the view
                 self.update_view()
                 if self.stage.needs_render:
@@ -277,7 +276,7 @@ class WorldClock(App):
                 # wait 5 minutes
                 waiting = True
                 wait_start = time.time()
-                self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh day count")
+                self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh view")
                 last_time = time.perf_counter()
                 while waiting and self.running:
                     current_time = time.time()
