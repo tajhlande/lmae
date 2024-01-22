@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import logging
 import time
 
 from datetime import datetime
@@ -11,6 +12,10 @@ from lmae.core import Stage
 from lmae.app import App
 from lmae.actor import StillImage
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
+logger = logging.getLogger("world_clock")
+logger.setLevel(logging.DEBUG)
+
 
 def normalize_radians(rads):
     while rads > pi:
@@ -20,11 +25,17 @@ def normalize_radians(rads):
     return rads
 
 
-def normalize_degrees(degs):
+def normalize_longitude(degs):
+    """
+    Ensure that a calculated longitude `l` that is outside `-180 <= l <= 180`
+    is normalized to be within that range
+    :param degs: the latitude in degrees
+    :return: the normalized latitude in degrees
+    """
     while degs > 180:
-        degs = degs - 180
+        degs = degs - 360
     while degs < -180:
-        degs = degs + 180
+        degs = degs + 360
     return degs
 
 
@@ -60,7 +71,7 @@ def compute_terminator_for_declination_and_angle(declination, hour_of_day, angle
     :return: A pair (L, B) that is a north latitude and east longitude on the terminator, in degrees
     """
     b = declination
-    l = normalize_degrees(180 - 15 * hour_of_day)
+    l = normalize_longitude(180 - 15 * hour_of_day)
     # psi = angle
     rad_b = radians(b)
     rad_l = radians(l)
@@ -127,21 +138,31 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
     """
     image = Image.new("RGBA", (64, 32), BLACK)
     image_draw = ImageDraw.Draw(image)
+    logger.debug(f"Declination: {declination:0.3f}, hour: {hour_of_day}")
 
     # check for equinoxes
     if is_equinox(declination):
         # compute the terminator just at the east and west extremes
-        right_terminator = compute_terminator_for_declination_and_angle(hour_of_day, declination, 0)
-        left_terminator = compute_terminator_for_declination_and_angle(hour_of_day, declination, 180)
-        right_term_xy = gall_peters_projection(right_terminator)
+        logger.debug(f"It's an equinox!")
+        right_terminator = compute_terminator_for_declination_and_angle(declination, hour_of_day, 0)
+        left_terminator = compute_terminator_for_declination_and_angle(declination, hour_of_day, 180)
         left_term_xy = gall_peters_projection(left_terminator)
-        if right_terminator[1] > left_terminator[1]:
+        right_term_xy = gall_peters_projection(right_terminator)
+        logger.debug(f"Left and right terminators: {left_terminator}, {right_terminator} and xy: "
+                     f"{left_term_xy}, {right_term_xy} at hour {hour_of_day}")
+        if right_term_xy[0] > left_term_xy[0]:
             # sun zone is contained entirely within the map
-            image_draw.rectangle(((left_term_xy[0], 0), (right_term_xy[0], 31)), fill=WHITE)
+            xy = ((left_term_xy[0], 0), (right_term_xy[0], 31))
+            logger.debug(f"Drawing rect at {xy}")
+            image_draw.rectangle(xy, fill=WHITE)
         else:
             # sun zone is split on left and right edges of the map
-            image_draw.rectangle(((0, 0), (right_term_xy[0], 31)), fill=WHITE)
-            image_draw.rectangle(((left_term_xy[0], 0), (63, 31)), fill=WHITE)
+            xy = ((0, 0), (right_term_xy[0], 31))
+            logger.debug(f"Drawing rect 1 at {xy}")
+            image_draw.rectangle(xy, fill=WHITE)
+            xy = ((left_term_xy[0], 0), (63, 31))
+            logger.debug(f"Drawing rect 2 at {xy}")
+            image_draw.rectangle(xy, fill=WHITE)
 
     else:
         # not an equinox, so let's draw the sun curve
@@ -152,30 +173,40 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
         while term_angle < 360:
             terminator_pt = compute_terminator_for_declination_and_angle(declination, hour_of_day, term_angle)
             term_pt_xy = gall_peters_projection(terminator_pt)
+            logger.debug(f"Terminator at {term_angle}º: {terminator_pt}, xy: {term_pt_xy}")
             if not first_term_pt:
                 first_term_pt = terminator_pt
             if last_term_pt:
                 # compute map boundary points
                 if declination > 0:
                     # sun is in northern hemisphere
-                    # TODO
-                    pass
+                    outer_boundary_pt_1 = last_term_pt_xy[0], 0
+                    outer_boundary_pt_2 = term_pt_xy[0], 0
                 else:
                     # sun is in southern hemisphere
-                    # TODO
-                    pass
+                    outer_boundary_pt_1 = last_term_pt_xy[0], 31
+                    outer_boundary_pt_2 = term_pt_xy[0], 31
 
                 # draw a quadrilateral
                 if abs(terminator_pt[1] - last_term_pt[1]) > 90:
                     # we probably wrapped around, so draw two separate quads
-                    # TODO
-                    image_draw.polygon()
-                    image_draw.polygon()
-                    pass
+                    if outer_boundary_pt_1[0] < 32:
+                        ob1x = 0
+                        ob2x = 63
+                    else:
+                        ob1x = 63
+                        ob2x = 0
+                    xy = [outer_boundary_pt_1, (ob1x, outer_boundary_pt_2[1]), (ob1x, term_pt_xy[1]), last_term_pt_xy]
+                    logger.debug(f"Polygon 1 xy: {xy}")
+                    image_draw.polygon(xy, fill=WHITE)
+                    xy = [outer_boundary_pt_2, (ob2x, outer_boundary_pt_1[1]), (ob2x, last_term_pt_xy[1]), term_pt_xy]
+                    logger.debug(f"Polygon 2 xy: {xy}")
+                    image_draw.polygon(xy, fill=WHITE)
                 else:
                     # draw one quadrilateral
-                    image_draw.polygon()
-                    pass
+                    xy = [outer_boundary_pt_1, outer_boundary_pt_2, term_pt_xy, last_term_pt_xy]
+                    logger.debug(f"Polygon xy: {xy}")
+                    image_draw.polygon(xy, fill=WHITE)
             last_term_pt = terminator_pt
             last_term_pt_xy = term_pt_xy
             term_angle = term_angle + 5   # a guess at what accuracy is good enough for a 64 bit screen

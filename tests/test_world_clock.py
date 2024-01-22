@@ -1,14 +1,36 @@
 import unittest
 
 from math import pi, degrees
+from PIL import Image
 
 from world_clock import (compute_sun_declination, compute_terminator_for_declination_and_angle, is_equinox,
-                         gall_peters_projection)
+                         gall_peters_projection, draw_day_night_mask, normalize_longitude)
 
 
 class TestWorldClock(unittest.TestCase):
-    def test_something(self):
-        self.assertEqual(True, False)  # add assertion here
+
+    def test_normalize__degrees(self):
+        self.assertEqual(-180, normalize_longitude(-540))
+        self.assertEqual(-90, normalize_longitude(-450))
+        self.assertEqual(0, normalize_longitude(-360))
+        self.assertEqual(90, normalize_longitude(-270))
+        self.assertEqual(-180, normalize_longitude(-180))
+        self.assertEqual(-90, normalize_longitude(-90))
+        self.assertEqual(0, normalize_longitude(0))
+        self.assertEqual(90, normalize_longitude(90))
+        self.assertEqual(180, normalize_longitude(180))
+        self.assertEqual(-90, normalize_longitude(270))
+        self.assertEqual(0, normalize_longitude(360))
+        self.assertEqual(90, normalize_longitude(450))
+        self.assertEqual(180, normalize_longitude(540))
+
+        self.assertEqual(179, normalize_longitude(-181))
+        self.assertEqual(-180, normalize_longitude(-180))
+        self.assertEqual(-179, normalize_longitude(-179))
+
+        self.assertEqual(179, normalize_longitude(179))
+        self.assertEqual(180, normalize_longitude(180))
+        self.assertEqual(-179, normalize_longitude(181))
 
     def test_is_equinox(self):
         self.assertFalse(is_equinox(compute_sun_declination(1)))
@@ -106,6 +128,37 @@ class TestWorldClock(unittest.TestCase):
         self.assertAlmostEqual(sprex_lat_long[0], -90, 1)
         self.assertAlmostEqual(sprex_lat_long[1], -180, 1)
 
+    def test_equinox_terminator_computation(self):
+        # spring equinox
+        day_of_year = 80
+        declination = compute_sun_declination(day_of_year)
+        print(f"Sun declination on spring equinox (day {day_of_year}) is {declination}")
+        self.assertTrue(is_equinox(declination))
+        # the first hour that the angle 0 part of the terminator is ont he west side of the 180th longitude
+        last_zero_term = compute_terminator_for_declination_and_angle(declination,6, 0)
+        for h in range(7, 24):
+            zero_term = compute_terminator_for_declination_and_angle(declination, h, 0)
+            # as the day goes by, the terminator should be moving westward, towards negative longitude
+            print(f"at hour {h}, zero term {zero_term}, last zero term {last_zero_term}")
+            self.assertLess(zero_term[1], last_zero_term[1], f"at hour {h}, zero term {zero_term}, "
+                                                       f"last zero term {last_zero_term}")
+            last_zero_term = zero_term
+
+        # fall equinox
+        day_of_year = 266
+        declination = compute_sun_declination(day_of_year)
+        print(f"Sun declination on fall equinox (day {day_of_year}) is {declination}")
+        self.assertTrue(is_equinox(declination))
+        # the first hour that the angle 0 part of the terminator is ont he west side of the 180th longitude
+        last_zero_term = compute_terminator_for_declination_and_angle(declination,6, 0)
+        for h in range(7, 24):
+            zero_term = compute_terminator_for_declination_and_angle(declination, h, 0)
+            # as the day goes by, the terminator should be moving westward, towards negative longitude
+            print(f"at hour {h}, zero term {zero_term}, last zero term {last_zero_term}")
+            self.assertLess(zero_term[1], last_zero_term[1], f"at hour {h}, zero term {zero_term}, "
+                                                             f"last zero term {last_zero_term}")
+            last_zero_term = zero_term
+
     def test_gall_peters_projection(self):
         self.assertEqual((32, 16), gall_peters_projection((0, 0)))
         self.assertEqual((32, 0), gall_peters_projection((90, 0)))
@@ -114,6 +167,12 @@ class TestWorldClock(unittest.TestCase):
         self.assertEqual((0, 0), gall_peters_projection((90, -180)))
         self.assertEqual((63, 31), gall_peters_projection((-90, 180)))
         self.assertEqual((0, 31), gall_peters_projection((-90, -180)))
+
+    def test_day_night_mask(self):
+        declination = compute_sun_declination(80)
+        for h in range(0, 24):
+            day_night_mask_image: Image = draw_day_night_mask(declination, h)
+            day_night_mask_image.save(f"tests/day_night_mask_{h:02d}.png")
 
 
 if __name__ == '__main__':
