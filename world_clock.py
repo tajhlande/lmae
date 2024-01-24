@@ -8,8 +8,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 import app_runner
 from lmae.core import Stage
-from lmae.app import App
 from lmae.actor import StillImage
+from lmae.app import DisplayManagedApp
 
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
 # logger = logging.getLogger("world_clock")
@@ -206,14 +206,15 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
     return image
 
 
-class WorldClock(App):
+class WorldClock(DisplayManagedApp):
     """
     Display a projection of the world with a day-night separator.
     """
 
     # noinspection PyTypeChecker
     def __init__(self, refresh_time: int = 300):
-        super().__init__()
+        super().__init__(refresh_time=refresh_time, max_frame_rate=20)
+
         self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
@@ -225,7 +226,7 @@ class WorldClock(App):
         self.current_datetime_utc: datetime = None
         self.last_view_update_datetime_utc: datetime = None
 
-    def compose_view(self):
+    def prepare(self):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
         self.stage.actors.append(self.composite_map)
 
@@ -255,55 +256,6 @@ class WorldClock(App):
             self.composite_map.set_from_image(composite_image)
 
             self.last_view_update_datetime_utc = self.current_datetime_utc
-
-    def prepare(self):
-        self.compose_view()
-
-    async def run(self):
-        await super().run()
-        self.logger.debug("Run started")
-        # self.compose_view()
-        max_frame_rate = 20
-        min_time_per_frame = 1.0 / max_frame_rate
-
-        try:
-            while self.running:
-                # update the view
-                self.update_view()
-                if self.stage.needs_render:
-                    self.stage.render_frame()
-
-                # wait 5 minutes
-                waiting = True
-                wait_start = time.time()
-                self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh view")
-                last_time = time.perf_counter()
-                while waiting and self.running:
-                    current_time = time.time()
-                    elapsed_time = current_time - wait_start
-                    self.update_view()
-                    # self.stage.needs_render = True  # have to force this for some reason
-                    self.stage.render_frame()
-                    waiting = elapsed_time < self.refresh_time
-
-                    # calculate the frame rate and render that
-                    render_end_time = time.perf_counter()
-
-                    # if we are rendering faster than max frame rate, slow down
-                    elapsed_render_time = render_end_time - last_time
-                    if elapsed_render_time < min_time_per_frame:
-                        sleep_time = min_time_per_frame - elapsed_render_time
-                        # self.logger.debug(f"Sleeping for {sleep_time}")
-                        await asyncio.sleep(sleep_time)
-                    else:
-                        # gotta yield control, with minimal sleep amount
-                        await asyncio.sleep(min_time_per_frame/10.0)
-
-                    # mark the timestamp
-                    last_time = time.perf_counter()
-
-        finally:
-            self.logger.debug("Run stopped")
 
 
 if __name__ == "__main__":
