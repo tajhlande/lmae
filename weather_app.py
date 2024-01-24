@@ -604,14 +604,13 @@ class WeatherApp(DisplayManagedApp):
         self.fresh_weather_data = False
 
 
-# get environment variables
-env_api_key = app_runner.get_env_parameter('OW_API_KEY', 'openweather', 'ow_api_key')
-env_latitude = app_runner.get_env_parameter('LATITUDE', 'location', 'latitude')
-env_longitude = app_runner.get_env_parameter('LONGITUDE', 'location', 'longitude')
-env_refresh_time = int(app_runner.get_env_parameter('REFRESH_TIME', 'settings', 'refresh_time',
-                                                default=60 * 15))  # default to 15 minutes
+if __name__ == "__main__":
+    # get environment variables
+    env_api_key = app_runner.get_env_parameter('OW_API_KEY', 'openweather', 'ow_api_key')
+    env_latitude = app_runner.get_env_parameter('LATITUDE', 'location', 'latitude')
+    env_longitude = app_runner.get_env_parameter('LONGITUDE', 'location', 'longitude')
+    env_refresh_time = int(app_runner.get_env_parameter('REFRESH_TIME', 'settings', 'refresh_time',
+                                                        default=60 * 15))  # default to 15 minutes
 
-app_runner.app_setup()
-wx_app = WeatherApp(api_key=env_api_key, latitude=env_latitude, longitude=env_longitude, refresh_time=env_refresh_time)
-wx_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-app_runner.start_app(wx_app)
+    app_runner.start_app(WeatherApp(api_key=env_api_key, latitude=env_latitude, longitude=env_longitude,
+                                    refresh_time=env_refresh_time))

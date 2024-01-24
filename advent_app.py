@@ -234,8 +234,4 @@ class AdventApp(DisplayManagedApp):
 
 
 if __name__ == "__main__":
-    # get environment variables
-    app_runner.app_setup()
-    advent_app = AdventApp()
-    advent_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-    app_runner.start_app(advent_app)
+    app_runner.start_app(AdventApp())

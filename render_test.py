@@ -92,7 +92,6 @@ ll_4_seq = Sequence(actor=lmae_long_4, repeat=True, animations=[
 ])
 
 sample_app = SingleStageRenderLoopApp(size=(display_width, display_height))
-sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 
 sample_app.add_actors(gradient_block,
                       lmae_long_1, lmae_long_2, lmae_long_3, lmae_long_4,

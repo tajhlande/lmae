@@ -42,12 +42,10 @@ emoji_words = EmojiText(name='EmojiText', text="☀️🌤️⛈️🌗", positi
                         color=(255, 255, 255, 255),
                         stroke_color=(0, 0, 0, 255), stroke_width=1)
 
+if __name__ == "__main__":
+    sample_app = SingleStageRenderLoopApp()
+    sample_app.add_actors(trees, emoji_words, words, kirby, grass)
+    sample_app.add_animations(kirby_sequence)
 
-app_runner.app_setup()
-sample_app = SingleStageRenderLoopApp()
-sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-sample_app.add_actors(trees, emoji_words, words, kirby, grass)
-sample_app.add_animations(kirby_sequence)
-
-app_runner.start_app(sample_app)
+    app_runner.start_app(sample_app)
 

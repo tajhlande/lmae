@@ -14,10 +14,9 @@ kirby_gif_image.set_from_file("images/kirby-walk-anim.gif")
 kirby_animations = kirby_gif_image.get_animations()
 
 
-app_runner.app_setup()
-sample_app = SingleStageRenderLoopApp()
-sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-sample_app.add_actors(kirby_gif_image)
-sample_app.add_animations(*kirby_animations)
+if __name__ == "__main__":
+    sample_app = SingleStageRenderLoopApp()
+    sample_app.add_actors(kirby_gif_image)
+    sample_app.add_animations(*kirby_animations)
 
-app_runner.start_app(sample_app)
+    app_runner.start_app(sample_app)
