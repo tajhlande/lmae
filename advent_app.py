@@ -8,18 +8,18 @@ from PIL import ImageFont
 import app_runner
 from lmae.animation import Sequence, HueFade
 from lmae.core import Stage, Animation
-from lmae.app import App
+from lmae.app import DisplayManagedApp
 from lmae.actor import Rectangle, StillImage, Text
 
 
-class AdventApp(App):
+class AdventApp(DisplayManagedApp):
     """
     Display the number of days until Christmas weather
     """
 
     # noinspection PyTypeChecker
     def __init__(self, refresh_time: int = 60):
-        super().__init__()
+        super().__init__(refresh_time=refresh_time, max_frame_rate = 20)
         self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
@@ -74,8 +74,8 @@ class AdventApp(App):
             light = Rectangle(name=f"Light_{light_ctr}", position=location, size=(0, 0), color=(192, 192, 255, 255))
             self.lights_list.append(light)
 
-    def compose_view(self):
-        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
+    def prepare(self):
+        super().prepare()
         self.stage.actors.extend((self.line_1_label, self.line_2_label, self.counter_label, self.tree_image))
         self.stage.actors.extend(self.lights_list)
 
@@ -101,7 +101,9 @@ class AdventApp(App):
         if self.days_until_christmas <= 1:
             self.hours_until_christmas = 24 - current_datetime.hour
             self.minutes_until_christmas = 60 - current_datetime.minute
-        self.logger.debug(f"Counted {self.days_until_christmas} days until Christmas")
+
+        if self.last_days_until_christmas != self.days_until_christmas:
+            self.logger.debug(f"Counted {self.days_until_christmas} days until Christmas")
 
     @staticmethod
     def format_epoch_time(timestamp):
@@ -115,11 +117,15 @@ class AdventApp(App):
         self.colors_index = int(hour_of_day % 6)
         self.twinkle = int(hour_of_day % 2)
 
-    def update_view(self):
+    def update_view(self, elapsed_time: float):
+        self.update_countdown()
+
         # determine counter and text label values
         if (self.was_it_christmas != self.is_christmas or self.last_days_until_christmas != self.days_until_christmas or
                 self.last_hours_until_christmas != self.hours_until_christmas or
                 self.last_minutes_until_christmas != self.minutes_until_christmas):
+            self.counter_label.show()
+            self.line_2_label.set_text("until")
             if self.is_christmas:
                 self.counter_label.hide()
                 self.line_1_label.set_text("Merry")
@@ -138,6 +144,7 @@ class AdventApp(App):
                         self.line_1_label.set_text("hours")
                     self.counter_label.set_text(str(self.hours_until_christmas))
             else:  # days
+                self.counter_label.set_text(str(self.days_until_christmas))
                 self.line_1_label.set_text("days")
 
             # center labels
@@ -224,58 +231,6 @@ class AdventApp(App):
                     li = li + 1
                     light_sequences.append(sequence)
             self.stage.add_animations(light_sequences)
-
-    def prepare(self):
-        self.compose_view()
-
-    async def run(self):
-        await super().run()
-        self.logger.debug("Run started")
-        # self.compose_view()
-        max_frame_rate = 20
-        min_time_per_frame = 1.0 / max_frame_rate
-
-        try:
-            while self.running:
-                # get updated day count
-                self.update_countdown()
-
-                # update the view
-                self.update_view()
-                if self.stage.needs_render:
-                    self.stage.render_frame()
-
-                # wait 15 minutes
-                waiting = True
-                wait_start = time.time()
-                self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh day count")
-                last_time = time.perf_counter()
-                while waiting and self.running:
-                    current_time = time.time()
-                    elapsed_time = current_time - wait_start
-                    self.update_view()
-                    # self.stage.needs_render = True  # have to force this for some reason
-                    self.stage.render_frame()
-                    waiting = elapsed_time < self.refresh_time
-
-                    # calculate the frame rate and render that
-                    render_end_time = time.perf_counter()
-
-                    # if we are rendering faster than max frame rate, slow down
-                    elapsed_render_time = render_end_time - last_time
-                    if elapsed_render_time < min_time_per_frame:
-                        sleep_time = min_time_per_frame - elapsed_render_time
-                        # self.logger.debug(f"Sleeping for {sleep_time}")
-                        await asyncio.sleep(sleep_time)
-                    else:
-                        # gotta yield control, with minimal sleep amount
-                        await asyncio.sleep(min_time_per_frame/10.0)
-
-                    # mark the timestamp
-                    last_time = time.perf_counter()
-
-        finally:
-            self.logger.debug("Run stopped")
 
 
 if __name__ == "__main__":
