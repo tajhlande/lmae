@@ -1,19 +1,12 @@
-import asyncio
 import datetime
-import time
 
 from datetime import datetime, timezone
 from math import sin, cos, asin, atan2, radians, degrees, pi, sqrt, isclose, floor
 from PIL import Image, ImageDraw, ImageFont
 
 import app_runner
-from lmae.core import Stage
 from lmae.actor import StillImage
 from lmae.app import DisplayManagedApp
-
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
-# logger = logging.getLogger("world_clock")
-# logger.setLevel(logging.DEBUG)
 
 
 def normalize_radians(rads):

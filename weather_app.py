@@ -6,9 +6,7 @@ from datetime import datetime
 from PIL import Image, ImageFont, ImageFilter, ImageEnhance
 
 import app_runner
-# from app_runner import matrix, matrix_options, start_app, env_config
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
-from lmae.core import Stage
 from lmae.app import DisplayManagedApp
 from lmae.actor import StillImage, SpriteImage, Text, Line
 from lmae.animation import Easing, Sequence, Still, StraightMove
