@@ -1,6 +1,4 @@
-import asyncio
 import datetime
-import os
 import time
 
 from datetime import datetime
@@ -8,7 +6,7 @@ from PIL import ImageFont
 
 import app_runner
 from lmae.animation import Sequence, HueFade
-from lmae.core import Stage, Animation
+from lmae.core import Animation
 from lmae.app import DisplayManagedApp
 from lmae.actor import Rectangle, StillImage, Text
 
