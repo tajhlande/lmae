@@ -18,8 +18,8 @@ else:  # Windows or Darwin aka macOS
 
 class App(metaclass=ABCMeta):
     """
-    An app module is a self-contained app that renders itself on the LED matrix.
-    Apps that want to run should extend this class and implement the abstract methods.
+    An app is a self-contained instance that knows how to compute and render itself on the LED matrix.
+    Apps that want to run should extend this class or use an existing extension and implement the abstract methods.
     An initialized matrix object and matrix options are provided for rendering purposes.
     """
     def __init__(self):
@@ -68,10 +68,19 @@ class App(metaclass=ABCMeta):
 
 class SingleStageRenderLoopApp(App):
     """
-    Using a single stage, render a loop of items
+    Using a single stage, render within an unmanaged loop.
+    This rendering will happen at the maximum possible frame rate, which defaults to 120 fps.
+
+    This is a good candidate for an app if you want to implement callback methods to set up
+    your actors and animations and specify behavior, and the view is relatively simple.
     """
 
-    def __init__(self, size: tuple[int, int] = (64, 32)):
+    def __init__(self, size: tuple[int, int] = (64, 32), max_frame_rate: int = 120):
+        """
+        Initialize the app.
+        :param size: Set the size of the display in pixels.
+        :param max_frame_rate: Set the maximum frame rate in fps.
+        """
         super().__init__()
         self.size = size
         self.lock = Lock()
@@ -79,6 +88,7 @@ class SingleStageRenderLoopApp(App):
         self.actors = list()
         self.animations = list()
         self.pre_render_callback = None
+        self.max_frame_rate = max_frame_rate
 
     def add_actors(self, *args: Actor):
         self.actors.extend(args)
@@ -102,9 +112,7 @@ class SingleStageRenderLoopApp(App):
         await super().run()
         self.logger.debug("Run started")
         self.running = True
-        max_frame_rate = 120
-        min_time_per_frame = 1.0 / max_frame_rate
-        i = 0
+        min_time_per_frame = 1.0 / self.max_frame_rate
         last_time = time.perf_counter()
         try:
             while self.running:
@@ -142,6 +150,8 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
     An app with a single stage, where the display refresh rate is managed to a limit,
     and rendering only happens when it is needed (when some changes to the actors on a stage
     require re-rendering).
+
+    This is a good candidate to use if you want to override the class with your own app class.
     """
 
     # noinspection PyTypeChecker
