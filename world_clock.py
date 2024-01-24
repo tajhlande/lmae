@@ -259,8 +259,4 @@ class WorldClock(DisplayManagedApp):
 
 
 if __name__ == "__main__":
-    # get environment variables
-    app_runner.app_setup()
-    world_clock = WorldClock()
-    world_clock.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-    app_runner.start_app(world_clock)
+    app_runner.start_app(WorldClock())

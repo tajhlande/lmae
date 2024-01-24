@@ -60,21 +60,27 @@ def get_env_parameter(env_key: str = None, ini_header: str = None, ini_key: str 
         sys.exit(-1)
 
 
-def app_setup():
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
-    global logger
-    logger = logging.getLogger("app_runner")
-    logger.setLevel(logging.DEBUG)
-    print("App Runner")
+_app_setup_happened = False
 
-    global matrix_options
-    matrix_options = parse_matrix_options_command_line()
-    global matrix
-    if virtual_leds:
-        logger.info("Initializing virtual LED matrix")
-    else:
-        logger.info("Initializing real LED matrix")
-    matrix = RGBMatrix(options=matrix_options)
+
+def app_setup():
+    global _app_setup_happened
+    if not _app_setup_happened:
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
+        global logger
+        logger = logging.getLogger("app_runner")
+        logger.setLevel(logging.DEBUG)
+        print("App Runner")
+
+        global matrix_options
+        matrix_options = parse_matrix_options_command_line()
+        global matrix
+        if virtual_leds:
+            logger.info("Initializing virtual LED matrix")
+        else:
+            logger.info("Initializing real LED matrix")
+        matrix = RGBMatrix(options=matrix_options)
+    _app_setup_happened = True
 
 
 # borrowed from StackOverflow:
@@ -107,6 +113,8 @@ async def run_app(app: App):
 
 
 def start_app(app: App):
+    app_setup()
+    app.set_matrix(matrix=matrix, options=matrix_options)
     asyncio.run(run_app(app))
 
 

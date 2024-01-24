@@ -34,9 +34,7 @@ def set_mario_sprite_frame_name():
     sprite_label.set_text(mario_sprite.selected)
 
 
-app_runner.app_setup()
 sample_app = SingleStageRenderLoopApp()
-sample_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 sample_app.add_actors(mario_animation, sprite_label)
 sample_app.add_animations(*mario_animation.get_animations())
 sample_app.set_pre_render_callback(set_mario_sprite_frame_name)
