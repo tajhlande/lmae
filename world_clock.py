@@ -227,7 +227,7 @@ class WorldClock(DisplayManagedApp):
         self.last_view_update_datetime_utc: datetime = None
 
     def prepare(self):
-        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
+        super().prepare()
         self.stage.actors.append(self.composite_map)
 
     def time_to_update(self):
@@ -235,7 +235,7 @@ class WorldClock(DisplayManagedApp):
         return (not self.last_view_update_datetime_utc or
                 (self.current_datetime_utc - self.last_view_update_datetime_utc).total_seconds() > (60 * 60))
 
-    def update_view(self):
+    def update_view(self, elapsed_time: float):
         # see if we need to update the map
         if self.time_to_update():
             self.logger.debug(f"Updating view")

@@ -9,20 +9,20 @@ import app_runner
 # from app_runner import matrix, matrix_options, start_app, env_config
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae.core import Stage
-from lmae.app import App
+from lmae.app import DisplayManagedApp
 from lmae.actor import StillImage, SpriteImage, Text, Line
 from lmae.animation import Easing, Sequence, Still, StraightMove
 from lmae.component import Carousel
 
 
-class WeatherApp(App):
+class WeatherApp(DisplayManagedApp):
     """
     Display the current weather
     """
 
     # noinspection PyTypeChecker
     def __init__(self, api_key: str, latitude: str, longitude: str, refresh_time: int = 900):
-        super().__init__()
+        super().__init__(max_frame_rate = 60, refresh_time=refresh_time)
         self.fresh_weather_data = False
         self.api_key = api_key
         self.latitude = latitude
@@ -86,7 +86,8 @@ class WeatherApp(App):
         self.sunrise_sunset_image: Image = Image.open("images/backgrounds/sunrise_sunset.png").convert('RGBA')
         self.bg_image_name = None
 
-    def compose_view(self):
+    def prepare(self):
+        super().prepare()
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
 
         # background image
@@ -268,6 +269,9 @@ class WeatherApp(App):
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
     def update_view(self, elapsed_time: float):
+        if not self.temperature_str or elapsed_time > self.refresh_time:
+            self.update_weather_data()
+
         self.temperature_label.set_text(self.temperature_str)
         self.dewpoint_label.set_text(self.dewpoint_str)
         self.feels_like_label.set_text(self.feels_like_str)
@@ -599,69 +603,15 @@ class WeatherApp(App):
 
         self.fresh_weather_data = False
 
-    def prepare(self):
-        self.compose_view()
-
-    async def run(self):
-        await super().run()
-        self.logger.debug("Run started")
-        # self.compose_view()
-        max_frame_rate = 60
-        min_time_per_frame = 1.0 / max_frame_rate
-
-        try:
-            while self.running:
-                # get updated weather conditions
-                self.update_weather_data()
-
-                # update the view
-                self.update_view(0)
-                if self.stage.needs_render:
-                    self.stage.render_frame()
-
-                # wait 15 minutes
-                waiting = True
-                wait_start = time.time()
-                self.logger.debug(f"Waiting {self.refresh_time / 60} minutes to refresh weather data")
-                last_time = time.perf_counter()
-                while waiting and self.running:
-                    current_time = time.time()
-                    elapsed_time = current_time - wait_start
-                    self.update_view(elapsed_time)
-                    self.stage.needs_render = True  # have to force this for some reason
-                    self.stage.render_frame()
-                    waiting = elapsed_time < self.refresh_time
-
-                    # await asyncio.sleep(1)
-
-                    # calculate the frame rate and render that
-                    render_end_time = time.perf_counter()
-
-                    # if we are rendering faster than max frame rate, slow down
-                    elapsed_render_time = render_end_time - last_time
-                    if elapsed_render_time < min_time_per_frame:
-                        sleep_time = min_time_per_frame - elapsed_render_time
-                        # self.logger.debug(f"Sleeping for {sleep_time}")
-                        await asyncio.sleep(sleep_time)
-                    else:
-                        # gotta yield control, with minimal sleep amount
-                        await asyncio.sleep(min_time_per_frame/10.0)
-
-                    # mark the timestamp
-                    last_time = time.perf_counter()
-
-        finally:
-            self.logger.debug("Run stopped")
-
 
 # get environment variables
-api_key = app_runner.get_env_parameter('OW_API_KEY', 'openweather', 'ow_api_key')
-latitude = app_runner.get_env_parameter('LATITUDE', 'location', 'latitude')
-longitude = app_runner.get_env_parameter('LONGITUDE', 'location', 'longitude')
-refresh_time = int(app_runner.get_env_parameter('REFRESH_TIME', 'settings', 'refresh_time',
+env_api_key = app_runner.get_env_parameter('OW_API_KEY', 'openweather', 'ow_api_key')
+env_latitude = app_runner.get_env_parameter('LATITUDE', 'location', 'latitude')
+env_longitude = app_runner.get_env_parameter('LONGITUDE', 'location', 'longitude')
+env_refresh_time = int(app_runner.get_env_parameter('REFRESH_TIME', 'settings', 'refresh_time',
                                                 default=60 * 15))  # default to 15 minutes
 
 app_runner.app_setup()
-wx_app = WeatherApp(api_key=api_key, latitude=latitude, longitude=longitude, refresh_time=refresh_time)
+wx_app = WeatherApp(api_key=env_api_key, latitude=env_latitude, longitude=env_longitude, refresh_time=env_refresh_time)
 wx_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
 app_runner.start_app(wx_app)

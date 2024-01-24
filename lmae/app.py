@@ -162,14 +162,14 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
         self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
 
     @abstractmethod
-    def update_view(self):
+    def update_view(self, elapsed_time: float):
         """
         Apps should use this method to update the view of the stage that will be displayed.
 
         This method will be called on every frame, and should
         be efficient for that reason. If the view isn't actually updating,
         it should return quickly without doing excessive work.
-        :return:
+        :param elapsed_time: How much time has elapsed since the last time `self.update_view()` was called, in seconds
         """
         pass
 
@@ -185,7 +185,7 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
         try:
             while self.running:
                 # update the view
-                self.update_view()
+                self.update_view(elapsed_time=0.0)
                 if self.stage.needs_render:
                     self.stage.render_frame()
 
@@ -197,7 +197,7 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
                 while waiting and self.running:
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
-                    self.update_view()
+                    self.update_view(elapsed_time=elapsed_time)
                     # self.stage.needs_render = True  # have to force this for some reason
                     self.stage.render_frame()
                     waiting = elapsed_time < self.refresh_time
