@@ -1,12 +1,16 @@
 from unittest import TestCase
-
 import logging
-
 import freezegun
+from PIL import Image
 
 from advent_app import AdventApp
+from lmae.core import Stage
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
+
+
+class MatrixMock:
+    pass
 
 
 class TestAdventApp(TestCase):
@@ -14,6 +18,9 @@ class TestAdventApp(TestCase):
     def test_countdown_text(self):
         # logger = logging.getLogger("TestAdventApp.test_countdown_text")
         advent_app = AdventApp()
+        matrix = MatrixMock()
+        matrix.CreateFrameCanvas = lambda : Image.new("L", size=(10,10), color=0)
+        advent_app.stage = Stage(matrix=matrix)
         with freezegun.freeze_time("2023-12-01 12:00:00"):
             advent_app.update_countdown()
             advent_app.update_view()

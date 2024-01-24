@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import os
 import time
 
 from datetime import datetime
@@ -20,7 +21,6 @@ class AdventApp(DisplayManagedApp):
     # noinspection PyTypeChecker
     def __init__(self, refresh_time: int = 60):
         super().__init__(refresh_time=refresh_time, max_frame_rate = 20)
-        self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
         self.refresh_time = refresh_time
@@ -117,7 +117,7 @@ class AdventApp(DisplayManagedApp):
         self.colors_index = int(hour_of_day % 6)
         self.twinkle = int(hour_of_day % 2)
 
-    def update_view(self, elapsed_time: float):
+    def update_view(self, elapsed_time: float = 0.0):
         self.update_countdown()
 
         # determine counter and text label values

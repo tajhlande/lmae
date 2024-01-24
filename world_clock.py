@@ -215,7 +215,6 @@ class WorldClock(DisplayManagedApp):
     def __init__(self, refresh_time: int = 300):
         super().__init__(refresh_time=refresh_time, max_frame_rate=20)
 
-        self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
         self.refresh_time = refresh_time

@@ -29,7 +29,6 @@ class WeatherApp(DisplayManagedApp):
         self.longitude = longitude
         self.logger.info(f"Weather conditions for location at lat/long {self.latitude}, {self.longitude}")
         self.lock = asyncio.Lock()
-        self.stage: Stage = None
         self.actors = list()
         self.pre_render_callback = None
         self.conditions_and_forecast = None
@@ -88,7 +87,6 @@ class WeatherApp(DisplayManagedApp):
 
     def prepare(self):
         super().prepare()
-        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
 
         # background image
         self.background_image = StillImage(name='BackgroundImage', position=(0, 0))
