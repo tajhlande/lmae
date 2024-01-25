@@ -225,7 +225,8 @@ class Stage(LMAEObject):
         self.matrix = matrix or (RGBMatrix(options=matrix_options) if matrix_options else None)
         if not self.matrix:
             self.logger.warning("No matrix or matrix options were provided to the stage")
-        self.double_buffer = self.matrix.CreateFrameCanvas()
+        else:
+            self.double_buffer = self.matrix.CreateFrameCanvas()
         self.needs_render = True
 
     def add_animation(self, animation: Animation):
