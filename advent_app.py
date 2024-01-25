@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 
 from datetime import datetime
@@ -17,20 +18,24 @@ class AdventApp(DisplayManagedApp):
     """
 
     # noinspection PyTypeChecker
-    def __init__(self, refresh_time: int = 60):
-        super().__init__(refresh_time=refresh_time, max_frame_rate = 20)
+    def __init__(self, refresh_time: int = 60, font_path: str = "fonts/", image_path: str = "images/"):
+        super().__init__(refresh_time=refresh_time, max_frame_rate=20)
         self.actors = list()
         self.pre_render_callback = None
         self.refresh_time = refresh_time
-        self.big_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 15)
+        roboto_font_path = os.path.join(font_path, "Roboto/Roboto-Light.ttf")
+        print(f"Roboto font path: {roboto_font_path}")
+        self.big_font = ImageFont.truetype(roboto_font_path, 15)
         self.counter_label = Text(font=self.big_font, name="counter", position=(8, 2))
-        self.small_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
+        teeny_font_path = os.path.join(font_path, "teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf")
+        self.small_font = ImageFont.truetype(teeny_font_path, 5)
         self.line_1_label = Text(font=self.small_font, name="line_1_text", position=(9, 18), text="days",
                                  color=(192, 192, 192, 255))
         self.line_2_label = Text(font=self.small_font, name="line_2_text", position=(7, 25), text="until",
                                  color=(192, 192, 192, 255))
         self.tree_image = StillImage(name="tree", position=(37, 0))
-        self.tree_image.set_from_file('images/pixel-tree-22x32-alpha.png')
+        tree_image_path = os.path.join(image_path, "pixel-tree-22x32-alpha.png")
+        self.tree_image.set_from_file(tree_image_path)
         self.days_until_christmas = 0
         self.hours_until_christmas = 0
         self.minutes_until_christmas = 0

@@ -13,14 +13,15 @@ class MatrixMock:
     pass
 
 
+# noinspection DuplicatedCode
 class TestAdventApp(TestCase):
 
     def test_countdown_text(self):
         # logger = logging.getLogger("TestAdventApp.test_countdown_text")
-        advent_app = AdventApp()
+        advent_app = AdventApp(font_path="fonts", image_path="images")
         matrix = MatrixMock()
         matrix.CreateFrameCanvas = lambda : Image.new("L", size=(10,10), color=0)
-        advent_app.stage = Stage(matrix=matrix)
+        advent_app.stage = Stage()
         with freezegun.freeze_time("2023-12-01 12:00:00"):
             advent_app.update_countdown()
             advent_app.update_view()
@@ -164,7 +165,7 @@ class TestAdventApp(TestCase):
 
     def test_determine_light_patterns_and_color(self):
         logger = logging.getLogger("TestAdventApp.test_determine_light_patterns_and_color")
-        advent_app = AdventApp()
+        advent_app = AdventApp(font_path="fonts", image_path="images")
         distinct_patterns = set()
         for i in range(0, 24):
             advent_app.determine_light_patterns_and_color(i)

@@ -1,12 +1,15 @@
+import glob
+import os
 import unittest
 
-from math import pi, degrees
+from math import pi
 from PIL import Image
 
 from world_clock import (compute_sun_declination, compute_terminator_for_declination_and_angle, is_equinox,
                          gall_peters_projection, draw_day_night_mask, normalize_longitude)
 
 
+# noinspection DuplicatedCode
 class TestWorldClock(unittest.TestCase):
 
     def test_normalize__degrees(self):
@@ -168,11 +171,18 @@ class TestWorldClock(unittest.TestCase):
         self.assertEqual((63, 31), gall_peters_projection((-90, 180)))
         self.assertEqual((0, 31), gall_peters_projection((-90, -180)))
 
+    @unittest.skip("only run if doing a visual inspection")
     def test_day_night_mask(self):
         declination = compute_sun_declination(80)
         for h in range(0, 24):
             day_night_mask_image: Image = draw_day_night_mask(declination, h)
             day_night_mask_image.save(f"tests/day_night_mask_{h:02d}.png")
+
+    def tearDown(self):
+        test_mask_files_list = glob.glob("tests/day_night_mask*.png")
+        for mask_file in test_mask_files_list:
+            print(f"Deleting generated test file {mask_file}")
+            os.remove(mask_file)
 
 
 if __name__ == '__main__':
