@@ -1,7 +1,7 @@
 # LMAE - LED Matrix Animation Engine for RPi and Python
 
 <!--suppress CheckImageSize -->
-<img alt="LMAE demo image" height="259" src="images/doc/lmae_demo_image.png" title="LMAE demo image" width="515"/>
+<img alt="LMAE demo image" height="259" src="doc/images/lmae_demo_image.png" title="LMAE demo image" width="515"/>
 
 A library for building little applications  that can run on a Raspberry Pi and
 display interesting things on a LED matrix.
@@ -68,7 +68,7 @@ Install the required library modules:
 
 Run the first example in a virtual LED window on your laptop:
 
-    python render_test.py
+    python examples/render_test.py
 
 If all is successful, you will see a surprise animation demo!
 Press "return" on the app console to end the test.
@@ -82,7 +82,7 @@ virtual environment, run something like:
 
 And then run the example like this:
 
-    sudo venv/bin/python render_test.py
+    sudo venv/bin/python examples/render_test.py
 
 The `sudo` is necessary to allow the LED matrix code to run with
 the elevated privileges necessary to achieve best GPIO timing performance.
@@ -101,6 +101,8 @@ will be nice and clean, you'll need to do one of the following:
     `pip -e` command above) to your IDE's Python sys.path or PYTHONPATH settings.
 
 Instructions for JetBrains IDEs can be found [here](https://www.jetbrains.com/help/idea/installing-uninstalling-and-reloading-interpreter-paths.html).
+Instructions for VSCode can be found [here](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
+
 
 ### Virtual LED Display
 
@@ -183,7 +185,7 @@ To run the weather app on a virtual LED display in your venv-activated developtm
 
 If successful, you should see something like the following, depending on current conditions:
 
-![Weather app screenshot](images/doc/weather_app_screenshot.png)
+![Weather app screenshot](doc/images/weather_app_screenshot.png)
 
 To run it on the real LED display:
 

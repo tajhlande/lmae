@@ -1,10 +1,12 @@
+import os.path
 from unittest import TestCase
 import logging
 import freezegun
 from PIL import Image
 
-from advent_app import AdventApp
+from context import lmae
 from lmae.core import Stage
+from examples.advent_app import AdventApp
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
 
@@ -18,9 +20,11 @@ class TestAdventApp(TestCase):
 
     def test_countdown_text(self):
         # logger = logging.getLogger("TestAdventApp.test_countdown_text")
-        advent_app = AdventApp(font_path="fonts", image_path="images")
+        resource_path = os.path.join(os.path.dirname(__file__), "../examples")
+        advent_app = AdventApp(font_path=os.path.join(resource_path, "fonts"),
+                               image_path=os.path.join(resource_path, "images"))
         matrix = MatrixMock()
-        matrix.CreateFrameCanvas = lambda : Image.new("L", size=(10,10), color=0)
+        matrix.CreateFrameCanvas = lambda : Image.new("L", size=(10, 10), color=0)
         advent_app.stage = Stage()
         with freezegun.freeze_time("2023-12-01 12:00:00"):
             advent_app.update_countdown()
@@ -165,7 +169,9 @@ class TestAdventApp(TestCase):
 
     def test_determine_light_patterns_and_color(self):
         logger = logging.getLogger("TestAdventApp.test_determine_light_patterns_and_color")
-        advent_app = AdventApp(font_path="fonts", image_path="images")
+        resource_path = os.path.join(os.path.dirname(__file__), "../examples")
+        advent_app = AdventApp(font_path=os.path.join(resource_path, "fonts"),
+                               image_path=os.path.join(resource_path, "images"))
         distinct_patterns = set()
         for i in range(0, 24):
             advent_app.determine_light_patterns_and_color(i)

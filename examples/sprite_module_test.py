@@ -1,8 +1,10 @@
 import logging
+import os.path
 
 from PIL import ImageFont
 
-import app_runner
+from context import lmae
+from lmae import app_runner
 from lmae.actor import SpriteImage, Text
 from lmae.app import SingleStageRenderLoopApp
 
@@ -14,12 +16,14 @@ print("LED Matrix Module Test - Sprite Module Test")
 # set up stage
 logger.debug("Setting up stage")
 
+resource_path = os.path.dirname(__file__)
+
 mario_sprite = SpriteImage(name="Mario Sprite", position=(35, 0))
-mario_sprite.set_from_file("images/smb/smb2_heroes_sheet.png",  # "images/smb/smb_mario_sheet.png",
-                           "images/smb/smb2_mario_sprites.json")  # "images/smb/mario-sprites.json")
+mario_sprite.set_from_file(os.path.join(resource_path, "images/smb/smb2_heroes_sheet.png"),
+                           os.path.join(resource_path, "images/smb/smb2_mario_sprites.json"))
 mario_sprite.set_sprite("sprite1")
 
-font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
+font = ImageFont.truetype(os.path.join(resource_path, "fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf"), 5)
 sprite_label = Text(name="Sprite label", position=(2, 24), font=font, stroke_width=1)
 sprite_frame = 0
 

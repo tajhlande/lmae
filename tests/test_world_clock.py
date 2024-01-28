@@ -2,11 +2,12 @@ import glob
 import os
 import unittest
 
+
 from math import pi
 from PIL import Image
 
-from world_clock import (compute_sun_declination, compute_terminator_for_declination_and_angle, is_equinox,
-                         gall_peters_projection, draw_day_night_mask, normalize_longitude)
+from examples.world_clock import (compute_sun_declination, compute_terminator_for_declination_and_angle, is_equinox,
+                                  gall_peters_projection, draw_day_night_mask, normalize_longitude)
 
 
 # noinspection DuplicatedCode

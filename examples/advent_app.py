@@ -1,11 +1,12 @@
 import datetime
-import os
+import os.path
 import time
 
 from datetime import datetime
 from PIL import ImageFont
 
-import app_runner
+from context import lmae
+from lmae import app_runner
 from lmae.animation import Sequence, HueFade
 from lmae.core import Animation
 from lmae.app import DisplayManagedApp
@@ -237,4 +238,7 @@ class AdventApp(DisplayManagedApp):
 
 
 if __name__ == "__main__":
-    app_runner.start_app(AdventApp())
+    resources_path = resource_path = os.path.dirname(__file__)
+    font_path = os.path.join(resource_path, "fonts")
+    images_path = os.path.join(resource_path, "images")
+    app_runner.start_app(AdventApp(font_path = font_path, image_path = images_path))

@@ -3,9 +3,10 @@ import logging
 import time
 
 from abc import ABCMeta, abstractmethod
-from lmae.core import Stage, Actor, Animation
 from threading import Lock
 from typing import Callable
+
+from lmae.core import Stage, Actor, Animation
 
 # hackity hackington to determine whether we're going to use virtual bindings or not
 import platform

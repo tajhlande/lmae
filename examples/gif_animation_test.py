@@ -1,6 +1,8 @@
 import logging
+import os.path
 
-import app_runner
+from context import lmae
+from lmae import app_runner
 from lmae.app import SingleStageRenderLoopApp
 from lmae.component import AnimatedImage
 
@@ -9,8 +11,9 @@ logger = logging.getLogger("gif_animation_test")
 logger.setLevel(logging.DEBUG)
 print("LED Matrix Module Test - GIF App")
 
+resource_path = os.path.dirname(__file__)
 kirby_gif_image = AnimatedImage(name="Kirby Animated Image", position=(17, 6), repeat=True)
-kirby_gif_image.set_from_file("images/kirby-walk-anim.gif")
+kirby_gif_image.set_from_file(os.path.join(resource_path, "images/kirby-walk-anim.gif"))
 kirby_animations = kirby_gif_image.get_animations()
 
 

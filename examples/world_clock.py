@@ -1,10 +1,12 @@
 import datetime
+import os.path
 
 from datetime import datetime, timezone
 from math import sin, cos, asin, atan2, radians, degrees, pi, sqrt, isclose, floor
 from PIL import Image, ImageDraw, ImageFont
 
-import app_runner
+from context import lmae
+from lmae import app_runner
 from lmae.actor import StillImage
 from lmae.app import DisplayManagedApp
 
@@ -205,15 +207,15 @@ class WorldClock(DisplayManagedApp):
     """
 
     # noinspection PyTypeChecker
-    def __init__(self, refresh_time: int = 300):
+    def __init__(self, refresh_time: int = 300, resource_path: str = ""):
         super().__init__(refresh_time=refresh_time, max_frame_rate=20)
 
         self.actors = list()
         self.pre_render_callback = None
         self.refresh_time = refresh_time
-        self.big_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 15)
-        self.daytime_map_image = Image.open("images/visible-earth/world-topo-bathy.png")
-        self.nighttime_map_image = Image.open("images/visible-earth/black-marble.png")
+        self.big_font = ImageFont.truetype(os.path.join(resource_path, "fonts/Roboto/Roboto-Light.ttf"), 15)
+        self.daytime_map_image = Image.open(os.path.join(resource_path, "images/visible-earth/world-topo-bathy.png"))
+        self.nighttime_map_image = Image.open(os.path.join(resource_path, "images/visible-earth/black-marble.png"))
         self.composite_map = StillImage(name="composite-map")
         self.current_datetime_utc: datetime = None
         self.last_view_update_datetime_utc: datetime = None
@@ -251,4 +253,4 @@ class WorldClock(DisplayManagedApp):
 
 
 if __name__ == "__main__":
-    app_runner.start_app(WorldClock())
+    app_runner.start_app(WorldClock(resource_path=os.path.dirname(__file__)))

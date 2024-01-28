@@ -5,7 +5,7 @@
 
 ##################
 # Apple
-.DS_Store
+*/.DS_Store
 
 ##################
 ### C template
@@ -226,5 +226,5 @@ cython_debug/
 #.idea/
 
 env.ini
-/images/backgrounds/raw/
+/examples/images/backgrounds/raw/
 
