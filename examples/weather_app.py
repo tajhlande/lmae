@@ -1,11 +1,13 @@
 import asyncio
 import json
+import os.path
 import time
 
 from datetime import datetime
 from PIL import Image, ImageFont, ImageFilter, ImageEnhance
 
-import app_runner
+from context import lmae
+from lmae import app_runner
 from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae.app import DisplayManagedApp
 from lmae.actor import StillImage, SpriteImage, Text, Line
@@ -19,8 +21,9 @@ class WeatherApp(DisplayManagedApp):
     """
 
     # noinspection PyTypeChecker
-    def __init__(self, api_key: str, latitude: str, longitude: str, refresh_time: int = 900):
-        super().__init__(max_frame_rate = 60, refresh_time=refresh_time)
+    def __init__(self, api_key: str, latitude: str, longitude: str, refresh_time: int = 900, resource_path: str = ""):
+        super().__init__(max_frame_rate=60, refresh_time=refresh_time)
+        self.resource_path = resource_path
         self.fresh_weather_data = False
         self.api_key = api_key
         self.latitude = latitude
@@ -31,9 +34,10 @@ class WeatherApp(DisplayManagedApp):
         self.pre_render_callback = None
         self.conditions_and_forecast = None
         self.call_status = "ok"
-        self.primary_text_font = ImageFont.truetype("fonts/Roboto/Roboto-Light.ttf", 15)
+        self.primary_text_font = ImageFont.truetype(os.path.join(resource_path, "fonts/Roboto/Roboto-Light.ttf"), 15)
         self.temperature_label: Text = None
-        self.secondary_text_font = ImageFont.truetype("fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf", 5)
+        self.secondary_text_font = ImageFont.truetype(os.path.join(resource_path,
+                                                                   "fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf"), 5)
         self.dewpoint_label: Text = None
         self.feels_like_label: Text = None
         self.humidity_label: Text = None
@@ -76,11 +80,16 @@ class WeatherApp(DisplayManagedApp):
         self.logger.info(f"Refreshing weather data every {self.refresh_time} seconds")
         self.old_brightness: int = None
 
-        self.blue_sky_image: Image = Image.open("images/backgrounds/blue_sky.png").convert('RGBA')
-        self.cloudy_image: Image = Image.open("images/backgrounds/cloudy.png").convert('RGBA')
-        self.dark_clouds_image: Image = Image.open("images/backgrounds/dark_clouds.png").convert('RGBA')
-        self.night_sky_image: Image = Image.open("images/backgrounds/night_sky.png").convert('RGBA')
-        self.sunrise_sunset_image: Image = Image.open("images/backgrounds/sunrise_sunset.png").convert('RGBA')
+        self.blue_sky_image = (Image.open(os.path.join(resource_path, "images/backgrounds/blue_sky.png"))
+                                    .convert('RGBA'))
+        self.cloudy_image = (Image.open(os.path.join(resource_path, "images/backgrounds/cloudy.png"))
+                                  .convert('RGBA'))
+        self.dark_clouds_image = (Image.open(os.path.join(resource_path, "images/backgrounds/dark_clouds.png"))
+                                       .convert('RGBA'))
+        self.night_sky_image = (Image.open(os.path.join(resource_path, "images/backgrounds/night_sky.png"))
+                                     .convert('RGBA'))
+        self.sunrise_sunset_image = (Image.open(os.path.join(resource_path, "images/backgrounds/sunrise_sunset.png"))
+                                          .convert('RGBA'))
         self.bg_image_name = None
 
     def prepare(self):
@@ -133,8 +142,8 @@ class WeatherApp(DisplayManagedApp):
         self.stage.actors.append(self.condition_description_label)
 
         # conditions image actor
-        sprite_sheet: Image = Image.open("images/weather-sprites.png").convert('RGBA')
-        with open("images/weather-sprites.json") as spec_file:
+        sprite_sheet: Image = Image.open(os.path.join(self.resource_path, "images/weather-sprites.png")).convert('RGBA')
+        with open(os.path.join(self.resource_path, "images/weather-sprites.json")) as spec_file:
             sprite_spec = json.load(spec_file)
         self.main_daytime_image = SpriteImage(name='main-daytime-condition', position=(39, 10),
                                               sheet=sprite_sheet, spec=sprite_spec)
@@ -161,7 +170,8 @@ class WeatherApp(DisplayManagedApp):
         # convert edges into shadow image by applying edges as alpha to black image
         shadow_image = Image.new("RGBA", sprite_grayscale.size, (0, 0, 0, 255))
         shadow_image.putalpha(edges)
-        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow', position=self.main_daytime_image.position,
+        self.daytime_image_shadow = SpriteImage(name='daytime-condition-shadow',
+                                                position=self.main_daytime_image.position,
                                                 sheet=shadow_image, spec=sprite_spec)
 
         # main condition actors
@@ -608,5 +618,6 @@ if __name__ == "__main__":
     env_refresh_time = int(app_runner.get_env_parameter('REFRESH_TIME', 'settings', 'refresh_time',
                                                         default=60 * 15))  # default to 15 minutes
 
+    resource_path = os.path.dirname(__file__)
     app_runner.start_app(WeatherApp(api_key=env_api_key, latitude=env_latitude, longitude=env_longitude,
-                                    refresh_time=env_refresh_time))
+                                    refresh_time=env_refresh_time, resource_path=resource_path))

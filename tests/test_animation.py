@@ -1,4 +1,6 @@
 import unittest
+
+from context import lmae
 from lmae.animation import Easing
 
 

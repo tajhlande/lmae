@@ -14,6 +14,7 @@ virtual_leds = False
 if os_name == 'Linux':
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
+    # from lmae.display
     from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
     virtual_leds = True
 
