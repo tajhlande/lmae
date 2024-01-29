@@ -78,7 +78,7 @@ you need to install the `rgbmatrix` library into the venv environment in develop
 the path to the python bindings in your copy of the `rpi-rgb-led-matrix`, so after activating your
 virtual environment, run something like:
 
-    pip install -e ~/rpi-rgb-led-matrix/bindings/python
+    pip install -e ${PATH_TOPROEJCT}/rpi-rgb-led-matrix/bindings/python
 
 And then run the example like this:
 
@@ -89,20 +89,35 @@ the elevated privileges necessary to achieve best GPIO timing performance.
 And because `sudo` doesn't use the user's path, the usual means to activating
 the virtual environment doesn't work.
 
-### Setting up your development environment
+### Setting up your development environment to work on this project
 
 The following assumes you want to develop on a Windows or Mac laptop, separate from the RPi.
 
 In order to get your IDE to find the `rgbmatrix` module so all your syntax highlighting
-will be nice and clean, you'll need to do one of the following:
+will be nice and clean, you'll need to do one of the following to install the module in
+development mode, as it isn't platform-independent and can't be installed from PyPI:
 
-1.  `pip install -e ~/rpi-rgb-led-matrix/bindings/python` in your IDE's virtual environment.
+1.  `pip install -e ${PATH_TO_PROJECT}/rpi-rgb-led-matrix/bindings/python` in your IDE's virtual environment.
 2.  Add the python bindings path (the same path as what you set in the
-    `pip -e` command above) to your IDE's Python sys.path or PYTHONPATH settings.
+    `pip -e` command above) to your IDE's Python `sys.path` or `PYTHONPATH` settings.
 
 Instructions for JetBrains IDEs can be found [here](https://www.jetbrains.com/help/idea/installing-uninstalling-and-reloading-interpreter-paths.html).
 Instructions for VSCode can be found [here](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
+ 
+### Setting up your development environment for a project that uses `lmae` as a package
 
+First, follow the instructions above to install the `rgbmatrix` module in development mode, 
+then do one of the following in the same manner for this project:
+
+1.  `pip install -e ${PATH_TO_PROJECT}/lmae` in your IDE's virtual environment.
+2.  Add the python bindings path (the same path as what you set in the
+    `pip -e` command above) to your IDE's Python `sys.path` or `PYTHONPATH` settings.
+3.  If you're using Poetry, you can run a command like `poetry add --editable ${PATH_TO_PROJECT}/lmae`, or
+4.  Edit your `poetry.toml` under the `[tool.poetry.dependencies]` header to include
+    `lmae = {path = "${PATH_TO_PROJECT}/lmae", develop = true}`
+
+The packaging for the `lmae` module doesn't include the `rgbmatrix` dependency, so you'll need to include it
+in your dependency list.
 
 ### Virtual LED Display
 
@@ -151,16 +166,17 @@ If they are not set to repeat, they are removed from the stage on completion.
 Components are actors that know how to generate their own animations.
 This is meant to encapsulate complex animation behavior.
 
-The `lmae.app` module, along with the `app_runner` module, provide tools for the
+The `lmae.app` module, along with the `lmae.app_runner` module, provide tools for the
 construction and execution of apps.
 
 
 
 # Weather app
 
-The first app is a weather conditions display app.
-It relies on the [OpenWeather One Call API](https://openweathermap.org/api/one-call-api)
-to get current weather conditions for a given latitude & longitude.
+A reasonably complex demo app in included in `weather_app.py`. 
+It is a weather conditions display app that relies on the [OpenWeather One Call API](https://openweathermap.org/api/one-call-api)
+to get current weather conditions for a given location, specified by
+latitude & longitude.
 
 You need to set the following environment variables:
 
@@ -170,7 +186,7 @@ You need to set the following environment variables:
 * `REFRESH_TIME` - Optionally, the number of seconds between refreshing weather data.
     Defaults to 600 seconds, which is the suggested shortest refresh time in the OpenWeather API documentation.
 
-Alternatively, you could create an `env.ini` file in this directory with the following structure:
+Alternatively, you could create an `env.ini` file in the project's base directory with the following structure:
 
     [location]
     latitude=XXX.XXXXXX
@@ -179,9 +195,9 @@ Alternatively, you could create an `env.ini` file in this directory with the fol
     [openweather]
     ow_api_key=0123456789abcdef0123456789abcdef
 
-To run the weather app on a virtual LED display in your venv-activated developtment environment:
+To run the weather app on a virtual LED display in your venv-activated development environment:
 
-    python weather_app.py
+    python examples/weather_app.py
 
 If successful, you should see something like the following, depending on current conditions:
 
@@ -189,7 +205,7 @@ If successful, you should see something like the following, depending on current
 
 To run it on the real LED display:
 
-    sudo venv/bin/python weather_app.py
+    sudo venv/bin/python examples/weather_app.py
 
 --------
 A previous iteration of the weather app used the Visual Crossing API, and the VX API client
@@ -254,10 +270,12 @@ to enable animation effects of indefinite length.
 
 #### Component classes
 Components are actors in `lmae.component` that know how to construct their own animation sequences.
-There is only one component at this point:
 
-* `Carousel` - a composite actor that slides several actors through a crop window, one at a time, with configurable
-    pause time and motion time, and that resets
+* `Carousel` - Carousels slide several actors through a cropped viewing window, one at a time, with configurable
+    pause time and motion time, and then repeats by scrolling back to the first actor
+* `AnimatedSprite` - Displays a `SpriteImage` and runs throw
+   an animation sequence of frames for the sprite.
+* `AnimatedImage`  - Displays a sequence of images. Typically created by loading from an animated GIF. 
 
 ## App framework
 
@@ -267,22 +285,38 @@ your app can extend to get access to a basic app running framework.
 Your app just needs to know how to `prepare()` itself, how to `run()`, and how to
 `stop()`.
 
-To run the app, `app_runner.py` contains a few helper methods that can get your app
-running:
-
-    app_runner.app_setup()
-
-then set the matrix on your app:
-
-    my_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
-
-then start your app:
+To run the app:
 
     app_runner.start_app(my_app)
 
-The app runner waits for a `return` keypress before exiting the app.
+This function will run a few helper methods that get your app set up, including
+setting up the matrix and matrix options for your app by calling this:
+
+    my_app.set_matrix(app_runner.matrix, options=app_runner.matrix_options)
+
+The app runner waits for a `return` keypress on the console before exiting the app.
 
 The `app_runner` module also includes a helper method to get environmental
 properties, set either as `env` variables or in an `env.ini` file: `app_runner.get_env_parameter()`.
 Note that the env variable and the env.ini property don't have to have exactly the same name.
 
+### App classes
+
+To save on some of the boilerplate for app development, there are two 
+classes in `lmae.app` that your app can choose to extend:
+
+* `SingleStageRenderLoopApp` - A very simple app with one stage and an indefinite
+   rendering loop.  Call `my_app.add_actors()` and `my_app.add_animations()` to add
+   actors and animations to the stage. Call `my_app.set_pre_render_callback()` to set a function
+   that will be called before each rendered frame. This app will run at a frame rate up 
+   to the maximum frame rate, which defaults to 120 fps. It works well for the most simple of 
+   apps without complex pre-rendering needs.
+* `DisplayManagedApp` - A slightly more sophisticated base class. Apps need to 
+   set up their own stage, actors, and animations.  Override `my_app.update_view()`
+   to make changes that will be displayed on rendering. This method needs to run fast
+   to achieve high frame rates, and so calls to data services should be cached.
+   The call to `update_view()` includes `elapsed_time` since the app started running.
+   The app will only render new frames if the contents of the stage have changed in some
+   way to require it.  Each actor tracks its own state to know if a state change requires
+   re-rendering. As with the above, it will run at a frame rate up
+   to the maximum frame rate, which defaults to 120 fps.
