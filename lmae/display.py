@@ -114,7 +114,7 @@ class VirtualRGBMatrix:
         return new_colors
 
     @staticmethod
-    def _get_image_pixel(image: Image, x: int, y: int) -> tuple[int, int, int] or tuple[int, int, int, int]:
+    def _get_image_pixel(image: Image, x: int, y: int) -> tuple[int, int, int]:
         if 0 <= x < image.size[0] and 0 <= y < image.size[1]:
             return image.getpixel((x, y))
         else:
