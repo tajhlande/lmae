@@ -16,7 +16,8 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
   * [LMAE Basics](#lmae-basics)
     * [Prerequisites](#prerequisites)
     * [Getting started](#getting-started)
-    * [Setting up your development environment](#setting-up-your-development-environment)
+    * [Setting up your development environment to work on this project](#setting-up-your-development-environment-to-work-on-this-project)
+    * [Setting up your development environment for a project that uses `lmae` as a package](#setting-up-your-development-environment-for-a-project-that-uses-lmae-as-a-package)
     * [Virtual LED Display](#virtual-led-display)
     * [Library structure](#library-structure)
 * [Weather app](#weather-app)
@@ -29,6 +30,7 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
       * [Animation classes](#animation-classes)
       * [Component classes](#component-classes)
   * [App framework](#app-framework)
+    * [App classes](#app-classes)
 <!-- TOC -->
 
 ## LMAE Basics
