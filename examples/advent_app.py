@@ -236,9 +236,13 @@ class AdventApp(DisplayManagedApp):
                     light_sequences.append(sequence)
             self.stage.add_animations(light_sequences)
 
+    @staticmethod
+    def get_app_instance():
+        resource_path = os.path.dirname(__file__)
+        font_path = os.path.join(resource_path, "fonts")
+        images_path = os.path.join(resource_path, "images")
+        return AdventApp(font_path=font_path, image_path=images_path)
+
 
 if __name__ == "__main__":
-    resources_path = resource_path = os.path.dirname(__file__)
-    font_path = os.path.join(resource_path, "fonts")
-    images_path = os.path.join(resource_path, "images")
-    app_runner.start_app(AdventApp(font_path = font_path, image_path = images_path))
+    app_runner.start_app(AdventApp.get_app_instance())
