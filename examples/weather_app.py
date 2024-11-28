@@ -134,6 +134,7 @@ class WeatherApp(DisplayManagedApp):
         self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
         # condition description actor
+        self.need_to_update_condition_desc_animation = True
         self.condition_description_label_position = (2, 2)
         self.condition_description_label = Text(name='condition-description',
                                                 position=self.condition_description_label_position,

@@ -43,7 +43,7 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
         for app in app_list:
             log.info(f"Starting app: {app.__class__.__name__}")
             asyncio.run(run_app_with_timeout(app, timeout=cycle_timeout))
-            print(f"Finished or terminated app: {app.__class__.__name__}")
+            log.info(f"Finished or terminated app: {app.__class__.__name__}")
             time.sleep(1)  # Short pause between scripts
 
 

@@ -25,7 +25,7 @@ class AdventApp(DisplayManagedApp):
         self.pre_render_callback = None
         self.refresh_time = refresh_time
         roboto_font_path = os.path.join(font_path, "Roboto/Roboto-Light.ttf")
-        print(f"Roboto font path: {roboto_font_path}")
+        self.logger.debug(f"Roboto font path: {roboto_font_path}")
         self.big_font = ImageFont.truetype(roboto_font_path, 15)
         self.counter_label = Text(font=self.big_font, name="counter", position=(8, 2))
         teeny_font_path = os.path.join(font_path, "teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf")
@@ -82,6 +82,7 @@ class AdventApp(DisplayManagedApp):
         super().prepare()
         self.stage.actors.extend((self.line_1_label, self.line_2_label, self.counter_label, self.tree_image))
         self.stage.actors.extend(self.lights_list)
+        self.logger.debug(f"Stage needs render? {self.stage.needs_render}")
 
     def update_countdown(self):
         current_datetime = datetime.now()
@@ -235,6 +236,20 @@ class AdventApp(DisplayManagedApp):
                     li = li + 1
                     light_sequences.append(sequence)
             self.stage.add_animations(light_sequences)
+
+    def stop(self):
+        super().stop()
+        self.days_until_christmas = 0
+        self.hours_until_christmas = 0
+        self.minutes_until_christmas = 0
+        self.is_christmas = False
+
+        self.was_it_christmas = None
+        self.last_days_until_christmas = -1
+        self.last_hours_until_christmas = -1
+        self.last_minutes_until_christmas = -1
+        self.last_hour = -1
+
 
     @staticmethod
     def get_app_instance():
