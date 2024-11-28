@@ -251,6 +251,10 @@ class WorldClock(DisplayManagedApp):
 
             self.last_view_update_datetime_utc = self.current_datetime_utc
 
+    def stop(self):
+        super().stop()
+        self.last_view_update_datetime_utc = None
+
     @staticmethod
     def get_app_instance():
         return WorldClock(resource_path=os.path.dirname(__file__))
