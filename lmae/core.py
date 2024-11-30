@@ -251,8 +251,8 @@ class Stage(LMAEObject):
         size_before = len(self.animations)
         self.animations = [anim for anim in self.animations if anim.actor != actor]
         size_after = len(self.animations)
-        self.logger.debug(f"Cleared animations for actor {actor.name}. Total anims before: {size_before}, "
-                          f"after: {size_after}")
+        # self.logger.debug(f"Cleared animations for actor {actor.name}. Total anims before: {size_before}, "
+        #                   f"after: {size_after}")
 
     def clear_animations_for_all(self, actors: list[Actor]):
         """

@@ -25,6 +25,7 @@ class WeatherApp(DisplayManagedApp):
         super().__init__(max_frame_rate=60, refresh_time=refresh_time)
         self.resource_path = resource_path
         self.fresh_weather_data = False
+        self.last_weather_data_at: float = None
         self.api_key = api_key
         self.latitude = latitude
         self.longitude = longitude
@@ -196,9 +197,15 @@ class WeatherApp(DisplayManagedApp):
     def update_weather_data(self):
         try:
             self.logger.debug(f"Fetching current weather data")
+
+            # by setting this before the call, we avoid repeated calls in the case of errors
+            # as long as the temperature was retrieved at least once, we won't exceed our call count
+            self.last_weather_data_at = time.time()
+
             conditions_and_forecast = get_conditions_and_forecast_by_lat_long(self.latitude, self.longitude,
                                                                               self.api_key)
             if conditions_and_forecast:
+
                 self.logger.debug("Call to get conditions and forecast succeeded")
                 self.conditions_and_forecast = conditions_and_forecast
                 self.call_status = "ok"
@@ -276,7 +283,9 @@ class WeatherApp(DisplayManagedApp):
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
     def update_view(self, elapsed_time: float):
-        if not self.temperature_str or elapsed_time > self.refresh_time:
+        time_since_last_update = time.time() - self.last_weather_data_at if self.last_weather_data_at \
+            else self.refresh_time + 1
+        if not self.temperature_str or time_since_last_update >= self.refresh_time:
             self.update_weather_data()
 
         self.temperature_label.set_text(self.temperature_str)
@@ -583,8 +592,12 @@ class WeatherApp(DisplayManagedApp):
 
         # timer line, shows remaining time until next call to refresh weather data
         # old_size = self.timer_line.size
-        relative_length = int(round(max(round(self.refresh_time - elapsed_time), 0) * 64.0 / self.refresh_time))
-        self.timer_line.set_start((64-relative_length, 31))
+        if self.last_weather_data_at:
+            time_since_last_update = time.time() - self.last_weather_data_at
+            relative_length = int(round(max(round(self.refresh_time - time_since_last_update), 0) * 64.0 / self.refresh_time))
+        else:
+            relative_length = 0
+        self.timer_line.set_start((64 - relative_length, 31))
 
         # if old_size[0] != self.timer_line.size[0]:
         #     self.logger.debug(f"Timer line length is now {relative_length}")
