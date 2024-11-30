@@ -4,7 +4,7 @@ emoji==2.6.0
 freezegun==1.4.0
 idna==3.4
 munch==4.0.0
-Pillow==10.2.0
+Pillow==10.3.0
 pilmoji==2.0.3
 pygame==2.5.1
 python-dateutil==2.8.2
