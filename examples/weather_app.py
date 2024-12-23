@@ -93,8 +93,7 @@ class WeatherApp(DisplayManagedApp):
                                           .convert('RGBA'))
         self.bg_image_name = None
 
-    def prepare(self):
-        super().prepare()
+        # moved actor setup from prepare() since it can really just be done once
 
         # background image
         self.background_image = StillImage(name='BackgroundImage', position=(0, 0))
@@ -192,6 +191,11 @@ class WeatherApp(DisplayManagedApp):
         # timer actor
         self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
         self.stage.actors.append(self.timer_line)
+
+
+    def prepare(self):
+        super().prepare()
+
 
     # noinspection PyBroadException
     def update_weather_data(self):
