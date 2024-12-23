@@ -97,12 +97,10 @@ class WeatherApp(DisplayManagedApp):
 
         # background image
         self.background_image = StillImage(name='BackgroundImage', position=(0, 0))
-        self.stage.actors.append(self.background_image)
 
         # temperature actor
         self.temperature_label = Text(name='TemperatureActor', position=(5, 7), font=self.primary_text_font,
                                       color=(255, 255, 255, 255), stroke_color=(0, 0, 0, 255), stroke_width=1)
-        self.stage.actors.append(self.temperature_label)
 
         # feels like actor
         self.feels_like_label = Text(name='FeelsLikeActor', position=(5, 24), font=self.secondary_text_font,
@@ -129,18 +127,13 @@ class WeatherApp(DisplayManagedApp):
                                        position=(4, 23), panel_offset=(1, 1),
                                        panels=[self.feels_like_label, self.dewpoint_label, self.humidity_label,
                                                self.low_temp_label, self.high_temp_label])
-        self.stage.actors.append(self.temps_carousel)
-        self.stage.add_animations(self.temps_carousel.get_animations())
-        self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
 
         # condition description actor
-        self.need_to_update_condition_desc_animation = True
         self.condition_description_label_position = (2, 2)
         self.condition_description_label = Text(name='condition-description',
                                                 position=self.condition_description_label_position,
                                                 font=self.secondary_text_font, stroke_width=1,
                                                 color=(192, 192, 192, 255), stroke_color=(0, 0, 0, 220))
-        self.stage.actors.append(self.condition_description_label)
 
         # conditions image actor
         sprite_sheet: Image = Image.open(os.path.join(self.resource_path, "images/weather-sprites.png")).convert('RGBA')
@@ -175,29 +168,39 @@ class WeatherApp(DisplayManagedApp):
                                                 position=self.main_daytime_image.position,
                                                 sheet=shadow_image, spec=sprite_spec)
 
-        # main condition actors
-        self.stage.actors.append(self.daytime_image_shadow)
-        self.stage.actors.append(self.main_daytime_image)
 
         # moon phase actor
         self.moon_phase_image = SpriteImage(name='moon-phase', position=(39, 7), sheet=sprite_sheet, spec=sprite_spec)
-        self.stage.actors.append(self.moon_phase_image)
-
-        # support condition actors
-        self.stage.actors.append(self.support_daytime_image_1)
-        self.stage.actors.append(self.support_daytime_image_2)
 
 
         # timer actor
         self.timer_line = Line(name='timer-line', start=(0, 31), end=(63, 31), color=(255, 255, 0, 128))
-        self.stage.actors.append(self.timer_line)
+
 
 
     def prepare(self):
         super().prepare()
 
+        self.stage.animations.clear()
+        self.stage.actors.clear()
 
-    # noinspection PyBroadException
+        self.stage.actors.append(self.background_image)
+        self.stage.actors.append(self.temperature_label)
+        self.stage.actors.append(self.temps_carousel)
+        self.stage.add_animations(self.temps_carousel.get_animations())
+        self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
+        self.stage.actors.append(self.condition_description_label)
+        self.stage.actors.append(self.daytime_image_shadow)
+        self.stage.actors.append(self.main_daytime_image)
+        self.stage.actors.append(self.moon_phase_image)
+        self.stage.actors.append(self.support_daytime_image_1)
+        self.stage.actors.append(self.support_daytime_image_2)
+        self.stage.actors.append(self.timer_line)
+
+        self.need_to_update_condition_desc_animation = True
+
+
+# noinspection PyBroadException
     def update_weather_data(self):
         try:
             self.logger.debug(f"Fetching current weather data")
