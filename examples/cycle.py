@@ -60,4 +60,4 @@ if __name__ == "__main__":
     app_runner.app_setup()
     for app in apps:
         app.set_matrix(matrix=app_runner.matrix, options=app_runner.matrix_options)
-    run_apps_in_cycle(apps, cycle_timeout=30)
+    run_apps_in_cycle(apps, cycle_timeout=5)
