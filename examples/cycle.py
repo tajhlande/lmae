@@ -9,6 +9,11 @@ import weather_app
 import world_clock
 
 log = logging.getLogger(__file__)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+handler.setLevel(logging.DEBUG)
+log.addHandler(handler)
 
 
 async def run_app_with_timeout(app, timeout=600):
