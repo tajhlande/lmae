@@ -56,6 +56,8 @@ def create_apps_list():
 
 
 if __name__ == "__main__":
+    import gc
+    gc.set_debug(gc.DEBUG_LEAK)
     apps = create_apps_list()
     app_runner.app_setup()
     for app in apps:
