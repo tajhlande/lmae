@@ -57,7 +57,7 @@ def create_apps_list():
 
 if __name__ == "__main__":
     import pydevd_pycharm
-    pydevd_pycharm.settrace('raspberrypi', port=12345, stdoutToServer=True, stderrToServer=True)
+    pydevd_pycharm.settrace('Iridium.local', port=12345, stdoutToServer=True, stderrToServer=True)
     apps = create_apps_list()
     app_runner.app_setup()
     for app in apps:
