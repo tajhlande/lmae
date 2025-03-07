@@ -119,4 +119,4 @@ if __name__ == "__main__":
     app_runner.app_setup()
     for app in apps:
         app.set_matrix(matrix=app_runner.matrix, options=app_runner.matrix_options)
-    run_apps_in_subprocess_cycle(["weather_app.py", "world_clock.py"], cycle_timeout=5)
+    run_apps_in_subprocess_cycle(["weather_app.py", "world_clock.py"], cycle_timeout=15)
