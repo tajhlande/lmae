@@ -112,9 +112,7 @@ async def run_app(app: App):
 
     logger.debug("run_app() finished")
 
-import pwd
 def start_app(app: App):
-    logger.warning(f"Current user is {pwd.getpwuid(os.getuid()).pw_name}")
     app_setup()
     app.set_matrix(matrix=matrix, options=matrix_options)
     asyncio.run(run_app(app))
