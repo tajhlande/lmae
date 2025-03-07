@@ -57,7 +57,7 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
 
         #process = subprocess.run(args=["sudo", python_path, app_script_path], check=True)
         process = subprocess.Popen(args=["sudo", python_path, app_script_path],
-                                   stdout=sys.stdout, stderr=sys.stderr)
+                                   stdout=sys.stdout, stderr=sys.stderr, user="tajh")
 
 
         #app_runner_task = asyncio.create_task()
