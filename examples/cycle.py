@@ -53,6 +53,7 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
     try:
         log.debug(f"Executing app subprocess to run for {timeout} seconds")
         log.debug(f"exec: sudo {python_path} {app_script_path}")
+        log.debug(f"Parent process user: {os.geteuid()} ({os.getlogin()})")
 
         #process = subprocess.run(args=["sudo", python_path, app_script_path], check=True)
         process = subprocess.Popen(args=["sudo", python_path, app_script_path],
