@@ -51,8 +51,9 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
 
     try:
         log.debug(f"Executing app subprocess to run for {timeout} seconds")
+        log.debug(f"exec: {python_path} {app_script_path}")
 
-        process = subprocess.run(args=[python_path, app_script_path], check=True, shell=True,
+        process = subprocess.run(args=["sudo", python_path, app_script_path], check=True, shell=True,
                                  stdout=sys.stdout, stderr=sys.stderr)
         try:
             outs, errs = process.communicate(timeout=timeout)
