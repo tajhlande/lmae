@@ -53,7 +53,7 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
         log.debug(f"Executing app subprocess to run for {timeout} seconds")
 
         process = subprocess.run(args=[python_path, app_script_path], check=True,
-                                 stdout=subprocess.STDOUT, stderr=subprocess.STDOUT)
+                                 stdout=sys.stdout, stderr=sys.stderr)
         try:
             outs, errs = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
