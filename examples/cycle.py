@@ -49,12 +49,12 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
     """Runs a given app as a subprocess for a specified timeout."""
 
     try:
-        log.debug(f"Preparing app to run for {timeout} seconds")
+        log.debug(f"Executing app subprocess to run for {timeout} seconds")
 
+        subprocess.run(args=[python_path, app_script_path], timeout=timeout, check=True)
+        #app_runner_task = asyncio.create_task()
 
-        app_runner_task = asyncio.create_task(subprocess.run(args=[python_path, app_script_path], timeout=timeout, check=True))
-
-        await asyncio.wait_for(app_runner_task, timeout=timeout)
+        #await asyncio.wait_for(app_runner_task, timeout=timeout)
 
         log.debug(f"App finished")
     except asyncio.TimeoutError:
