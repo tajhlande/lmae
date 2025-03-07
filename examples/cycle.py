@@ -4,6 +4,7 @@ import logging
 import time
 import subprocess
 import os.path
+from subprocess import STDOUT
 
 from context import lmae
 from lmae import app_runner
@@ -51,7 +52,8 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
     try:
         log.debug(f"Executing app subprocess to run for {timeout} seconds")
 
-        process = subprocess.Popen(args=[python_path, app_script_path])
+        process = subprocess.run(args=[python_path, app_script_path], check=True,
+                                 stdout=subprocess.STDOUT, stderr=subprocess.STDOUT)
         try:
             outs, errs = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
