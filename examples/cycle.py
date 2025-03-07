@@ -57,14 +57,17 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
 
         #process = subprocess.run(args=["sudo", python_path, app_script_path], check=True)
         process = subprocess.Popen(args=["/usr/bin/sudo", python_path, app_script_path],
-                                   stdout=sys.stdout, stderr=sys.stderr, user=os.getlogin())
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, user=os.getlogin())
 
-
+        log.info(f"Command Output: {process.stdout.strip()}")
         #app_runner_task = asyncio.create_task()
 
         #await asyncio.wait_for(app_runner_task, timeout=timeout)
 
         log.debug(f"App finished")
+    except subprocess.CalledProcessError as e:
+        log.error(f"Command failed with exit code {e.returncode}")
+        log.error(f"Error output: {e.stderr.strip()}")
     except asyncio.TimeoutError:
         log.info(f"Time limit reached")
     except Exception:
