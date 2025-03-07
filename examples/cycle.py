@@ -2,6 +2,8 @@ import asyncio
 import sys
 import logging
 import time
+import subprocess
+import os.path
 
 from context import lmae
 from lmae import app_runner
@@ -29,7 +31,32 @@ async def run_app_with_timeout(app, timeout=600):
 
         await asyncio.wait_for(app_runner_task, timeout=timeout)
 
-        logger.debug("run_app() finished")
+        log.debug("run_app() finished")
+    except asyncio.TimeoutError:
+        log.info(f"Time limit reached")
+    except Exception:
+        log.exception(f"Error executing {app.__class__.__name__}")
+        return
+
+    if app.running:
+        log.info(f"Stopping app {app.__class__.__name__}")
+        app.stop()
+    else:
+        log.info(f"App {app.__class__.__name__} already stopped")
+
+
+async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: str, timeout=600):
+    """Runs a given app as a subprocess for a specified timeout."""
+
+    try:
+        log.debug(f"Preparing app to run for {timeout} seconds")
+
+
+        app_runner_task = asyncio.create_task(subprocess.run(args=[python_path, app_script_path], timeout=timeout, check=True))
+
+        await asyncio.wait_for(app_runner_task, timeout=timeout)
+
+        log.debug(f"App finished")
     except asyncio.TimeoutError:
         log.info(f"Time limit reached")
     except Exception:
@@ -50,7 +77,23 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
             log.info(f"Starting app: {app.__class__.__name__}")
             asyncio.run(run_app_with_timeout(app, timeout=cycle_timeout))
             log.info(f"Finished or terminated app: {app.__class__.__name__}")
-            gc.collect()
+            # gc.collect()
+            # graph = refcycle.objects_reachable_from(app_list[0])
+            # log.warning(f"Graph size for Weather app: {len(graph)}")
+            time.sleep(1)  # Short pause between scripts
+
+def run_apps_in_subprocess_cycle(app_script_list: list[str], cycle_timeout=600):
+    """Runs scripts in a cycle, each for 'cycle_timeout' seconds."""
+    python_path = sys.executable
+    current_script_path = os.path.dirname(os.path.realpath(__file__))
+    log.info(f"Python path: {python_path}")
+    log.info(f"Current script path: {current_script_path}")
+    while True:
+        for app_script in app_script_list:
+            app_script_path = os.path.join(current_script_path, app_script)
+            log.info(f"Starting app {app_script} from file {app_script_path}")
+            asyncio.run(run_app_as_subprocess_with_timeout(python_path, app_script_path, timeout=cycle_timeout))
+            log.info(f"Finished or terminated app: {app_script}")
             time.sleep(1)  # Short pause between scripts
 
 
@@ -64,9 +107,9 @@ def create_apps_list():
 
 if __name__ == "__main__":
     import gc
-    gc.set_debug(gc.DEBUG_LEAK)
+    # gc.set_debug(gc.DEBUG_LEAK)
     apps = create_apps_list()
     app_runner.app_setup()
     for app in apps:
         app.set_matrix(matrix=app_runner.matrix, options=app_runner.matrix_options)
-    run_apps_in_cycle(apps, cycle_timeout=5)
+    run_apps_in_subprocess_cycle(["weather_app.py", "world_clock.py"], cycle_timeout=5)
