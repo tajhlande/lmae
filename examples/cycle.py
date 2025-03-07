@@ -1,4 +1,5 @@
 import asyncio
+import pwd
 import sys
 import logging
 import time
@@ -53,15 +54,10 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
         log.debug(f"Executing app subprocess to run for {timeout} seconds")
         log.debug(f"exec: {python_path} {app_script_path}")
 
-        process = subprocess.run(args=["sudo", python_path, app_script_path], check=True)
-        try:
-            outs, errs = process.communicate(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            outs, errs = process.communicate()
+        #process = subprocess.run(args=["sudo", python_path, app_script_path], check=True)
+        process = subprocess.Popen(args=[python_path, app_script_path],
+                                   stdout=sys.stdout, stderr=sys.stderr)
 
-        log.info(f"Output from subprocess: {outs}")
-        log.info(f"Errors from subprocess: {errs}")
 
         #app_runner_task = asyncio.create_task()
 
