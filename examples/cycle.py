@@ -99,7 +99,7 @@ def run_apps_in_subprocess_cycle(app_script_list: list[str], cycle_timeout=600):
 
 def create_apps_list():
     return [
-        weather_app.WeatherApp.get_app_instance(),
+        advent_app.AdventApp.get_app_instance(),
         world_clock.WorldClock.get_app_instance(),
         # advent_app.AdventApp.get_app_instance()
     ]
