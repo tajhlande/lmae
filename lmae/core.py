@@ -346,17 +346,17 @@ class Stage(LMAEObject):
 virtual_leds = False
 
 
-_parsed_matrix_options = False
+_have_parsed_matrix_options = False
 
 def parse_matrix_options_command_line():
     """
     Parse the command line options and construct a RGBMatrixOptions object
     :return: an RGBMatrixOptions object
     """
-    global _parsed_matrix_options
-    if _parsed_matrix_options:
+    global _have_parsed_matrix_options
+    if _have_parsed_matrix_options:
         raise Exception("Trying to parse matrix options a second time")
-    _parsed_matrix_options = True
+    _have_parsed_matrix_options = True
     options = RGBMatrixOptions()
     parser = argparse.ArgumentParser()
 
