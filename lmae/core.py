@@ -346,11 +346,17 @@ class Stage(LMAEObject):
 virtual_leds = False
 
 
+_parsed_matrix_options = False
+
 def parse_matrix_options_command_line():
     """
     Parse the command line options and construct a RGBMatrixOptions object
     :return: an RGBMatrixOptions object
     """
+    global _parsed_matrix_options
+    if _parsed_matrix_options:
+        raise Exception("Trying to parse matrix options a second time")
+    _parsed_matrix_options = True
     options = RGBMatrixOptions()
     parser = argparse.ArgumentParser()
 
@@ -417,7 +423,7 @@ def parse_matrix_options_command_line():
     options.led_rgb_sequence = args.led_rgb_sequence
     options.pixel_mapper_config = args.led_pixel_mapper
     options.panel_type = args.led_panel_type
-    global virtual_leds
+    global virtual_leds, _parsed_matrix_options
     virtual_leds = args.virtual_leds
 
 
