@@ -57,7 +57,7 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
         #await asyncio.wait_for(app_runner_task, timeout=timeout)
 
         log.debug(f"App finished")
-    except asyncio.TimeoutError or subprocess.TimeoutExpired:
+    except (asyncio.TimeoutError, subprocess.TimeoutExpired):
         log.info(f"Time limit reached")
     except Exception:
         log.exception(f"Error executing {app.__class__.__name__}")
