@@ -345,8 +345,13 @@ class Stage(LMAEObject):
 
 virtual_leds = False
 
-
-_have_parsed_matrix_options = False
+try:
+    _have_parsed_matrix_options
+except NameError:
+    _have_parsed_matrix_options = False
+    print("Setting _have_parsed_matrix_options for the first time")
+else:
+    print("Discovering _have_parsed_matrix_options is already set")
 
 def parse_matrix_options_command_line():
     """
