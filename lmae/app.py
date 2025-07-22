@@ -27,7 +27,7 @@ class App(metaclass=ABCMeta):
         self.matrix = None
         self.matrix_options = None
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
         self.running = False
 
     def set_matrix(self, matrix: RGBMatrix, options: RGBMatrixOptions):

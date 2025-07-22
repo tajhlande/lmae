@@ -17,7 +17,7 @@ else:  # Windows or Darwin aka macOS
     from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
 
 logger = logging.getLogger("lmae.core")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 _current_sequence = dict()
 
