@@ -236,13 +236,13 @@ class WorldClock(DisplayManagedApp):
 
             current_timetuple = self.current_datetime_utc.timetuple()
             day_of_year = current_timetuple[7]
-            self.logger.info(f"Day of year: {day_of_year}")
+            self.logger.debug(f"Day of year: {day_of_year}")
 
             declination = compute_sun_declination(day_of_year)
-            self.logger.info(f"Declination of sun: {declination:.3f}")
+            self.logger.debug(f"Declination of sun: {declination:.3f}")
 
             hour_of_day = current_timetuple[3]
-            self.logger.info(f"UTC hour of day: {hour_of_day}")
+            self.logger.debug(f"UTC hour of day: {hour_of_day}")
 
             day_night_mask_image = draw_day_night_mask(declination, hour_of_day)
             # composite_image = Image.new("RGBA", (64, 32), _BLACK)

@@ -11,6 +11,11 @@ import advent_app
 import weather_app
 import world_clock
 
+# debugging tool imports
+import tracemalloc, time
+import psutil, os, time
+import threading
+
 log = logging.getLogger("cycle.py")
 # handler = logging.StreamHandler(sys.stdout)
 # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -18,7 +23,7 @@ log = logging.getLogger("cycle.py")
 # handler.setLevel(logging.DEBUG)
 # log.handlers.clear()
 # log.addHandler(handler)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 async def run_app_with_timeout(app, timeout=600):
     """Runs a given app within the same interpreter process for a specified timeout."""
@@ -27,23 +32,23 @@ async def run_app_with_timeout(app, timeout=600):
         log.debug(f"Preparing app to run for {timeout} seconds")
         app.prepare()
 
-        log.info("Creating app runner task")
+        log.debug("Creating app runner task")
         app_runner_task = asyncio.create_task(app.run())
 
         await asyncio.wait_for(app_runner_task, timeout=timeout)
 
         log.debug("run_app() finished")
     except asyncio.TimeoutError:
-        log.info(f"Time limit reached")
+        log.debug(f"Time limit reached")
     except Exception:
         log.exception(f"Error executing {app.__class__.__name__}")
         return
 
     if app.running:
-        log.info(f"Stopping app {app.__class__.__name__}")
+        log.debug(f"Stopping app {app.__class__.__name__}")
         app.stop()
     else:
-        log.info(f"App {app.__class__.__name__} already stopped")
+        log.debug(f"App {app.__class__.__name__} already stopped")
 
 
 async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: str, timeout=600):
@@ -59,13 +64,13 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
 
         log.debug(f"App finished")
     except (asyncio.TimeoutError, subprocess.TimeoutExpired):
-        log.info(f"Time limit reached")
+        log.debug(f"Time limit reached")
     except Exception:
         log.exception(f"Error executing {app.__class__.__name__}")
         return
 
     if app.running:
-        log.info(f"Stopping app {app.__class__.__name__}")
+        log.debug(f"Stopping app {app.__class__.__name__}")
         app.stop()
     else:
         log.info(f"App {app.__class__.__name__} already stopped")
@@ -73,6 +78,9 @@ async def run_app_as_subprocess_with_timeout(python_path: str, app_script_path: 
 
 def run_apps_in_cycle(app_list, cycle_timeout=600):
     """Runs scripts in a cycle, each for 'cycle_timeout' seconds."""
+    last_time : float = None
+    tracemalloc.start()
+    proc = psutil.Process(os.getpid())
     while True:
         for app in app_list:
             log.info(f"Starting app: {app.__class__.__name__}")
@@ -82,6 +90,17 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
             # graph = refcycle.objects_reachable_from(app_list[0])
             # log.warning(f"Graph size for Weather app: {len(graph)}")
             time.sleep(1)  # Short pause between scripts
+            now_time = time.time()
+            if not last_time or now_time > last_time + 5 * 60:
+                last_time = now_time
+                snapshot = tracemalloc.take_snapshot()
+                top = snapshot.statistics('lineno')
+                log.info("Top memory lines:")
+                for stat in top[:5]:
+                    log.info(f"    {stat}")
+                log.info(f"Memory: {proc.memory_info().rss / 1024**2:.1f} MB")
+                log.info(f"Thread count: {len(threading.enumerate())}")
+
 
 def run_apps_in_subprocess_cycle(app_script_list: list[str], cycle_timeout=600):
     """Runs scripts in a cycle, each for 'cycle_timeout' seconds."""
