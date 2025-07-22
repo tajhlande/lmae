@@ -11,13 +11,14 @@ import advent_app
 import weather_app
 import world_clock
 
-log = logging.getLogger(__file__)
-handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-handler.setLevel(logging.DEBUG)
-log.addHandler(handler)
-
+log = logging.getLogger("cycle.py")
+# handler = logging.StreamHandler(sys.stdout)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# handler.setFormatter(formatter)
+# handler.setLevel(logging.DEBUG)
+# log.handlers.clear()
+# log.addHandler(handler)
+log.setLevel(logging.DEBUG)
 
 async def run_app_with_timeout(app, timeout=600):
     """Runs a given app within the same interpreter process for a specified timeout."""
