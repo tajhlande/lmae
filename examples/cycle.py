@@ -77,7 +77,7 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
             log.info(f"Starting app: {app.__class__.__name__}")
             asyncio.run(run_app_with_timeout(app, timeout=cycle_timeout))
             log.info(f"Finished or terminated app: {app.__class__.__name__}")
-            gc.collect(gc.DEBUG_LEAK)
+            gc.collect(generation=1)
             # graph = refcycle.objects_reachable_from(app_list[0])
             # log.warning(f"Graph size for Weather app: {len(graph)}")
             time.sleep(1)  # Short pause between scripts
@@ -107,7 +107,7 @@ def create_apps_list():
 
 if __name__ == "__main__":
     import gc
-    # gc.set_debug(gc.DEBUG_LEAK)
+    gc.set_debug(gc.DEBUG_LEAK)
     apps = create_apps_list()
     app_runner.app_setup()
     for app in apps:
