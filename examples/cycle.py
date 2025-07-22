@@ -78,7 +78,7 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
             log.info(f"Starting app: {app.__class__.__name__}")
             asyncio.run(run_app_with_timeout(app, timeout=cycle_timeout))
             log.info(f"Finished or terminated app: {app.__class__.__name__}")
-            gc.collect(generation=1)
+            gc.collect()
             # graph = refcycle.objects_reachable_from(app_list[0])
             # log.warning(f"Graph size for Weather app: {len(graph)}")
             time.sleep(1)  # Short pause between scripts
