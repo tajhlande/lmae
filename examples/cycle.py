@@ -99,7 +99,7 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
                 for stat in top[:5]:
                     log.info(f"    {stat}")
                 # log.info(f"Memory: {proc.memory_info().rss / 1024**2:.1f} MB")
-                log.info(f"Proc memory info: {proc.memory_info()}")
+                log.info(f"Process memory info: {proc.memory_info()}")
                 log.info(f"Live asyncio tasks: {len(asyncio.all_tasks())}")
 
 
@@ -128,7 +128,7 @@ def create_apps_list():
 
 if __name__ == "__main__":
     import gc
-    gc.set_debug(gc.DEBUG_LEAK)
+    #gc.set_debug(gc.DEBUG_LEAK)
     apps = create_apps_list()
     app_runner.app_setup()
     for app in apps:
