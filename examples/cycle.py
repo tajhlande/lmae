@@ -100,7 +100,6 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
                     log.info(f"    {stat}")
                 # log.info(f"Memory: {proc.memory_info().rss / 1024**2:.1f} MB")
                 log.info(f"Process memory info: {proc.memory_info()}")
-                log.info(f"Live asyncio tasks: {len(asyncio.all_tasks())}")
 
 
 def run_apps_in_subprocess_cycle(app_script_list: list[str], cycle_timeout=600):
