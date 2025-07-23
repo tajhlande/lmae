@@ -144,10 +144,10 @@ class Text(Actor):
         self.logger = logging.getLogger(name)
         self.has_warned_about_image_mode = False
         self.rendered_text: Image = None
+        self.prerender_size_image: Image = None
         self.text: str or None = None
         if text:
             self.set_text(text)
-        self.prerender_size_image: Image = None
 
     def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
         if self.color != color:
