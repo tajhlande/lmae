@@ -111,6 +111,8 @@ _WHITE = 255  # (255, 255, 255, 255)
 _BLACK = 0  # (0, 0, 0, 255)
 
 
+_day_night_mask_image : Image = None
+
 def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
     """
     Given a declination and an hour of the day, compute and draw day and night
@@ -123,8 +125,14 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
              the first int is the y coordinate, and the second int is latitudinally pointing to daylight
             (+1 for northern sunlight or -1 for southern sunlight)
     """
-    image = Image.new("L", (64, 32), _BLACK)
-    image_draw = ImageDraw.Draw(image)
+    global _day_night_mask_image
+    if not _day_night_mask_image:
+        _day_night_mask_image = Image.new("L", (64, 32), _BLACK)
+        image_draw = ImageDraw.Draw(_day_night_mask_image)
+    else:
+        image_draw = ImageDraw.Draw(_day_night_mask_image)
+        draw.rectangle((0, 0, self.size[0], self.size[1]), fill=(0, 0, 0))
+
     # logger.debug(f"Declination: {declination:0.3f}, hour: {hour_of_day}")
 
     # check for equinoxes
@@ -198,7 +206,7 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
             last_term_pt_xy = term_pt_xy
             term_angle = term_angle + 5   # a guess at what accuracy is good enough for a 64 bit screen
 
-    return image
+    return _day_night_mask_image
 
 
 class WorldClock(DisplayManagedApp):
