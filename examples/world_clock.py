@@ -131,7 +131,7 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
         image_draw = ImageDraw.Draw(_day_night_mask_image)
     else:
         image_draw = ImageDraw.Draw(_day_night_mask_image)
-        image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill=(0, 0, 0))
+        image_draw.rectangle((0, 0, 64, 32), fill=_BLACK)
 
     # logger.debug(f"Declination: {declination:0.3f}, hour: {hour_of_day}")
 
