@@ -147,6 +147,7 @@ class Text(Actor):
         self.text: str or None = None
         if text:
             self.set_text(text)
+        self.prerender_size_image: Image = None
 
     def set_color(self, color: tuple[int, int, int] or tuple[int, int, int, int]):
         if self.color != color:
@@ -156,8 +157,13 @@ class Text(Actor):
 
     def _prerender_text(self):
         # measure size of text
-        image = Image.new('RGBA', (64, 32), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(image)
+        if not self.prerender_size_image:
+            self.prerender_size_image = Image.new('RGBA', (64, 32), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(self.prerender_size_image)
+        else:
+            draw = ImageDraw.Draw(self.prerender_size_image)
+            draw.rectangle((0, 0, self.size[0], self.size[1]), fill=(0, 0, 0, 0))
+
         # assume font is TTF for now, because the doc for this function says that is required
         text_bbox = draw.textbbox(xy=(0, 0), text=self.text, font=self.font, stroke_width=self.stroke_width)
         self.size = text_bbox[2:4]
@@ -167,8 +173,13 @@ class Text(Actor):
         self.size = (self.size[0] + self.stroke_width * 2, self.size[1] + self.stroke_width * 2)
 
         # render into the image we'll keep
-        self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
-        draw = ImageDraw.Draw(self.rendered_text)
+        if not self.rendered_text:
+            self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw(self.rendered_text)
+        else:
+            draw = ImageDraw.Draw(self.rendered_text)
+            draw.rectangle((0, 0, self.size[0], self.size[1]), fill=(0, 0, 0, 0))
+
         draw.text((self.stroke_width, self.stroke_width), self.text, fill=self.color, font=self.font,
                   stroke_fill=self.stroke_color, stroke_width=self.stroke_width)
 
