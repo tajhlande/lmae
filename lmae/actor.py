@@ -158,7 +158,7 @@ class Text(Actor):
     def _prerender_text(self):
         # measure size of text
         if not self.prerender_size_image:
-            self.prerender_size_image = Image.new('RGBA', (64, 32), (0, 0, 0, 0))
+            self.prerender_size_image = Image.new('RGBA', (1, 1), (0, 0, 0, 0))
             draw = ImageDraw.Draw(self.prerender_size_image)
         else:
             draw = ImageDraw.Draw(self.prerender_size_image)
