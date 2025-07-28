@@ -217,6 +217,7 @@ class Stage(LMAEObject):
                  matrix: RGBMatrix = None,
                  matrix_options: RGBMatrixOptions = None):
         name = name or _get_sequential_name("Stage")  # 'Stage_' + f'{randrange(65536):04X}'
+        self.logger.info(f"Initializing Stage {name}")
         super().__init__(name)
         self.size = size        # size in pixels
         self.actors = actors or list()
