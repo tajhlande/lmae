@@ -113,6 +113,7 @@ class SingleStageRenderLoopApp(App):
         else:
             self.stage.actors = self.actors or list()
             self.stage.animations = self.animations or list()
+            self.stage.blank_canvas()
 
     async def run(self):
         await super().run()
@@ -178,6 +179,8 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
         if not self.stage:
             self.stage = Stage(name=f"{self.__class__.__name__}-Stage", matrix=self.matrix,
                                matrix_options=self.matrix_options)
+        else:
+            self.stage.blank_canvas()
 
     @abstractmethod
     def update_view(self, elapsed_time: float):
