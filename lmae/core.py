@@ -343,6 +343,9 @@ class Stage(LMAEObject):
             pass  # no update needed
         self.post_render()
 
+    def blank_canvas(self):
+        self.canvas.blank()
+
 
 virtual_leds = False
 
