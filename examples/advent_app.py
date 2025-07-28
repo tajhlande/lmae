@@ -80,8 +80,9 @@ class AdventApp(DisplayManagedApp):
 
     def prepare(self):
         super().prepare()
-        self.stage.actors.extend((self.line_1_label, self.line_2_label, self.counter_label, self.tree_image))
-        self.stage.actors.extend(self.lights_list)
+        if len(self.stage.actors) == 0: # i.e. we've never added these actors to the stage before
+            self.stage.actors.extend((self.line_1_label, self.line_2_label, self.counter_label, self.tree_image))
+            self.stage.actors.extend(self.lights_list)
         self.logger.debug(f"Stage needs render? {self.stage.needs_render}")
 
     def update_countdown(self):
