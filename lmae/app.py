@@ -106,8 +106,13 @@ class SingleStageRenderLoopApp(App):
         self.pre_render_callback = pre_render_callback
 
     def prepare(self):
-        self.stage = Stage(size=self.size, matrix=self.matrix, matrix_options=self.matrix_options,
-                           actors=self.actors, animations=self.animations)
+        if not self.stage:
+            self.stage = Stage(name=f"{self.__class__.__name__}-Stage", size=self.size,
+                               matrix=self.matrix, matrix_options=self.matrix_options,
+                               actors=self.actors, animations=self.animations)
+        else:
+            self.stage.actors = self.actors or list()
+            self.stage.animations = self.animations or list()
 
     async def run(self):
         await super().run()
@@ -170,7 +175,9 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
 
     def prepare(self):
         super().prepare()
-        self.stage = Stage(matrix=self.matrix, matrix_options=self.matrix_options)
+        if not self.stage:
+            self.stage = Stage(name=f"{self.__class__.__name__}-Stage", matrix=self.matrix,
+                               matrix_options=self.matrix_options)
 
     @abstractmethod
     def update_view(self, elapsed_time: float):
