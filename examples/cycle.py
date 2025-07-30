@@ -121,7 +121,7 @@ def create_apps_list():
     return [
         advent_app.AdventApp.get_app_instance(),
         world_clock.WorldClock.get_app_instance(),
-        # advent_app.AdventApp.get_app_instance()
+        weather_app.WeatherApp.get_app_instance()
     ]
 
 
