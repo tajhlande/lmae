@@ -66,6 +66,16 @@ class App(metaclass=ABCMeta):
         self.logger.debug("Got command to stop")
         self.running = False
 
+    @staticmethod
+    @abstractmethod
+    def get_app_instance():
+        """
+        This static method should return an instance of the app with default values.
+        This may, if desired, be a singleton instance.
+        :return: an instance of this class
+        """
+        pass
+
 
 class SingleStageRenderLoopApp(App):
     """
@@ -150,6 +160,15 @@ class SingleStageRenderLoopApp(App):
     def stop(self):
         self.logger.debug("Got command to stop")
         self.running = False
+
+    @staticmethod
+    def get_app_instance():
+        """
+        This static method should return an instance of the app with default values.
+        This may, if desired, be a singleton instance.
+        :return: an instance of this class
+        """
+        return SingleStageRenderLoopApp()
 
 
 class DisplayManagedApp(App, metaclass=ABCMeta):
