@@ -4,6 +4,7 @@ import logging
 import time
 import subprocess
 import os.path
+from importlib.util import spec_from_file_location, module_from_spec
 
 from context import lmae
 from lmae import app_runner
@@ -16,6 +17,9 @@ import tracemalloc, time
 import psutil, os, time
 import threading
 
+from lmae.app import App
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
 log = logging.getLogger("cycle.py")
 # handler = logging.StreamHandler(sys.stdout)
 # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -124,13 +128,68 @@ def create_apps_list():
         weather_app.WeatherApp.get_app_instance()
     ]
 
+def load_app_instance(module_path: str, module_name: str, app_class_name: str) -> App:
+    if module_name in sys.modules.keys():
+        log.info(f"Module {module_name} already loaded")
+        module = sys.modules[module_name]
+    else:
+        log.info(f"Creating spec for module {module_name} at path {module_path}")
+        try:
+            spec = spec_from_file_location(module_name, module_path)
+        except ImportError:
+            raise RuntimeError(f"Unable to load spec for module {module_name} at path {module_path}")
+
+        log.info(f"Loading module {module_name}")
+        try:
+            module = module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
+        except FileNotFoundError | ImportError:
+            raise RuntimeError(f"Unable to load module {module_name} at path {module_path}")
+
+    log.info(f"Instantiating app class {app_class_name} from module {module_name}")
+    try:
+        app_class: App = getattr(module, app_class_name)
+        app = app_class.get_app_instance()
+        return app
+    except NameError | OSError:
+        raise RuntimeError(f"Unable to instantiate app class {app_class_name} in module {module_name}")
+
+
+def create_apps_list_from_app_names():
+    module_base_path = os.path.dirname(os.path.realpath(__file__))
+    log.info(f"Module base path: {module_base_path}")
+    app_config_list = [
+        {
+            'module_name': 'lmae.examples.advent_app',
+            'module_path': 'advent_app.py',
+            'app_class': 'AdventApp'
+        },
+        {
+            'module_name': 'lmae.examples.weather_app',
+            'module_path': 'weather_app.py',
+            'app_class': 'WeatherApp'
+        },
+        {
+            'module_name': 'lmae.examples.world_clock',
+            'module_path': 'world_clock.py',
+            'app_class': 'WorldClock'
+        }
+    ]
+
+    return map(lambda config: load_app_instance(os.path.join(module_base_path, config['module_path']),
+                                                config['module_name'], config['app_class']),
+               app_config_list)
+
 
 if __name__ == "__main__":
     import gc
     #gc.set_debug(gc.DEBUG_LEAK)
-    apps = create_apps_list()
+    apps = create_apps_list() #create_apps_list_from_app_names()
+    log.info(f"Setting up app runner and initializing LED matrix")
     app_runner.app_setup()
     for app in apps:
         app.set_matrix(matrix=app_runner.matrix, options=app_runner.matrix_options)
+    log.info(f"Beginning app execution")
     run_apps_in_cycle(apps, cycle_timeout=5)
     #run_apps_in_subprocess_cycle(["advent_app.py", "world_clock.py"], cycle_timeout=5)

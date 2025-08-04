@@ -71,7 +71,7 @@ def app_setup():
         global logger
         logger = logging.getLogger("app_runner")
         logger.setLevel(logging.DEBUG)
-        print("App Runner")
+        logger.info("App Runner logging setup")
 
         global matrix_options
         matrix_options = parse_matrix_options_command_line()
