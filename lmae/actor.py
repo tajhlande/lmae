@@ -173,7 +173,9 @@ class Text(Actor):
         self.size = (self.size[0] + self.stroke_width * 2, self.size[1] + self.stroke_width * 2)
 
         # render into the image we'll keep
-        if not self.rendered_text or self.size[0] < self.rendered_text.width or self.size[1] < self.rendered_text.height:
+        # if the old rendered text image wasn't big enough for what we're about to render, then
+        # make a new rendered text image
+        if not self.rendered_text or self.size[0] > self.rendered_text.width or self.size[1] > self.rendered_text.height:
             self.rendered_text = Image.new('RGBA', self.size, (0, 0, 0, 0))
             draw = ImageDraw.Draw(self.rendered_text)
         else:
