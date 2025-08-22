@@ -216,7 +216,9 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
     async def run(self):
         await super().run()
         self.logger.debug("Run started")
-        # self.compose_view()
+
+        # mark stage as needing rendering in case we've been run before
+        self.stage.needs_render = True
 
         min_time_per_frame = 1.0 / self.max_frame_rate
         self.logger.debug(f"Maximum frame rate: {self.max_frame_rate} fps")
