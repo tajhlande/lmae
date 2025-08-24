@@ -180,7 +180,7 @@ class Text(Actor):
             draw = ImageDraw.Draw(self.rendered_text)
         else:
             draw = ImageDraw.Draw(self.rendered_text)
-            draw.rectangle((0, 0, self.size[0], self.size[1]), fill=(0, 0, 0, 0))
+            draw.rectangle((0, 0, rendered_text.width, rendered_text.height), fill=(0, 0, 0, 0))
 
         draw.text((self.stroke_width, self.stroke_width), self.text, fill=self.color, font=self.font,
                   stroke_fill=self.stroke_color, stroke_width=self.stroke_width)

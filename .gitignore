@@ -228,3 +228,4 @@ cython_debug/
 env.ini
 /examples/images/backgrounds/raw/
 
+/lmae.egg-info.disabled/
