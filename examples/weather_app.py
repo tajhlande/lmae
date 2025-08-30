@@ -305,13 +305,16 @@ class WeatherApp(DisplayManagedApp):
             self.condition_description_label.set_text(self.combined_long_desc)
             self.stage.clear_animations_for(self.condition_description_label)
             self.condition_description_label.set_position(self.condition_description_label_position)
-            if self.condition_description_label.size[0] > self.stage.size[0]:
-                scroll_distance = self.condition_description_label.size[0] - self.stage.size[0]
+            text_width = self.condition_description_label.size[0]
+            stage_width = self.stage.size[0]
+            self.logger.debug(f"Condition text width: {text_width}, stage width: {stage_width}")
+            if text_width > stage_width:
+                scroll_distance = text_width - stage_width
                 # scroll duration: 6 seconds per full width
                 scroll_duration = 6.0 * scroll_distance / self.stage.size[0]
                 pause_duration = 5.0
                 self.logger.debug(f"Adding scroll animation for condition text. "
-                                  f"Text width: {self.condition_description_label.size[0]} px, "
+                                  f"Text width: {text_width} px, "
                                   f"scroll distance: {scroll_distance}")
 
                 pause_1 = Still(name='Condition-pause-1', actor=self.condition_description_label,
@@ -335,7 +338,7 @@ class WeatherApp(DisplayManagedApp):
                 self.stage.add_animation(condition_sequence)
             else:
                 self.logger.debug(f"Not adding scroll animation for condition text. "
-                                  f"Text width: {self.condition_description_label.size[0]} px")
+                                  f"Text width: {text_width} px")
             self.need_to_update_condition_desc_animation = False
 
         # figure out whether it is day or night
