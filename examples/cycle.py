@@ -93,7 +93,7 @@ def run_apps_in_cycle(app_list, cycle_timeout=600):
             gc.collect()
             # graph = refcycle.objects_reachable_from(app_list[0])
             # log.warning(f"Graph size for Weather app: {len(graph)}")
-            time.sleep(1)  # Short pause between scripts
+            time.sleep(0.1)  # Short pause between scripts
             now_time = time.time()
             if not last_time or now_time > last_time + 5 * 60:
                 last_time = now_time
