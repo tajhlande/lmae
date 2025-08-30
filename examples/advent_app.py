@@ -84,6 +84,8 @@ class AdventApp(DisplayManagedApp):
             self.stage.actors.extend((self.line_1_label, self.line_2_label, self.counter_label, self.tree_image))
             self.stage.actors.extend(self.lights_list)
         self.logger.debug(f"Stage needs render? {self.stage.needs_render}")
+        # Fix: Recalculate countdown and update last_* variables so display is correct at start of each cycle
+        self.update_countdown()
 
     def update_countdown(self):
         current_datetime = datetime.now()
