@@ -6,11 +6,10 @@ import subprocess
 import os.path
 from importlib.util import spec_from_file_location, module_from_spec
 
-from context import lmae
 from lmae import app_runner
-import advent_app
-import weather_app
-import world_clock
+import examples.advent_app
+import examples.weather_app
+import examples.world_clock
 
 # debugging tool imports
 import tracemalloc, time
@@ -123,9 +122,9 @@ def run_apps_in_subprocess_cycle(app_script_list: list[str], cycle_timeout=600):
 
 def create_apps_list():
     return [
-        advent_app.AdventApp.get_app_instance(),
-        world_clock.WorldClock.get_app_instance(),
-        weather_app.WeatherApp.get_app_instance()
+        examples.advent_app.AdventApp.get_app_instance(),
+        examples.world_clock.WorldClock.get_app_instance(),
+        examples.weather_app.WeatherApp.get_app_instance()
     ]
 
 def load_app_instance(module_path: str, module_name: str, app_class_name: str) -> App:

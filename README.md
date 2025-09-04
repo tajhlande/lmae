@@ -70,7 +70,7 @@ Install the required library modules:
 
 Run the first example in a virtual LED window on your laptop:
 
-    python examples/render_test.py
+    python -m examples.render_test
 
 If all is successful, you will see a surprise animation demo!
 Press "return" on the app console to end the test.
@@ -84,7 +84,7 @@ virtual environment, run something like:
 
 And then run the example like this:
 
-    sudo venv/bin/python examples/render_test.py
+    sudo venv/bin/python -m examples.render_test
 
 The `sudo` is necessary to allow the LED matrix code to run with
 the elevated privileges necessary to achieve best GPIO timing performance.
@@ -207,7 +207,7 @@ If successful, you should see something like the following, depending on current
 
 To run it on the real LED display:
 
-    sudo venv/bin/python examples/weather_app.py
+    sudo venv/bin/python -m examples.weather_app
 
 --------
 A previous iteration of the weather app used the Visual Crossing API, and the VX API client

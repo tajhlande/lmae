@@ -3,7 +3,6 @@ import os.path
 
 from PIL import ImageFont
 
-from context import lmae
 from lmae import app_runner
 from lmae.actor import Text, GradientRectangle
 from lmae.animation import StraightMove, Sequence, Easing, HueRotate

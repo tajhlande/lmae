@@ -5,7 +5,6 @@ import time
 from datetime import datetime
 from PIL import ImageFont
 
-from context import lmae
 from lmae import app_runner
 from lmae.animation import Sequence, HueFade
 from lmae.core import Animation

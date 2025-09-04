@@ -244,6 +244,14 @@ class Stage(LMAEObject):
         """
         self.animations.extend(animations)
 
+    def get_animations_for(self, actor: Actor) -> List[Animation]:
+        """
+        Get the list of animations for a particular actor
+        :param actor: The actor for which we should get animations
+        :return: a list of animations for that actor
+        """
+        return [anim for anim in self.animations if anim.actor == actor]        
+
     def clear_animations_for(self, actor: Actor):
         """
         Remove animations for a particular actor

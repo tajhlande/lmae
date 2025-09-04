@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 from math import sin, cos, asin, atan2, radians, degrees, pi, sqrt, isclose, floor
 from PIL import Image, ImageDraw, ImageFont
 
-from context import lmae
 from lmae import app_runner
 from lmae.actor import StillImage
 from lmae.app import DisplayManagedApp

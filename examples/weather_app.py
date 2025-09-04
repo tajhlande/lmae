@@ -6,9 +6,8 @@ import time
 from datetime import datetime
 from PIL import Image, ImageFont, ImageFilter, ImageEnhance
 
-from context import lmae
 from lmae import app_runner
-from openweather.openweather_client import get_conditions_and_forecast_by_lat_long
+from examples.openweather.openweather_client import get_conditions_and_forecast_by_lat_long
 from lmae.app import DisplayManagedApp
 from lmae.actor import StillImage, SpriteImage, Text, Line
 from lmae.animation import Easing, Sequence, Still, StraightMove
@@ -200,7 +199,7 @@ class WeatherApp(DisplayManagedApp):
         self.need_to_update_condition_desc_animation = True
 
 
-# noinspection PyBroadException
+    # noinspection PyBroadException
     def update_weather_data(self):
         try:
             self.logger.debug(f"Fetching current weather data")

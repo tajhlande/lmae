@@ -1,7 +1,6 @@
 import logging
 import os.path
 
-from context import lmae
 from lmae import app_runner
 from lmae.app import SingleStageRenderLoopApp
 from lmae.component import AnimatedImage

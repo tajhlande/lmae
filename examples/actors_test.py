@@ -4,7 +4,6 @@ import os.path
 from pilmoji.source import AppleEmojiSource
 from PIL import Image, ImageFont
 
-from context import lmae
 from lmae.actor import StillImage, Text, EmojiText
 from lmae.animation import Hide, Show, StraightMove, Sequence
 from lmae.app import SingleStageRenderLoopApp

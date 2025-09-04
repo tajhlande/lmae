@@ -1,6 +1,5 @@
 import os, unittest
 
-from context import lmae
 from lmae.core import Canvas
 from lmae.actor import Text
 from PIL import Image, ImageFont, ImageDraw

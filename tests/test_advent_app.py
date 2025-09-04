@@ -4,7 +4,6 @@ import logging
 import freezegun
 from PIL import Image
 
-from context import lmae
 from lmae.core import Stage
 from examples.advent_app import AdventApp
 
