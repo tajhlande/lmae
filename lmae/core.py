@@ -54,8 +54,8 @@ class Canvas(LMAEObject):
         self.blank()
 
     def blank(self):
-        draw = ImageDraw.Draw(self.image)
-        draw.rectangle(((0, 0), (self.size[0] - 1, self.size[1] - 1)),
+        #draw = ImageDraw.Draw(self.image)
+        self.image_draw.rectangle(((0, 0), (self.size[0] - 1, self.size[1] - 1)),
                        fill=(0, 0, 0, 255 if self.background_fill else 0), width=1)
 
 
