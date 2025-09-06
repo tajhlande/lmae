@@ -257,6 +257,10 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
                         # must yield some control, with minimal sleep amount
                         await asyncio.sleep(min_time_per_frame/10.0)
 
+                    # see if we're still running
+                    if not self.running:
+                        self.logger.debug("No longer running, breaking out of wait loop")
+
                     # mark the timestamp
                     last_time = time.perf_counter()
 

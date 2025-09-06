@@ -229,7 +229,8 @@ class WorldClock(DisplayManagedApp):
 
     def prepare(self):
         super().prepare()
-        self.stage.actors.append(self.composite_map)
+        if not self.composite_map in self.stage.actors:
+            self.stage.actors.append(self.composite_map)
 
     def time_to_update(self):
         self.current_datetime_utc = datetime.now(timezone.utc)
