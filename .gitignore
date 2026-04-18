@@ -5,7 +5,7 @@
 
 ##################
 # Apple
-*/.DS_Store
+**/.DS_Store
 
 ##################
 ### C template
@@ -226,6 +226,6 @@ cython_debug/
 #.idea/
 
 env.ini
-/examples/images/backgrounds/raw/
+/images/backgrounds/raw/
 
 /lmae.egg-info.disabled/

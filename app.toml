@@ -1,0 +1,29 @@
+[apps.weather]
+main_file = "examples/weather_app.py"
+display_name = "Weather"
+entry_class = "WeatherApp"
+description = "Current weather conditions and forecast"
+parameters = [
+  { name = "api_key", display_name = "API Key", type = "string", required = true },
+  { name = "latitude", display_name = "Latitude", type = "string", required = true },
+  { name = "longitude", display_name = "Longitude", type = "string", required = true },
+  { name = "refresh_time", display_name = "Refresh Interval (s)", type = "integer", default = "900" },
+]
+
+[apps.advent]
+main_file = "examples/advent_app.py"
+display_name = "Advent Calendar"
+entry_class = "AdventApp"
+description = "Animated advent calendar display"
+parameters = [
+  { name = "refresh_time", display_name = "Refresh Interval (s)", type = "integer", default = "60" },
+]
+
+[apps.world_clock]
+main_file = "examples/world_clock.py"
+display_name = "World Clock"
+entry_class = "WorldClock"
+description = "World time zone map display"
+parameters = [
+  { name = "refresh_time", display_name = "Refresh Interval (s)", type = "integer", default = "300" },
+]

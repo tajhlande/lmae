@@ -1,0 +1,18 @@
+[Unit]
+Description=Raspberry Pi LED Matrix Display
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/tajh/lmae
+ExecStart=/home/tajh/lmae/venv/bin/python -m examples.cycle
+Restart=on-failure
+RestartSec=5
+RuntimeMaxSec=86400
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rpi-matrix
+
+[Install]
+WantedBy=multi-user.target
