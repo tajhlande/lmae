@@ -1,5 +1,6 @@
 import requests
 from munch import Munch
+import certifi
 
 """
 Open Weather API Client
@@ -164,7 +165,7 @@ def get_conditions_and_forecast_by_lat_long(latitude: str, longitude: str, api_k
                f'&appid={api_key}'
 
     headers = {'User-Agent': 'com.bluefilament.rpi-matrix.weather'}
-    with requests.get(endpoint, headers=headers) as request:
+    with requests.get(endpoint, headers=headers, verify=certifi.where()) as request:
         if request.status_code == requests.codes.ok:
             return Munch.fromDict(request.json())
         else:
