@@ -28,6 +28,8 @@ python-dateutil==2.9.0.post0
     # via freezegun
 requests==2.34.2
     # via lmae
+rgbmatrix @ git+https://github.com/hzeller/rpi-rgb-led-matrix@41809e40e912b7f278ad34046f20abf5609b2b07
+    # via lmae
 six==1.17.0
     # via python-dateutil
 sqlite3-cache==0.2.2

@@ -28,6 +28,7 @@ dependencies = [
     "psutil>=7.0.0",
     "sqlite3-cache>=0.2.1",
     # "rgbmatrix" # commented out because this package can't exist on macos
+    "rgbmatrix",
 ]
 
 [project.optional-dependencies]
@@ -45,3 +46,6 @@ include-package-data = true
 
 [tool.setuptools.dynamic]
 version = {attr = "lmae.VERSION"}
+
+[tool.uv.sources]
+rgbmatrix = { git = "https://github.com/hzeller/rpi-rgb-led-matrix" }
