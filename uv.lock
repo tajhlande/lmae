@@ -109,7 +109,7 @@ dependencies = [
     { name = "psutil" },
     { name = "pygame" },
     { name = "requests" },
-    { name = "rgbmatrix" },
+    { name = "rgbmatrix", marker = "sys_platform == 'linux'" },
     { name = "sqlite3-cache" },
 ]
 
@@ -128,7 +128,7 @@ requires-dist = [
     { name = "psutil", specifier = ">=7.0.0" },
     { name = "pygame", specifier = ">=2.5.1" },
     { name = "requests", specifier = ">=2.32.0" },
-    { name = "rgbmatrix", git = "https://github.com/hzeller/rpi-rgb-led-matrix" },
+    { name = "rgbmatrix", marker = "sys_platform == 'linux'", git = "https://github.com/hzeller/rpi-rgb-led-matrix" },
     { name = "sqlite3-cache", specifier = ">=0.2.1" },
 ]
 provides-extras = ["test"]

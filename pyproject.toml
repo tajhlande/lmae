@@ -27,8 +27,8 @@ dependencies = [
     "munch>=4.0.0",
     "psutil>=7.0.0",
     "sqlite3-cache>=0.2.1",
-    # "rgbmatrix" # commented out because this package can't exist on macos
-    "rgbmatrix",
+    # rgbmatrix only builds on Linux (Pi); on macOS the code falls back to the virtual display
+    "rgbmatrix; sys_platform == 'linux'",
 ]
 
 [project.optional-dependencies]
