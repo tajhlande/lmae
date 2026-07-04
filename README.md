@@ -37,6 +37,10 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
 
 ### Prerequisites
 
+> Note: I've updated the code and instructions to match Raspberry Pi OS Trixie, which ships with Python 3.13.
+> Older versions work with Python 3.9, though the dependencies have security issues which are fixed in
+> libraries that require newer versions of Python.
+
 This library is built on top of the RGB LED display driver
 written by Henner Zeller, found here: [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix)
 You'll need to build that first, as this library depends on it for access to the LED matrix.
@@ -56,17 +60,9 @@ option `--led-no-hardware-pulse 1`. This will also let you avoid having to run w
 
 ### Getting started
 `render_test.py` is an example program that test the basics of the core
-library. You should create a virtual environment using `venv`:
+library. Setup using `uv`:
 
-    python -m venv venv
-
-Activate your environment:
-
-    source venv/bin/activate
-
-Install the required library modules:
-
-    pip install -r requirements.txt
+    uv sync
 
 Run the first example in a virtual LED window on your laptop:
 
@@ -76,32 +72,17 @@ If all is successful, you will see a surprise animation demo!
 Press "return" on the app console to end the test.
 
 To run on the Raspberry Pi with the real LED matrix hardware,
-you need to install the `rgbmatrix` library into the venv environment in development mode, referencing
-the path to the python bindings in your copy of the `rpi-rgb-led-matrix`, so after activating your
-virtual environment, run something like:
+you should run with `sudo`:
 
-    pip install -e ${PATH_TOPROEJCT}/rpi-rgb-led-matrix/bindings/python
-
-And then run the example like this:
-
-    sudo venv/bin/python -m examples.render_test
+    sudo uv run python -m examples.render_test
 
 The `sudo` is necessary to allow the LED matrix code to run with
 the elevated privileges necessary to achieve best GPIO timing performance.
-And because `sudo` doesn't use the user's path, the usual means to activating
-the virtual environment doesn't work.
+Though `sudo` doesn't use the user's path, `uv` takes care of getting the path right.
 
 ### Setting up your development environment to work on this project
 
 The following assumes you want to develop on a Windows or Mac laptop, separate from the RPi.
-
-In order to get your IDE to find the `rgbmatrix` module so all your syntax highlighting
-will be nice and clean, you'll need to do one of the following to install the module in
-development mode, as it isn't platform-independent and can't be installed from PyPI:
-
-1.  `pip install -e ${PATH_TO_PROJECT}/rpi-rgb-led-matrix/bindings/python` in your IDE's virtual environment.
-2.  Add the python bindings path (the same path as what you set in the
-    `pip -e` command above) to your IDE's Python `sys.path` or `PYTHONPATH` settings.
 
 Instructions for JetBrains IDEs can be found [here](https://www.jetbrains.com/help/idea/installing-uninstalling-and-reloading-interpreter-paths.html).
 Instructions for VSCode can be found [here](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
