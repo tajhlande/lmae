@@ -1,0 +1,20 @@
+# Satori palettes
+# Format:  Name: #rrggbb #rrggbb ...
+# - One palette per line.
+# - Colors are 6-digit hex (#rrggbb). Count as many as you like.
+# - Lines beginning with '#' are comments.
+
+Cold:      #33ccff #0099ff #0033cc #0033ff
+Easter:    #66ff00 #6600ff #3399ff #ffff33
+Grayscale: #ffffff #333333 #cccccc #999999 #666666 #000000
+Hot:       #ffff33 #ffcc00 #ff6600 #bb0033 #ff3300
+Modern:    #dcd386 #767475 #d35a63 #d5a0a8 #81bfbc #e2d788 #95718d
+Primary:   #ffff00 #ff0000 #00ff00 #0000ff
+Rainbow:   #ff0066 #ff7f00 #ffff00 #99ff00 #33ff99 #0066ff #9900cc
+Romantic:  #ffff66 #ff99cc #9933ff #990099
+Southwest: #ddbb7b #5c5447 #cabdb5 #883c2e #4a5d5b #dabfa2
+Subdued:   #669966 #cccc99 #666633 #336666
+Tranquil:  #cc99ff #cc9966 #cccc33 #669966
+Tropical:  #ff33cc #003399 #00cc00 #ffff00
+Victorian: #c19ea8 #99887e #5b484e #892b23 #d09455 #80805a #334f43 #78a495 #cad6a8 #8b4c2b
+Wood:      #98785c #64563c #362828 #f2bd79 #816d52 #fbe2ba #a4785f
