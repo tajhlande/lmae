@@ -1,21 +1,21 @@
+import asyncio
+import configparser
+import contextlib
+import logging
 import os
 import sys
 
-import asyncio
-import logging
-import configparser
 from lmae.app import App
 from lmae.core import parse_matrix_options_command_line
 
-# hackity hackington to determine whether we're going to use virtual bindings or not
-import platform
-os_name = platform.system()
-virtual_leds = False
-if os_name == 'Linux':
-    from rgbmatrix import RGBMatrix, RGBMatrixOptions
-else:  # Windows or Darwin aka macOS
-    # from lmae.display
-    from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
+try:
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions  # pyright: ignore[reportAttributeAccessIssue]
+
+    virtual_leds = False
+except ImportError:
+    from lmae.display import VirtualRGBMatrix as RGBMatrix
+    from lmae.display import VirtualRGBMatrixOptions as RGBMatrixOptions
+
     virtual_leds = True
 
 matrix: RGBMatrix
@@ -23,8 +23,13 @@ logger: logging.Logger
 matrix_options: RGBMatrixOptions
 
 
-def get_env_parameter(env_key: str = None, ini_header: str = None, ini_key: str = None, default=None,
-                      local_env_config: configparser.ConfigParser = None):
+def get_env_parameter(
+    env_key: str | None = None,
+    ini_header: str | None = None,
+    ini_key: str | None = None,
+    default=None,
+    local_env_config: configparser.ConfigParser | None = None,
+):
     result = None
     if env_key:
         result = os.environ.get(env_key)
@@ -35,12 +40,8 @@ def get_env_parameter(env_key: str = None, ini_header: str = None, ini_key: str 
         local_env_config = env_config
 
     if ini_header and ini_key:
-
-        try:
+        with contextlib.suppress(BaseException):
             result = local_env_config[ini_header][ini_key]
-
-        except:
-            pass
 
     if result:
         return result
@@ -50,9 +51,11 @@ def get_env_parameter(env_key: str = None, ini_header: str = None, ini_key: str 
 
     else:
         env_key_msg = f"set environment variable {env_key}" if env_key else ""
-        ini_key_msg = f"set INI file header [{ini_header}] and variable {ini_key}" if ini_key else ""
+        ini_key_msg = (
+            f"set INI file header [{ini_header}] and variable {ini_key}" if ini_key else ""
+        )
 
-        print(f"Unable to find environment parameter. You must do one of the following:")
+        print("Unable to find environment parameter. You must do one of the following:")
         if env_key_msg:
             print(env_key_msg)
 
@@ -67,7 +70,10 @@ _app_setup_happened = False
 def app_setup():
     global _app_setup_happened
     if not _app_setup_happened:
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)12s [%(levelname)5s]: %(message)s')
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s %(name)12s [%(levelname)5s]: %(message)s",
+        )
         global logger
         logger = logging.getLogger("app_runner")
         logger.setLevel(logging.DEBUG)
@@ -87,13 +93,13 @@ def app_setup():
 # borrowed from StackOverflow:
 # https://stackoverflow.com/questions/58454190/python-async-waiting-for-stdin-input-while-doing-other-stuff
 async def async_input(string: str) -> str:
-    await asyncio.to_thread(sys.stdout.write, f'{string} ')
-    return (await asyncio.to_thread(sys.stdin.readline)).rstrip('\n')
+    await asyncio.to_thread(sys.stdout.write, f"{string} ")
+    return (await asyncio.to_thread(sys.stdin.readline)).rstrip("\n")
 
 
 async def stop_app(app: App):
     logger.info("***** Press return to stop the app *****")
-    await async_input('')
+    await async_input("")
     logger.debug("Return pressed")
     app.stop()
 
@@ -120,5 +126,4 @@ def start_app(app: App):
 
 
 env_config = configparser.ConfigParser()
-env_config.read('env.ini')
-
+env_config.read("env.ini")

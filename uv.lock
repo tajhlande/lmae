@@ -113,15 +113,14 @@ dependencies = [
     { name = "sqlite3-cache" },
 ]
 
-[package.optional-dependencies]
-test = [
+[package.dev-dependencies]
+dev = [
     { name = "freezegun" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "emoji", specifier = ">=2.6.0" },
-    { name = "freezegun", marker = "extra == 'test'", specifier = ">=1.5.0" },
     { name = "munch", specifier = ">=4.0.0" },
     { name = "pillow", specifier = ">=10.2.0" },
     { name = "pilmoji", specifier = ">=2.0.3" },
@@ -131,7 +130,9 @@ requires-dist = [
     { name = "rgbmatrix", marker = "sys_platform == 'linux'", git = "https://github.com/hzeller/rpi-rgb-led-matrix" },
     { name = "sqlite3-cache", specifier = ">=0.2.1" },
 ]
-provides-extras = ["test"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "freezegun", specifier = ">=1.5.0" }]
 
 [[package]]
 name = "munch"

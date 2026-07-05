@@ -1,18 +1,22 @@
 import glob
 import os
 import unittest
-
-
 from math import pi
+
 from PIL import Image
 
-from examples.world_clock import (compute_sun_declination, compute_terminator_for_declination_and_angle, is_equinox,
-                                  gall_peters_projection, draw_day_night_mask, normalize_longitude)
+from examples.world_clock import (
+    compute_sun_declination,
+    compute_terminator_for_declination_and_angle,
+    draw_day_night_mask,
+    gall_peters_projection,
+    is_equinox,
+    normalize_longitude,
+)
 
 
 # noinspection DuplicatedCode
 class TestWorldClock(unittest.TestCase):
-
     def test_normalize__degrees(self):
         self.assertEqual(-180, normalize_longitude(-540))
         self.assertEqual(-90, normalize_longitude(-450))
@@ -51,8 +55,7 @@ class TestWorldClock(unittest.TestCase):
         self.assertFalse(is_equinox(compute_sun_declination(366)))
 
     def test_compute_terminator(self):
-        angle = 0
-        step = 2 * pi / 64
+        2 * pi / 64
 
         # summer solstice
         ssol_day_of_year = 172  # summer solstice
@@ -138,14 +141,19 @@ class TestWorldClock(unittest.TestCase):
         declination = compute_sun_declination(day_of_year)
         print(f"Sun declination on spring equinox (day {day_of_year}) is {declination}")
         self.assertTrue(is_equinox(declination))
-        # the first hour that the angle 0 part of the terminator is ont he west side of the 180th longitude
-        last_zero_term = compute_terminator_for_declination_and_angle(declination,6, 0)
+        # the first hour that the angle 0 part of the terminator is on the
+        # west side of the 180th longitude
+        last_zero_term = compute_terminator_for_declination_and_angle(declination, 6, 0)
         for h in range(7, 24):
             zero_term = compute_terminator_for_declination_and_angle(declination, h, 0)
-            # as the day goes by, the terminator should be moving westward, towards negative longitude
+            # as the day goes by, the terminator should be moving westward,
+            # towards negative longitude
             print(f"at hour {h}, zero term {zero_term}, last zero term {last_zero_term}")
-            self.assertLess(zero_term[1], last_zero_term[1], f"at hour {h}, zero term {zero_term}, "
-                                                       f"last zero term {last_zero_term}")
+            self.assertLess(
+                zero_term[1],
+                last_zero_term[1],
+                f"at hour {h}, zero term {zero_term}, last zero term {last_zero_term}",
+            )
             last_zero_term = zero_term
 
         # fall equinox
@@ -153,14 +161,19 @@ class TestWorldClock(unittest.TestCase):
         declination = compute_sun_declination(day_of_year)
         print(f"Sun declination on fall equinox (day {day_of_year}) is {declination}")
         self.assertTrue(is_equinox(declination))
-        # the first hour that the angle 0 part of the terminator is ont he west side of the 180th longitude
-        last_zero_term = compute_terminator_for_declination_and_angle(declination,6, 0)
+        # the first hour that the angle 0 part of the terminator is on the
+        # west side of the 180th longitude
+        last_zero_term = compute_terminator_for_declination_and_angle(declination, 6, 0)
         for h in range(7, 24):
             zero_term = compute_terminator_for_declination_and_angle(declination, h, 0)
-            # as the day goes by, the terminator should be moving westward, towards negative longitude
+            # as the day goes by, the terminator should be moving westward,
+            # towards negative longitude
             print(f"at hour {h}, zero term {zero_term}, last zero term {last_zero_term}")
-            self.assertLess(zero_term[1], last_zero_term[1], f"at hour {h}, zero term {zero_term}, "
-                                                             f"last zero term {last_zero_term}")
+            self.assertLess(
+                zero_term[1],
+                last_zero_term[1],
+                f"at hour {h}, zero term {zero_term}, last zero term {last_zero_term}",
+            )
             last_zero_term = zero_term
 
     def test_gall_peters_projection(self):
@@ -186,5 +199,5 @@ class TestWorldClock(unittest.TestCase):
             os.remove(mask_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

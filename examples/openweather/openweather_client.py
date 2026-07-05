@@ -1,6 +1,6 @@
+import certifi
 import requests
 from munch import Munch
-import certifi
 
 """
 Open Weather API Client
@@ -18,7 +18,8 @@ Example response:
 }
 
 OneCall API
-https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units={units}&exclude={part}&appid={API key}
+https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}
+&units={units}&exclude={part}&appid={API key}
 units can be standard, metric, or imperial
 
 API Docs on data in response https://openweathermap.org/api/one-call-3#parameter
@@ -132,7 +133,8 @@ Example response:
    ],
     "alerts": [
     {
-      "sender_name": "NWS Philadelphia - Mount Holly (New Jersey, Delaware, Southeastern Pennsylvania)",
+      "sender_name": "NWS Philadelphia - Mount Holly
+      (New Jersey, Delaware, Southeastern Pennsylvania)",
       "event": "Small Craft Advisory",
       "start": 1684952747,
       "end": 1684988747,
@@ -157,14 +159,16 @@ Example response:
 
 
 def get_conditions_and_forecast_by_lat_long(latitude: str, longitude: str, api_key: str):
-    units = 'imperial'
-    exclude_part = None #  'alerts'
-    endpoint = f'https://api.openweathermap.org/data/3.0/onecall?' \
-               f'lat={latitude}&lon={longitude}&units={units}' \
-               f'{"&exclude=" + exclude_part if exclude_part else ""}' \
-               f'&appid={api_key}'
+    units = "imperial"
+    exclude_part = None  #  'alerts'
+    endpoint = (
+        f"https://api.openweathermap.org/data/3.0/onecall?"
+        f"lat={latitude}&lon={longitude}&units={units}"
+        f"{'&exclude=' + exclude_part if exclude_part else ''}"
+        f"&appid={api_key}"
+    )
 
-    headers = {'User-Agent': 'com.bluefilament.rpi-matrix.weather'}
+    headers = {"User-Agent": "com.bluefilament.rpi-matrix.weather"}
     with requests.get(endpoint, headers=headers, verify=certifi.where()) as request:
         if request.status_code == requests.codes.ok:
             return Munch.fromDict(request.json())

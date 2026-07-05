@@ -7,7 +7,7 @@ def measure_clock():
     t1 = time.perf_counter()
     while t1 == t0:
         t1 = time.perf_counter()
-    return t0, t1, t1-t0
+    return t0, t1, t1 - t0
 
 
-print(f"{reduce(lambda a, b: a+b, [measure_clock()[2] for i in range(1000000)])/1000000.0}")
+print(f"{reduce(lambda a, b: a + b, [measure_clock()[2] for i in range(1000000)]) / 1000000.0}")

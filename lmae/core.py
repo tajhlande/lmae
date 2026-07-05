@@ -1,31 +1,28 @@
-# Core classes for LED Matrix Animation Engine
 import argparse
 import logging
 import time
-from abc import ABCMeta, abstractmethod
-from typing import List
+from abc import ABC, abstractmethod
+from typing import cast
+
 from PIL import Image, ImageDraw
 
-# sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/..'))
-
-# hackity hackington to determine whether we're going to use virtual bindings or not
-import platform
-os_name = platform.system()
-if os_name == 'Linux':
-    from rgbmatrix import RGBMatrix, RGBMatrixOptions
-else:  # Windows or Darwin aka macOS
-    from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
+try:
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions  # pyright: ignore[reportAttributeAccessIssue]
+except ImportError:
+    from lmae.display import VirtualRGBMatrix as RGBMatrix
+    from lmae.display import VirtualRGBMatrixOptions as RGBMatrixOptions
 
 logger = logging.getLogger("lmae.core")
 logger.setLevel(logging.INFO)
 
-_current_sequence = dict()
+_current_sequence: dict[str, int] = {}
 
 
-def _get_sequential_name(class_name : str = "Object"):
+def _get_sequential_name(class_name: str = "Object") -> str:
     if class_name not in _current_sequence:
         _current_sequence[class_name] = 0
-    return f"{class_name}_{++_current_sequence[class_name]}"
+    _current_sequence[class_name] += 1
+    return f"{class_name}_{_current_sequence[class_name]}"
 
 
 class LMAEObject:
@@ -33,8 +30,8 @@ class LMAEObject:
     Base object for everything
     """
 
-    def __init__(self, name: str = None):
-        self.name = name or _get_sequential_name("Object")  # 'Object_' + f'{randrange(65536):04X}'
+    def __init__(self, name: str | None = None):
+        self.name = name or _get_sequential_name("Object")
         self.logger = logging.getLogger(self.name)
         self.logger.setLevel(logging.DEBUG)
 
@@ -43,8 +40,14 @@ class Canvas(LMAEObject):
     """
     A Canvas is an object on which other objects render themselves
     """
-    def __init__(self, name: str = None, size: tuple[int, int] = (64, 32), background_fill: bool = True):
-        name = name or _get_sequential_name("Canvas")  # 'Canvas_' + f'{randrange(65536):04X}'
+
+    def __init__(
+        self,
+        name: str | None = None,
+        size: tuple[int, int] = (64, 32),
+        background_fill: bool = True,
+    ):
+        name = name or _get_sequential_name("Canvas")
         super().__init__(name=name)
         self.size = size
         self.background_fill = background_fill
@@ -54,16 +57,20 @@ class Canvas(LMAEObject):
         self.blank()
 
     def blank(self):
-        #draw = ImageDraw.Draw(self.image)
-        self.image_draw.rectangle(((0, 0), (self.size[0] - 1, self.size[1] - 1)),
-                       fill=(0, 0, 0, 255 if self.background_fill else 0), width=1)
+        # draw = ImageDraw.Draw(self.image)
+        self.image_draw.rectangle(
+            ((0, 0), (self.size[0] - 1, self.size[1] - 1)),
+            fill=(0, 0, 0, 255 if self.background_fill else 0),
+            width=1,
+        )
 
 
-class Actor(LMAEObject, metaclass=ABCMeta):
+class Actor(LMAEObject, ABC):
     """
     An object that appears on a stage and knows how to render itself
     """
-    def __init__(self, name: str = None, position: tuple[int, int] = (0, 0)):
+
+    def __init__(self, name: str | None = None, position: tuple[int, int] = (0, 0)):
         name = name or _get_sequential_name("Actor")
         super().__init__(name=name)
         self.position = position
@@ -71,8 +78,8 @@ class Actor(LMAEObject, metaclass=ABCMeta):
         self.changes_since_last_render = True  # since we've not been rendered yet
         self.visible = True
 
-    def set_position(self, position: tuple[int, int]):
-        if not (position == self.position):
+    def set_position(self, position: tuple[int, int]) -> None:
+        if position != self.position:
             self.position = position
             self.changes_since_last_render = True
 
@@ -102,26 +109,40 @@ class Actor(LMAEObject, metaclass=ABCMeta):
         pass
 
 
-class CompositeActor(Actor, metaclass=ABCMeta):
+class CompositeActor(Actor, ABC):
     """
     Parent class for actors that are meant to modify the drawing behavior of other actors
     """
-    def __init__(self, name: str = None, child: Actor = None, position: tuple[int, int] = (0, 0)):
+
+    def __init__(
+        self,
+        child: Actor,
+        name: str | None = None,
+        position: tuple[int, int] = (0, 0),
+    ):
         name = name or _get_sequential_name("CompositeActor")
         super().__init__(name=name, position=position)
         self.child = child
 
     def needs_render(self):
-        return self.changes_since_last_render or (self.child.needs_render() if self.child else False)
+        return self.changes_since_last_render or (
+            self.child.needs_render() if self.child else False
+        )
 
 
-class Animation(LMAEObject, metaclass=ABCMeta):
+class Animation(LMAEObject, ABC):
     """
     A clock-based way to update an actor based on elapsed real time.
     This base class should be extended to provide specific animation behaviors.
     """
 
-    def __init__(self, name: str = None, actor: Actor = None, repeat: bool = False, duration: float = 1.0):
+    def __init__(
+        self,
+        actor: Actor,
+        name: str | None = None,
+        repeat: bool = False,
+        duration: float = 1.0,
+    ):
         name = name or _get_sequential_name("Animation")
         super().__init__(name=name)
         self.actor = actor
@@ -161,14 +182,15 @@ class Animation(LMAEObject, metaclass=ABCMeta):
             return 0
         return self.last_update_time - self.start_time
 
-    def set_update_time(self, update_time):
+    def set_update_time(self, update_time: float) -> None:
         self.last_update_time = update_time
 
     @abstractmethod
     def is_finished(self) -> bool:
         """
         Override this to indicate when an animation is done.
-        This should usually be based on the current time in the last call to `update_actor(current_time)`
+        This should usually be based on the current time in the last call to
+        `update_actor(current_time)`
         :return: `True` if this animation is finished, `False` otherwise
         """
         pass
@@ -178,12 +200,15 @@ class Animation(LMAEObject, metaclass=ABCMeta):
         """
         Override this to update this animation's actor based on the current time.
 
-        Implementors must call `self.set_update_time(time)`, usually at the end of their implementation.
+        Implementors must call `self.set_update_time(time)`, usually at the end
+        of their implementation.
 
-        Actors must correctly reflect their state of needing to be rendered after being updated.
+        Actors must correctly reflect their state of needing to be rendered after
+        being updated.
         If updating would cause any changes in the way an actor is rendered, then
-        `actor.changes_since_last_render` must be `True`. If updating did not cause any changes in the way
-        an actor is rendered, then `actor.changes_since_last_render` must be unchanged.
+        `actor.changes_since_last_render` must be `True`. If updating did not
+        cause any changes in the way an actor is rendered, then
+        `actor.changes_since_last_render` must be unchanged.
 
         :param current_time: the current time that this frame is being rendered
         """
@@ -197,7 +222,6 @@ def _retain_animation(anim: Animation) -> bool:
     :param anim: the animation
     :return: `True` if we retain it, `False` otherwise
     """
-    # logger.debug(f"Retain animation {anim.name}? finished: {anim.is_finished()}, repeat: {anim.should_repeat()}")
     if anim.is_finished() and anim.should_repeat():
         anim.reset()
     return not anim.is_finished() or anim.should_repeat()
@@ -212,16 +236,22 @@ class Stage(LMAEObject):
     Rendering to the canvas is double-buffered, to avoid seeing intermediate renders on
     the LED matrix.
     """
-    def __init__(self, name=None, size: tuple[int, int] = (64, 32), actors: list[Actor] = None,
-                 animations: list[Animation] = None,
-                 matrix: RGBMatrix = None,
-                 matrix_options: RGBMatrixOptions = None):
-        name = name or _get_sequential_name("Stage")  # 'Stage_' + f'{randrange(65536):04X}'
+
+    def __init__(
+        self,
+        name: str | None = None,
+        size: tuple[int, int] = (64, 32),
+        actors: list[Actor] | None = None,
+        animations: list[Animation] | None = None,
+        matrix: RGBMatrix | None = None,
+        matrix_options: RGBMatrixOptions | None = None,
+    ):
+        name = name or _get_sequential_name("Stage")
         super().__init__(name)
         self.logger.info(f"Initializing Stage {name}")
-        self.size = size        # size in pixels
-        self.actors = actors or list()
-        self.animations = animations or list()
+        self.size = size  # size in pixels
+        self.actors = actors or []
+        self.animations = animations or []
         self.canvas = Canvas(size=self.size)
         self.matrix = matrix or (RGBMatrix(options=matrix_options) if matrix_options else None)
         if not self.matrix:
@@ -237,31 +267,27 @@ class Stage(LMAEObject):
         """
         self.animations.append(animation)
 
-    def add_animations(self, animations: List[Animation]):
+    def add_animations(self, animations: list[Animation]):
         """
         Add a bunch of animations to this stage
         :param animations: a list of animations to add
         """
         self.animations.extend(animations)
 
-    def get_animations_for(self, actor: Actor) -> List[Animation]:
+    def get_animations_for(self, actor: Actor) -> list[Animation]:
         """
         Get the list of animations for a particular actor
         :param actor: The actor for which we should get animations
         :return: a list of animations for that actor
         """
-        return [anim for anim in self.animations if anim.actor == actor]        
+        return [anim for anim in self.animations if anim.actor == actor]
 
-    def clear_animations_for(self, actor: Actor):
+    def clear_animations_for(self, actor: Actor) -> None:
         """
         Remove animations for a particular actor
         :param actor: The actor for which we should remove animations
         """
-        size_before = len(self.animations)
         self.animations = [anim for anim in self.animations if anim.actor != actor]
-        size_after = len(self.animations)
-        # self.logger.debug(f"Cleared animations for actor {actor.name}. Total anims before: {size_before}, "
-        #                   f"after: {size_after}")
 
     def clear_animations_for_all(self, actors: list[Actor]):
         """
@@ -295,7 +321,7 @@ class Stage(LMAEObject):
 
             # update each animation
             anim.update_actor(current_time)
-            anim.last_render_time = current_time
+            anim.last_update_time = current_time
 
         # update the actors
         # self.logger.debug("Updating actors")
@@ -324,7 +350,6 @@ class Stage(LMAEObject):
         """
         # clean up finished animations
         self.animations = [anim for anim in self.animations if _retain_animation(anim)]
-        # self.logger.debug(f"After post-render, animations list is now {len(self.animations)} long")
 
     def display_frame(self):
         """
@@ -332,7 +357,8 @@ class Stage(LMAEObject):
         :return:
         """
         self.double_buffer.SetImage(self.canvas.image.convert("RGB"), 0, 0)
-        self.double_buffer = self.matrix.SwapOnVSync(self.double_buffer)
+        matrix = cast(RGBMatrix, self.matrix)  # avoids null typecheck
+        self.double_buffer = matrix.SwapOnVSync(self.double_buffer)
 
     def render_frame(self):
         """
@@ -356,14 +382,8 @@ class Stage(LMAEObject):
 
 
 virtual_leds = False
+_have_parsed_matrix_options = False
 
-try:
-    _have_parsed_matrix_options
-except NameError:
-    _have_parsed_matrix_options = False
-    print("Setting _have_parsed_matrix_options for the first time")
-else:
-    print("Discovering _have_parsed_matrix_options is already set")
 
 def parse_matrix_options_command_line():
     """
@@ -372,56 +392,151 @@ def parse_matrix_options_command_line():
     """
     global _have_parsed_matrix_options
     if _have_parsed_matrix_options:
-        raise Exception("Trying to parse matrix options a second time")
+        raise RuntimeError("Trying to parse matrix options a second time")
     _have_parsed_matrix_options = True
     options = RGBMatrixOptions()
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-r", "--led-rows", action="store",
-                        help="Display rows. 16 for 16x32, 32 for 32x32. Default: 32", default=32, type=int)
-    parser.add_argument("--led-cols", action="store",
-                        help="Panel columns. Typically 32 or 64. (Default: 64)", default=64, type=int)
-    parser.add_argument("-c", "--led-chain", action="store",
-                        help="Daisy-chained boards. Default: 1.", default=1, type=int)
-    parser.add_argument("-P", "--led-parallel", action="store",
-                        help="For Plus-models or RPi2: parallel chains. 1..3. Default: 1", default=1, type=int)
-    parser.add_argument("-p", "--led-pwm-bits", action="store",
-                        help="Bits used for PWM. Something between 1..11. Default: 11", default=11, type=int)
-    parser.add_argument("-b", "--led-brightness", action="store",
-                        help="Sets brightness level. Default: 100. Range: 1..100", default=100, type=int)
-    parser.add_argument("-m", "--led-gpio-mapping", default='adafruit-hat',
-                        help="Hardware Mapping: regular, adafruit-hat, adafruit-hat-pwm",
-                        choices=['regular', 'regular-pi1', 'adafruit-hat', 'adafruit-hat-pwm'], type=str)
-    parser.add_argument("--led-scan-mode", action="store",
-                        help="Progressive or interlaced scan. 0 Progressive,  1 Interlaced (default)",
-                        default=1, choices=range(2), type=int)
-    parser.add_argument("--led-pwm-lsb-nanoseconds", action="store",
-                        help="Base time-unit for the on-time in the lowest significant bit in nanoseconds. "
-                             "Default: 130",  default=130, type=int)
-    parser.add_argument("--led-show-refresh", action="store_true",
-                        help="Shows the current refresh rate of the LED panel")
-    parser.add_argument("--led-slowdown-gpio", action="store",
-                        help="Slow down writing to GPIO. Range: 0..4. Default: 1", default=1, type=int)
-    parser.add_argument("--led-no-hardware-pulse", action="store",
-                        help="Don't use hardware pin-pulse generation")
-    parser.add_argument("--led-rgb-sequence", action="store",
-                        help="Switch if your matrix has led colors swapped. Default: RGB", default="RGB", type=str)
-    parser.add_argument("--led-pixel-mapper", action="store",
-                        help="Apply pixel mappers. e.g \"Rotate:90\"", default="", type=str)
-    parser.add_argument("--led-row-addr-type", action="store",
-                        help="0 = default; 1=AB-addressed panels; 2=row direct; 3=ABC-addressed panels; "
-                             "4 = ABC Shift + DE direct", default=0, type=int, choices=[0, 1, 2, 3, 4])
-    parser.add_argument("--led-multiplexing", action="store",
-                        help="Multiplexing type: 0=direct; 1=strip; 2=checker; 3=spiral; 4=ZStripe; "
-                             "5=ZnMirrorZStripe; 6=coreman; 7=Kaler2Scan; 8=ZStripeUneven... (Default: 0)",
-                        default=0, type=int)
-    parser.add_argument("--led-panel-type", action="store",
-                        help="Needed to initialize special panels. Supported: 'FM6126A'", default="", type=str)
-    parser.add_argument("--led-no-drop-privs", dest="drop_privileges",
-                        help="Don't drop privileges from 'root' after initializing the hardware.", action='store_false')
-    parser.add_argument("-v", "--virtual-leds", action="store_true", dest="virtual_leds",
-                        help="Draw to virtual LED display on screen instead of real LED panel.",
-                        default=False)
+    parser.add_argument(
+        "-r",
+        "--led-rows",
+        action="store",
+        help="Display rows. 16 for 16x32, 32 for 32x32. Default: 32",
+        default=32,
+        type=int,
+    )
+    parser.add_argument(
+        "--led-cols",
+        action="store",
+        help="Panel columns. Typically 32 or 64. (Default: 64)",
+        default=64,
+        type=int,
+    )
+    parser.add_argument(
+        "-c",
+        "--led-chain",
+        action="store",
+        help="Daisy-chained boards. Default: 1.",
+        default=1,
+        type=int,
+    )
+    parser.add_argument(
+        "-P",
+        "--led-parallel",
+        action="store",
+        help="For Plus-models or RPi2: parallel chains. 1..3. Default: 1",
+        default=1,
+        type=int,
+    )
+    parser.add_argument(
+        "-p",
+        "--led-pwm-bits",
+        action="store",
+        help="Bits used for PWM. Something between 1..11. Default: 11",
+        default=11,
+        type=int,
+    )
+    parser.add_argument(
+        "-b",
+        "--led-brightness",
+        action="store",
+        help="Sets brightness level. Default: 100. Range: 1..100",
+        default=100,
+        type=int,
+    )
+    parser.add_argument(
+        "-m",
+        "--led-gpio-mapping",
+        default="adafruit-hat",
+        help="Hardware Mapping: regular, adafruit-hat, adafruit-hat-pwm",
+        choices=["regular", "regular-pi1", "adafruit-hat", "adafruit-hat-pwm"],
+        type=str,
+    )
+    parser.add_argument(
+        "--led-scan-mode",
+        action="store",
+        help="Progressive or interlaced scan. 0 Progressive,  1 Interlaced (default)",
+        default=1,
+        choices=range(2),
+        type=int,
+    )
+    parser.add_argument(
+        "--led-pwm-lsb-nanoseconds",
+        action="store",
+        help="Base time-unit for the on-time in the lowest significant bit in nanoseconds. "
+        "Default: 130",
+        default=130,
+        type=int,
+    )
+    parser.add_argument(
+        "--led-show-refresh",
+        action="store_true",
+        help="Shows the current refresh rate of the LED panel",
+    )
+    parser.add_argument(
+        "--led-slowdown-gpio",
+        action="store",
+        help="Slow down writing to GPIO. Range: 0..4. Default: 1",
+        default=1,
+        type=int,
+    )
+    parser.add_argument(
+        "--led-no-hardware-pulse",
+        action="store",
+        help="Don't use hardware pin-pulse generation",
+    )
+    parser.add_argument(
+        "--led-rgb-sequence",
+        action="store",
+        help="Switch if your matrix has led colors swapped. Default: RGB",
+        default="RGB",
+        type=str,
+    )
+    parser.add_argument(
+        "--led-pixel-mapper",
+        action="store",
+        help='Apply pixel mappers. e.g "Rotate:90"',
+        default="",
+        type=str,
+    )
+    parser.add_argument(
+        "--led-row-addr-type",
+        action="store",
+        help="0 = default; 1=AB-addressed panels; 2=row direct; 3=ABC-addressed panels; "
+        "4 = ABC Shift + DE direct",
+        default=0,
+        type=int,
+        choices=[0, 1, 2, 3, 4],
+    )
+    parser.add_argument(
+        "--led-multiplexing",
+        action="store",
+        help="Multiplexing type: 0=direct; 1=strip; 2=checker; 3=spiral; 4=ZStripe; "
+        "5=ZnMirrorZStripe; 6=coreman; 7=Kaler2Scan; 8=ZStripeUneven... (Default: 0)",
+        default=0,
+        type=int,
+    )
+    parser.add_argument(
+        "--led-panel-type",
+        action="store",
+        help="Needed to initialize special panels. Supported: 'FM6126A'",
+        default="",
+        type=str,
+    )
+    parser.add_argument(
+        "--led-no-drop-privs",
+        dest="drop_privileges",
+        help="Don't drop privileges from 'root' after initializing the hardware.",
+        action="store_false",
+    )
+    parser.add_argument(
+        "-v",
+        "--virtual-leds",
+        action="store_true",
+        dest="virtual_leds",
+        help="Draw to virtual LED display on screen instead of real LED panel.",
+        default=False,
+    )
     parser.set_defaults(drop_privileges=True)
 
     args = parser.parse_args()
@@ -440,9 +555,8 @@ def parse_matrix_options_command_line():
     options.led_rgb_sequence = args.led_rgb_sequence
     options.pixel_mapper_config = args.led_pixel_mapper
     options.panel_type = args.led_panel_type
-    global virtual_leds, _parsed_matrix_options
+    global virtual_leds
     virtual_leds = args.virtual_leds
-
 
     if args.led_show_refresh:
         options.show_refresh_rate = 1
@@ -453,7 +567,7 @@ def parse_matrix_options_command_line():
     if not args.drop_privileges:
         options.drop_privileges = False
 
-    logger.debug(f"Matrix configuration:")
+    logger.debug("Matrix configuration:")
     logger.debug(f"    hardware_mapping:  {options.hardware_mapping}")
     logger.debug(f"    rows:  {options.rows}")
     logger.debug(f"    cols:  {options.cols}")

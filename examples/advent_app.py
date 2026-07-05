@@ -1,15 +1,14 @@
-import datetime
 import os.path
 import time
-
 from datetime import datetime
+
 from PIL import ImageFont
 
 from lmae import app_runner
-from lmae.animation import Sequence, HueFade
-from lmae.core import Animation
-from lmae.app import DisplayManagedApp
 from lmae.actor import Rectangle, StillImage, Text
+from lmae.animation import HueFade, Sequence
+from lmae.app import DisplayManagedApp
+from lmae.core import Animation
 
 
 class AdventApp(DisplayManagedApp):
@@ -18,7 +17,12 @@ class AdventApp(DisplayManagedApp):
     """
 
     # noinspection PyTypeChecker
-    def __init__(self, refresh_time: int = 60, font_path: str = "fonts/", image_path: str = "images/"):
+    def __init__(
+        self,
+        refresh_time: int = 60,
+        font_path: str = "fonts/",
+        image_path: str = "images/",
+    ):
         super().__init__(refresh_time=refresh_time, max_frame_rate=20)
         self.actors = list()
         self.pre_render_callback = None
@@ -29,10 +33,20 @@ class AdventApp(DisplayManagedApp):
         self.counter_label = Text(font=self.big_font, name="counter", position=(8, 2))
         teeny_font_path = os.path.join(font_path, "teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf")
         self.small_font = ImageFont.truetype(teeny_font_path, 5)
-        self.line_1_label = Text(font=self.small_font, name="line_1_text", position=(9, 18), text="days",
-                                 color=(192, 192, 192, 255))
-        self.line_2_label = Text(font=self.small_font, name="line_2_text", position=(7, 25), text="until",
-                                 color=(192, 192, 192, 255))
+        self.line_1_label = Text(
+            font=self.small_font,
+            name="line_1_text",
+            position=(9, 18),
+            text="days",
+            color=(192, 192, 192, 255),
+        )
+        self.line_2_label = Text(
+            font=self.small_font,
+            name="line_2_text",
+            position=(7, 25),
+            text="until",
+            color=(192, 192, 192, 255),
+        )
         self.tree_image = StillImage(name="tree", position=(37, 0))
         tree_image_path = os.path.join(image_path, "pixel-tree-22x32-alpha.png")
         self.tree_image.set_from_file(tree_image_path)
@@ -65,7 +79,12 @@ class AdventApp(DisplayManagedApp):
         for y in range(0, self.tree_image.size[1]):
             for x in range(0, self.tree_image.size[0]):
                 pixel_color = pil_image.getpixel((x, y))
-                if pixel_color == (255, 255, 255) or pixel_color == (255, 255, 255, 255):
+                if pixel_color == (255, 255, 255) or pixel_color == (
+                    255,
+                    255,
+                    255,
+                    255,
+                ):
                     self.lights_locations.append((x + offset[0], y + offset[1]))
 
         self.logger.debug(f"Found {len(self.lights_locations)} lights on tree")
@@ -74,16 +93,27 @@ class AdventApp(DisplayManagedApp):
         light_ctr = 0
         for location in self.lights_locations:
             light_ctr = light_ctr + 1
-            light = Rectangle(name=f"Light_{light_ctr}", position=location, size=(0, 0), color=(192, 192, 255, 255))
+            light = Rectangle(
+                name=f"Light_{light_ctr}",
+                position=location,
+                size=(0, 0),
+                color=(192, 192, 255, 255),
+            )
             self.lights_list.append(light)
 
     def prepare(self):
         super().prepare()
-        if len(self.stage.actors) == 0: # i.e. we've never added these actors to the stage before
-            self.stage.actors.extend((self.line_1_label, self.line_2_label, self.counter_label, self.tree_image))
+        if len(self.stage.actors) == 0:  # i.e. we've never added these actors to the stage before
+            self.stage.actors.extend(
+                (
+                    self.line_1_label,
+                    self.line_2_label,
+                    self.counter_label,
+                    self.tree_image,
+                )
+            )
             self.stage.actors.extend(self.lights_list)
         self.logger.debug(f"Stage needs render? {self.stage.needs_render}")
-        # Fix: Recalculate countdown and update last_* variables so display is correct at start of each cycle
         self.update_countdown()
 
     def update_countdown(self):
@@ -94,9 +124,9 @@ class AdventApp(DisplayManagedApp):
         # self.logger.debug(f"Current date: {current_year:04}-{current_month:02}-{current_day:02}")
         self.is_christmas = current_month == 12 and current_day == 25
         christmas_has_passed = current_month == 12 and current_day > 25
-        # self.logger.debug(f"Has Christmas passed this year already? {'yes' if christmas_has_passed else 'no'}")
-
-        christmas_datetime = datetime(current_year + 1 if christmas_has_passed else current_year, 12, 25, 0, 0)
+        christmas_datetime = datetime(
+            current_year + 1 if christmas_has_passed else current_year, 12, 25, 0, 0
+        )
         # self.logger.debug(f"Date of Christmas: {christmas_datetime.year:04}-"
         #                   f"{christmas_datetime.month:02}-{christmas_datetime.day:02}")
 
@@ -113,9 +143,9 @@ class AdventApp(DisplayManagedApp):
             self.logger.debug(f"Counted {self.days_until_christmas} days until Christmas")
 
     @staticmethod
-    def format_epoch_time(timestamp):
+    def format_epoch_time(timestamp: float | str) -> str:
         timestamp_format = "%H:%M:%S"
-        if timestamp is str:
+        if isinstance(timestamp, str):
             timestamp = float(timestamp)
         return time.strftime(timestamp_format, time.localtime(timestamp))
 
@@ -128,9 +158,12 @@ class AdventApp(DisplayManagedApp):
         self.update_countdown()
 
         # determine counter and text label values
-        if (self.was_it_christmas != self.is_christmas or self.last_days_until_christmas != self.days_until_christmas or
-                self.last_hours_until_christmas != self.hours_until_christmas or
-                self.last_minutes_until_christmas != self.minutes_until_christmas):
+        if (
+            self.was_it_christmas != self.is_christmas
+            or self.last_days_until_christmas != self.days_until_christmas
+            or self.last_hours_until_christmas != self.hours_until_christmas
+            or self.last_minutes_until_christmas != self.minutes_until_christmas
+        ):
             self.counter_label.show()
             self.line_2_label.set_text("until")
             if self.is_christmas:
@@ -182,11 +215,22 @@ class AdventApp(DisplayManagedApp):
             elif self.colors_index == 3:  # 3 colors: red white blue
                 self.colors = [(255, 0, 0, 255), (255, 255, 255, 255), (0, 0, 255, 255)]
             elif self.colors_index == 4:  # 3 colors: purple, yellowish green, aqua
-                self.colors = [(255, 0, 189, 255), (189, 255, 0, 255), (0, 189, 255, 255)]
+                self.colors = [
+                    (255, 0, 189, 255),
+                    (189, 255, 0, 255),
+                    (0, 189, 255, 255),
+                ]
             elif self.colors_index == 5:  # 4 colors: red, green, blue purple
-                self.colors = [(255, 0, 0, 255), (128, 255, 0, 255), (0, 255, 255, 255), (128, 0, 255, 255)]
+                self.colors = [
+                    (255, 0, 0, 255),
+                    (128, 255, 0, 255),
+                    (0, 255, 255, 255),
+                    (128, 0, 255, 255),
+                ]
 
-            self.logger.debug(f"Using color option {self.colors_index} with {len(self.colors)} colors")
+            self.logger.debug(
+                f"Using color option {self.colors_index} with {len(self.colors)} colors"
+            )
             self.logger.debug(f"Twinkle is set to {self.twinkle}")
 
             tree_color = (65, 167, 66, 255)
@@ -205,8 +249,14 @@ class AdventApp(DisplayManagedApp):
                         start_color = self.colors[ci]
                         end_color = tree_color if self.twinkle else self.colors[ci]
 
-                    hue_fade = HueFade(name=f"Light{li}_fade_0", actor=light, initial_color=start_color,
-                                       final_color=end_color, callback=light.set_color, duration=light_duration)
+                    hue_fade = HueFade(
+                        name=f"Light{li}_fade_0",
+                        actor=light,
+                        initial_color=start_color,
+                        final_color=end_color,
+                        callback=light.set_color,
+                        duration=light_duration,
+                    )
                     sequence.add_animations(hue_fade)
 
                     if li % 2 == 0:  # start off vs start on
@@ -216,8 +266,14 @@ class AdventApp(DisplayManagedApp):
                         start_color = tree_color
                         end_color = self.colors[ci] if self.twinkle else tree_color
 
-                    hue_fade = HueFade(name=f"Light{li}_fade_1", actor=light, initial_color=start_color,
-                                       final_color=end_color, callback=light.set_color, duration=light_duration)
+                    hue_fade = HueFade(
+                        name=f"Light{li}_fade_1",
+                        actor=light,
+                        initial_color=start_color,
+                        final_color=end_color,
+                        callback=light.set_color,
+                        duration=light_duration,
+                    )
                     sequence.add_animations(hue_fade)
 
                     ci = (ci + 1) % len(self.colors)
@@ -231,9 +287,19 @@ class AdventApp(DisplayManagedApp):
                     for i in range(0, len(self.colors)):
                         ci = (li + i) % len(self.colors)
                         start_color = self.colors[ci]
-                        end_color = self.colors[(ci + 1) % len(self.colors)] if self.twinkle else start_color
-                        hue_fade = HueFade(name=f"Light{li}_fade_{i}", actor=light, initial_color=start_color,
-                                           final_color=end_color, callback=light.set_color, duration=light_duration)
+                        end_color = (
+                            self.colors[(ci + 1) % len(self.colors)]
+                            if self.twinkle
+                            else start_color
+                        )
+                        hue_fade = HueFade(
+                            name=f"Light{li}_fade_{i}",
+                            actor=light,
+                            initial_color=start_color,
+                            final_color=end_color,
+                            callback=light.set_color,
+                            duration=light_duration,
+                        )
                         sequence.add_animations(hue_fade)
                     li = li + 1
                     light_sequences.append(sequence)
@@ -251,7 +317,6 @@ class AdventApp(DisplayManagedApp):
         self.last_hours_until_christmas = -1
         self.last_minutes_until_christmas = -1
         self.last_hour = -1
-
 
     @staticmethod
     def get_app_instance():

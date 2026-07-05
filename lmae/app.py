@@ -1,36 +1,37 @@
 import asyncio
 import logging
-import time
-
-from abc import ABCMeta, abstractmethod
-from threading import Lock
-from typing import Callable
-
-from lmae.core import Stage, Actor, Animation
-
-# hackity hackington to determine whether we're going to use virtual bindings or not
 import platform
+import time
+from abc import ABC, abstractmethod
+from collections.abc import Callable
+from threading import Lock
+
+from lmae.core import Actor, Animation, Stage
+
 os_name = platform.system()
-if os_name == 'Linux':
+if os_name == "Linux":
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 else:  # Windows or Darwin aka macOS
-    from lmae.display import VirtualRGBMatrix as RGBMatrix, VirtualRGBMatrixOptions as RGBMatrixOptions
+    from lmae.display import VirtualRGBMatrix as RGBMatrix
+    from lmae.display import VirtualRGBMatrixOptions as RGBMatrixOptions
 
 
-class App(metaclass=ABCMeta):
+class App(ABC):
     """
-    An app is a self-contained instance that knows how to compute and render itself on the LED matrix.
-    Apps that want to run should extend this class or use an existing extension and implement the abstract methods.
-    An initialized matrix object and matrix options are provided for rendering purposes.
+    An app is a self-contained instance that knows how to compute and render
+    itself on the LED matrix. Apps that want to run should extend this class
+    or use an existing extension and implement the abstract methods.
+    An initialized matrix object and matrix options are provided for rendering.
     """
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.matrix = None
         self.matrix_options = None
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.setLevel(logging.INFO)
         self.running = False
 
-    def set_matrix(self, matrix: RGBMatrix, options: RGBMatrixOptions):
+    def set_matrix(self, matrix: RGBMatrix, options: RGBMatrixOptions) -> None:
         """
         Called to set the matrix object. Must be called before any abstract methods are called.
         :return:
@@ -39,30 +40,21 @@ class App(metaclass=ABCMeta):
         self.matrix = matrix
         self.matrix_options = options
 
-    def prepare(self):
+    def prepare(self) -> None:  # noqa: B027
         """
         Apps can implement this method to prepare themselves before rendering.
-        :return: True if the method was successful, False if not (or throw an exception)
         """
-        pass
 
     @abstractmethod
-    async def run(self):
+    async def run(self) -> None:
         """
         This method will be invoked in a distinct thread when the app should start running.
         It should be async friendly and should yield on reasonable occasion.
-        It should occasionally check for `self.running`'s value, and when that value is no longer
-        true, it should exit.
-        :return:
         """
         self.logger.debug("Got command to start running")
         self.running = True
 
-    def stop(self):
-        """
-        Apps should stop running when this method is called.
-        :return:
-        """
+    def stop(self) -> None:
         self.logger.debug("Got command to stop")
         self.running = False
 
@@ -86,7 +78,7 @@ class SingleStageRenderLoopApp(App):
     your actors and animations and specify behavior, and the view is relatively simple.
     """
 
-    def __init__(self, size: tuple[int, int] = (64, 32), max_frame_rate: int = 120):
+    def __init__(self, size: tuple[int, int] = (64, 32), max_frame_rate: int = 120) -> None:
         """
         Initialize the app.
         :param size: Set the size of the display in pixels.
@@ -96,18 +88,18 @@ class SingleStageRenderLoopApp(App):
         self.size = size
         self.lock = Lock()
         self.stage = None
-        self.actors = list()
-        self.animations = list()
+        self.actors = []
+        self.animations = []
         self.pre_render_callback = None
         self.max_frame_rate = max_frame_rate
 
-    def add_actors(self, *args: Actor):
+    def add_actors(self, *args: Actor) -> None:
         self.actors.extend(args)
 
-    def add_animations(self, *args: Animation):
+    def add_animations(self, *args: Animation) -> None:
         self.animations.extend(args)
 
-    def set_pre_render_callback(self, pre_render_callback: Callable):
+    def set_pre_render_callback(self, pre_render_callback: Callable[[], None]) -> None:
         """
         Set a function to be called before each render frame. This can be used to
         update actors. It should be fast!
@@ -115,17 +107,22 @@ class SingleStageRenderLoopApp(App):
         """
         self.pre_render_callback = pre_render_callback
 
-    def prepare(self):
+    def prepare(self) -> None:
         if not self.stage:
-            self.stage = Stage(name=f"{self.__class__.__name__}-Stage", size=self.size,
-                               matrix=self.matrix, matrix_options=self.matrix_options,
-                               actors=self.actors, animations=self.animations)
+            self.stage = Stage(
+                name=f"{self.__class__.__name__}-Stage",
+                size=self.size,
+                matrix=self.matrix,
+                matrix_options=self.matrix_options,
+                actors=self.actors,
+                animations=self.animations,
+            )
         else:
-            self.stage.actors = self.actors or list()
-            self.stage.animations = self.animations or list()
+            self.stage.actors = self.actors or []
+            self.stage.animations = self.animations or []
             self.stage.blank_canvas()
 
-    async def run(self):
+    async def run(self) -> None:
         await super().run()
         self.logger.debug("Run started")
         self.running = True
@@ -133,31 +130,24 @@ class SingleStageRenderLoopApp(App):
         last_time = time.perf_counter()
         try:
             while self.running:
-                # call pre-render callback
                 if self.pre_render_callback:
                     self.pre_render_callback()
 
-                # render the frame
                 self.stage.render_frame()
 
-                # calculate the frame rate and render that
                 render_end_time = time.perf_counter()
-
-                # if we are rendering faster than max frame rate, slow down
                 elapsed_render_time = render_end_time - last_time
                 if elapsed_render_time < min_time_per_frame:
                     sleep_time = min_time_per_frame - elapsed_render_time
-                    # self.logger.debug(f"Sleeping for {sleep_time}")
                     await asyncio.sleep(sleep_time)
 
-                # mark the timestamp
                 last_time = time.perf_counter()
-        except:
+        except Exception:
             self.logger.exception("Exception while running app")
         finally:
             self.logger.debug("Run stopped")
 
-    def stop(self):
+    def stop(self) -> None:
         self.logger.debug("Got command to stop")
         self.running = False
 
@@ -171,7 +161,7 @@ class SingleStageRenderLoopApp(App):
         return SingleStageRenderLoopApp()
 
 
-class DisplayManagedApp(App, metaclass=ABCMeta):
+class DisplayManagedApp(App, ABC):
     """
     An app with a single stage, where the display refresh rate is managed to a limit,
     and rendering only happens when it is needed (when some changes to the actors on a stage
@@ -180,8 +170,7 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
     This is a good candidate to use if you want to override the class with your own app class.
     """
 
-    # noinspection PyTypeChecker
-    def __init__(self, refresh_time: int = 300, max_frame_rate: int = 20):
+    def __init__(self, refresh_time: int = 300, max_frame_rate: int = 20) -> None:
         """
         Initialize the app.
 
@@ -191,29 +180,33 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
         super().__init__()
         self.refresh_time = refresh_time
         self.max_frame_rate = max_frame_rate
-        self.stage: Stage = None
+        self.stage: Stage | None = None
 
-    def prepare(self):
+    def prepare(self) -> None:
         super().prepare()
         if not self.stage:
-            self.stage = Stage(name=f"{self.__class__.__name__}-Stage", matrix=self.matrix,
-                               matrix_options=self.matrix_options)
+            self.stage = Stage(
+                name=f"{self.__class__.__name__}-Stage",
+                matrix=self.matrix,
+                matrix_options=self.matrix_options,
+            )
         else:
             self.stage.blank_canvas()
 
     @abstractmethod
-    def update_view(self, elapsed_time: float):
+    def update_view(self, elapsed_time: float) -> None:
         """
         Apps should use this method to update the view of the stage that will be displayed.
 
         This method will be called on every frame, and should
         be efficient for that reason. If the view isn't actually updating,
         it should return quickly without doing excessive work.
-        :param elapsed_time: How much time has elapsed since the last time `self.update_view()` was called, in seconds
+        :param elapsed_time: How much time has elapsed since the last time
+            `self.update_view()` was called, in seconds
         """
         pass
 
-    async def run(self):
+    async def run(self) -> None:
         await super().run()
         self.logger.debug("Run started")
 
@@ -240,7 +233,6 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time=elapsed_time)
-                    # self.stage.needs_render = True  # have to force this for some reason
                     self.stage.render_frame()
                     waiting = elapsed_time < self.refresh_time
 
@@ -251,11 +243,10 @@ class DisplayManagedApp(App, metaclass=ABCMeta):
                     elapsed_render_time = render_end_time - last_time
                     if elapsed_render_time < min_time_per_frame:
                         sleep_time = min_time_per_frame - elapsed_render_time
-                        # self.logger.debug(f"Sleeping for {sleep_time}")
                         await asyncio.sleep(sleep_time)
                     else:
                         # must yield some control, with minimal sleep amount
-                        await asyncio.sleep(min_time_per_frame/10.0)
+                        await asyncio.sleep(min_time_per_frame / 10.0)
 
                     # see if we're still running
                     if not self.running:

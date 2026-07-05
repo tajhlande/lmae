@@ -5,7 +5,10 @@ from lmae import app_runner
 from lmae.app import SingleStageRenderLoopApp
 from lmae.component import AnimatedImage
 
-logging.basicConfig(level=logging.INFO, format='%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(relativeCreated)9d %(name)10s [%(levelname)5s]: %(message)s",
+)
 logger = logging.getLogger("gif_animation_test")
 logger.setLevel(logging.DEBUG)
 print("LED Matrix Module Test - GIF App")

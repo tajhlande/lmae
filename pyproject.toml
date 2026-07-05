@@ -31,8 +31,8 @@ dependencies = [
     "rgbmatrix; sys_platform == 'linux'",
 ]
 
-[project.optional-dependencies]
-test = [
+[dependency-groups]
+dev = [
     "freezegun>=1.5.0",
 ]
 
@@ -49,3 +49,26 @@ version = {attr = "lmae.VERSION"}
 
 [tool.uv.sources]
 rgbmatrix = { git = "https://github.com/hzeller/rpi-rgb-led-matrix" }
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+
+[tool.ruff.lint.per-file-ignores]
+# VirtualRGBMatrix mimics the real RGBMatrix API (PascalCase methods like SetImage,
+# SwapOnVSync, CreateFrameCanvas). These names must match the rgbmatrix library's
+# interface, so non-PEP8 naming is intentional and should not be "fixed."
+"lmae/display.py" = ["E" ]
+"tests/testing_matrix.py" = ["E"]

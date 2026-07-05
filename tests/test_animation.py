@@ -44,5 +44,6 @@ class EasingTest(unittest.TestCase):
         self.assertEqual(1.09968184375, easing.apply(0.75))
         self.assertEqual(1.0, easing.apply(1.0))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

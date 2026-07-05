@@ -31,7 +31,6 @@ from lmae.actor import StillImage
 from lmae.app import DisplayManagedApp
 from lmae.core import Stage
 
-
 # ---------------------------------------------------------------------------
 # C-fidelity helpers
 #
@@ -71,15 +70,25 @@ class _Knot:
     """
 
     __slots__ = (
-        "x", "y",
-        "flowsign", "spinsign", "leafsign", "rayssign", "wavesign",
-        "nspokes", "sectors", "frequency", "amplitude", "decay",
+        "amplitude",
+        "decay",
+        "flowsign",
+        "frequency",
+        "leafsign",
+        "nspokes",
+        "rayssign",
+        "sectors",
+        "spinsign",
+        "wavesign",
+        "x",
+        "y",
     )
 
 
 # ---------------------------------------------------------------------------
 # Palette parsing
 # ---------------------------------------------------------------------------
+
 
 def _parse_palettes(filepath: str) -> dict[str, list[tuple[int, int, int]]]:
     """Parse a palette file.
@@ -283,7 +292,8 @@ class SatoriPattern(StillImage):
                 return preference
             self.logger.warning(
                 "Unknown style %r; choosing randomly. Valid: %s",
-                preference, ", ".join(_ALL_STYLES),
+                preference,
+                ", ".join(_ALL_STYLES),
             )
         return self._rng.choice(_ALL_STYLES)
 
@@ -436,10 +446,7 @@ class SatoriPattern(StillImage):
         stripes = self._stripes
 
         # A. Determine the number of gradient bands
-        if not randomize:
-            nsteps = ncolors
-        else:
-            nsteps = rng.randint(3, 5) if stripes else rng.randint(5, 10)
+        nsteps = ncolors if not randomize else rng.randint(3, 5) if stripes else rng.randint(5, 10)
         if stripes:
             nsteps *= 2  # make room for black bands between colors
 
@@ -572,9 +579,7 @@ class SatoriApp(DisplayManagedApp):
         self._resource_path = resource_path
 
         # Parse palettes once at construction (reused across all generations)
-        palette_path = (
-            os.path.join(resource_path, palette_file) if resource_path else palette_file
-        )
+        palette_path = os.path.join(resource_path, palette_file) if resource_path else palette_file
         self._palettes = _parse_palettes(palette_path)
 
         # The pattern actor — created once in prepare(), reused on re-prepare
@@ -649,10 +654,10 @@ class SatoriApp(DisplayManagedApp):
         now = time.localtime()
         secs = now.tm_hour * 3600 + now.tm_min * 60 + now.tm_sec
 
-        dawn_start = 5 * 3600   # 05:00
-        dawn_end = 6 * 3600     # 06:00
+        dawn_start = 5 * 3600  # 05:00
+        dawn_end = 6 * 3600  # 06:00
         dusk_start = 21 * 3600  # 21:00
-        dusk_end = 22 * 3600    # 22:00
+        dusk_end = 22 * 3600  # 22:00
         day = self._daytime_brightness
         night = self._nighttime_brightness
 
@@ -703,7 +708,10 @@ class SatoriApp(DisplayManagedApp):
             self._last_brightness_log = (wall.tm_hour, wall.tm_min)
             self.logger.info(
                 "Brightness report %02d:%02d — target=%d, applied=%d",
-                wall.tm_hour, wall.tm_min, target, self._current_brightness,
+                wall.tm_hour,
+                wall.tm_min,
+                target,
+                self._current_brightness,
             )
 
     @staticmethod

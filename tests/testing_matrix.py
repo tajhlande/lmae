@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
+
 from PIL import Image
+
 
 class TestingRGBMatrixOptions:
     """
     A stand-in class for rgbmatrix.RGBMatrixOptions
     Useful in testing, does not invoke Pygame
     """
+
     def __init__(self):
         # defaults
         self.hardware_mapping = "regular"
@@ -31,20 +35,17 @@ class TestingRGBMatrixOptions:
 # noinspection PyPep8Naming
 # we are mocking the method names from the rgbmatrix library
 class TestingFrameCanvas:
-
     def __init__(self):
         self.logger = logging.getLogger("TestingFrameCanvas")
         self.image: Image = None
-        self.options: Optional[TestingRGBMatrixOptions] = None
+        self.options: TestingRGBMatrixOptions | None = None
         self.offset_x = 0
         self.offset_y = 0
-
 
     def SetImage(self, image: Image, offset_x: int = 0, offset_y: int = 0):
         self.image = image
         self.offset_x = offset_x
         self.offset_y = offset_y
-
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -54,6 +55,7 @@ class TestingRGBMatrix:
     A stand-in class for rgbmatrix.RGBMatrix
     Useful in testing, does not invoke Pygame
     """
+
     def __init__(self, options: TestingRGBMatrixOptions = None):
         self.logger = logging.getLogger("TestingRGBMatrix")
         if not options:
@@ -62,7 +64,6 @@ class TestingRGBMatrix:
         self.matrix_options: TestingRGBMatrixOptions = options
         self.frame_canvas = TestingFrameCanvas()
 
-
     def CreateFrameCanvas(self) -> TestingFrameCanvas:
         # self.logger.info("Creating frame canvas")
         frame_canvas = TestingFrameCanvas()
@@ -70,7 +71,9 @@ class TestingRGBMatrix:
 
     @staticmethod
     def adjust_brightness(colors: tuple[int, int, int], adjustment: float) -> tuple[int, int, int]:
-        def adjust_fn(x): return max(0, min(255, 255 - int((255 - x) / adjustment)))
+        def adjust_fn(x):
+            return max(0, min(255, 255 - int((255 - x) / adjustment)))
+
         new_colors = (adjust_fn(colors[0]), adjust_fn(colors[1]), adjust_fn(colors[2]))
         return new_colors
 

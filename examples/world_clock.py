@@ -1,8 +1,7 @@
-import datetime
 import os.path
+from datetime import UTC, datetime
+from math import asin, atan2, cos, degrees, floor, isclose, pi, radians, sin, sqrt
 
-from datetime import datetime, timezone
-from math import sin, cos, asin, atan2, radians, degrees, pi, sqrt, isclose, floor
 from PIL import Image, ImageDraw, ImageFont
 
 from lmae import app_runner
@@ -37,13 +36,15 @@ def compute_sun_declination(day_of_year):
     From https://www.aa.quae.nl/en/antwoorden/zonpositie.html#v526
     Compute the declination of the sun on a given day.
 
-    :param day_of_year: number of days since (the beginning of) the most recent December 31st (i.e., for midnight
-                        at the beginning of January 1st, for January 2nd, and so on).
+    :param day_of_year: number of days since (the beginning of) the most recent
+                        December 31st (i.e., for midnight at the beginning of
+                        January 1st, for January 2nd, and so on).
     :return: The declination of the sun on that day, in degrees.
-             The declination is the coordinate in the equatorial coordinate system in the sky that is similar to
-             latitude on Earth. It ranges between −90 degrees at the southern celestial pole and +90 degrees at
-             the northern celestial pole and is zero at the celestial equator. The other equatorial coordinate is
-             the right ascension.
+             The declination is the coordinate in the equatorial coordinate
+             system in the sky that is similar to latitude on Earth. It ranges
+             between -90 degrees at the southern celestial pole and +90 degrees
+             at the northern celestial pole and is zero at the celestial equator.
+             The other equatorial coordinate is the right ascension.
     """
     M = -3.6 + 0.9856 * day_of_year
     nu = M + 1.9 * sin(radians(M))
@@ -64,10 +65,9 @@ def compute_terminator_for_declination_and_angle(declination, hour_of_day, angle
     :return: A pair (L, B) that is a north latitude and east longitude on the terminator, in degrees
     """
     b = declination
-    l = normalize_longitude(180 - 15 * hour_of_day)
-    # psi = angle
+    lon = normalize_longitude(180 - 15 * hour_of_day)
     rad_b = radians(b)
-    rad_l = radians(l)
+    rad_l = radians(lon)
     rad_psi = radians(angle)
     B = asin(cos(rad_b) * sin(rad_psi))
     x = -cos(rad_l) * sin(rad_b) * sin(rad_psi) - sin(rad_l) * cos(rad_psi)
@@ -91,7 +91,8 @@ def gall_peters_projection(lat_long: tuple[float, float]) -> tuple[int, int]:
     # north and east are positive lat and long
     # X, Y (0, 0) is upper left corner of screen
     # aspect ratio adjusted to 2:1 (from default pi / 2:1)
-    # a few tweaks via multiplication parameters to get the projection to exactly match the screen in integers
+    # a few tweaks via multiplication parameters to get the projection to
+    # exactly match the screen in integers
     x = int(half_round_up((_gall_peters_radius * lat_long[1]) * 4 / _root_2_x_180) * 1.03 + 32)
     y = int(-(half_round_up(_gall_peters_radius * _root_2 * sin(radians(lat_long[0])))) * 1.05 + 16)
     return x, y
@@ -110,7 +111,8 @@ _WHITE = 255  # (255, 255, 255, 255)
 _BLACK = 0  # (0, 0, 0, 255)
 
 
-_day_night_mask_image : Image = None
+_day_night_mask_image: Image = None
+
 
 def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
     """
@@ -121,7 +123,8 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
     :param declination: angle to the sun, in degrees
     :param hour_of_day: hour of the day, in UTC
     :return: A list of tuples, where the index in the list is the x coordinate,
-             the first int is the y coordinate, and the second int is latitudinally pointing to daylight
+             the first int is the y coordinate, and the second int is
+             latitudinally pointing to daylight
             (+1 for northern sunlight or -1 for southern sunlight)
     """
     global _day_night_mask_image
@@ -139,7 +142,9 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
         # compute the terminator just at the east and west extremes
         # logger.debug(f"It's an equinox!")
         right_terminator = compute_terminator_for_declination_and_angle(declination, hour_of_day, 0)
-        left_terminator = compute_terminator_for_declination_and_angle(declination, hour_of_day, 180)
+        left_terminator = compute_terminator_for_declination_and_angle(
+            declination, hour_of_day, 180
+        )
         left_term_xy = gall_peters_projection(left_terminator)
         right_term_xy = gall_peters_projection(right_terminator)
         # logger.debug(f"Left and right terminators: {left_terminator}, {right_terminator} and xy: "
@@ -165,7 +170,9 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
         last_term_pt = None
         last_term_pt_xy = None
         while term_angle < 360:
-            terminator_pt = compute_terminator_for_declination_and_angle(declination, hour_of_day, term_angle)
+            terminator_pt = compute_terminator_for_declination_and_angle(
+                declination, hour_of_day, term_angle
+            )
             term_pt_xy = gall_peters_projection(terminator_pt)
             # logger.debug(f"Terminator at {term_angle}º: {terminator_pt}, xy: {term_pt_xy}")
             if not first_term_pt:
@@ -190,20 +197,37 @@ def draw_day_night_mask(declination: float, hour_of_day: float) -> Image:
                     else:
                         ob1x = 63
                         ob2x = 0
-                    xy = [outer_boundary_pt_1, (ob1x, outer_boundary_pt_2[1]), (ob1x, term_pt_xy[1]), last_term_pt_xy]
+                    xy = [
+                        outer_boundary_pt_1,
+                        (ob1x, outer_boundary_pt_2[1]),
+                        (ob1x, term_pt_xy[1]),
+                        last_term_pt_xy,
+                    ]
                     # logger.debug(f"Polygon 1 xy: {xy}")
                     image_draw.polygon(xy, fill=_WHITE)
-                    xy = [outer_boundary_pt_2, (ob2x, outer_boundary_pt_1[1]), (ob2x, last_term_pt_xy[1]), term_pt_xy]
+                    xy = [
+                        outer_boundary_pt_2,
+                        (ob2x, outer_boundary_pt_1[1]),
+                        (ob2x, last_term_pt_xy[1]),
+                        term_pt_xy,
+                    ]
                     # logger.debug(f"Polygon 2 xy: {xy}")
                     image_draw.polygon(xy, fill=_WHITE)
                 else:
                     # draw one quadrilateral
-                    xy = [outer_boundary_pt_1, outer_boundary_pt_2, term_pt_xy, last_term_pt_xy]
+                    xy = [
+                        outer_boundary_pt_1,
+                        outer_boundary_pt_2,
+                        term_pt_xy,
+                        last_term_pt_xy,
+                    ]
                     # logger.debug(f"Polygon xy: {xy}")
                     image_draw.polygon(xy, fill=_WHITE)
             last_term_pt = terminator_pt
             last_term_pt_xy = term_pt_xy
-            term_angle = term_angle + 5   # a guess at what accuracy is good enough for a 64 bit screen
+            term_angle = (
+                term_angle + 5
+            )  # a guess at what accuracy is good enough for a 64 bit screen
 
     return _day_night_mask_image
 
@@ -220,27 +244,34 @@ class WorldClock(DisplayManagedApp):
         self.actors = list()
         self.pre_render_callback = None
         self.refresh_time = refresh_time
-        self.big_font = ImageFont.truetype(os.path.join(resource_path, "fonts/Roboto/Roboto-Light.ttf"), 15)
-        self.daytime_map_image = Image.open(os.path.join(resource_path, "images/visible-earth/world-topo-bathy.png"))
-        self.nighttime_map_image = Image.open(os.path.join(resource_path, "images/visible-earth/black-marble.png"))
+        self.big_font = ImageFont.truetype(
+            os.path.join(resource_path, "fonts/Roboto/Roboto-Light.ttf"), 15
+        )
+        self.daytime_map_image = Image.open(
+            os.path.join(resource_path, "images/visible-earth/world-topo-bathy.png")
+        )
+        self.nighttime_map_image = Image.open(
+            os.path.join(resource_path, "images/visible-earth/black-marble.png")
+        )
         self.composite_map = StillImage(name="composite-map")
         self.current_datetime_utc: datetime = None
         self.last_view_update_datetime_utc: datetime = None
 
     def prepare(self):
         super().prepare()
-        if not self.composite_map in self.stage.actors:
+        if self.composite_map not in self.stage.actors:
             self.stage.actors.append(self.composite_map)
 
     def time_to_update(self):
-        self.current_datetime_utc = datetime.now(timezone.utc)
-        return (not self.last_view_update_datetime_utc or
-                (self.current_datetime_utc - self.last_view_update_datetime_utc).total_seconds() > (60 * 60))
+        self.current_datetime_utc = datetime.now(UTC)
+        return not self.last_view_update_datetime_utc or (
+            self.current_datetime_utc - self.last_view_update_datetime_utc
+        ).total_seconds() > (60 * 60)
 
     def update_view(self, elapsed_time: float):
         # see if we need to update the map
         if self.time_to_update():
-            self.logger.debug(f"Updating view")
+            self.logger.debug("Updating view")
 
             current_timetuple = self.current_datetime_utc.timetuple()
             day_of_year = current_timetuple[7]
@@ -254,7 +285,9 @@ class WorldClock(DisplayManagedApp):
 
             day_night_mask_image = draw_day_night_mask(declination, hour_of_day)
             # composite_image = Image.new("RGBA", (64, 32), _BLACK)
-            composite_image = Image.composite(self.daytime_map_image, self.nighttime_map_image, day_night_mask_image)
+            composite_image = Image.composite(
+                self.daytime_map_image, self.nighttime_map_image, day_night_mask_image
+            )
             self.composite_map.set_from_image(composite_image)
 
             self.last_view_update_datetime_utc = self.current_datetime_utc
