@@ -568,6 +568,7 @@ class SatoriApp(DisplayManagedApp):
         # 0 = wall-clock dimming; 1-100 = fixed override (skips the clock)
         self._fixed_brightness = max(0, min(100, brightness))
         self._current_brightness: int = -1  # sentinel: not yet applied
+        self._last_brightness_log: tuple[int, int] = (-1, -1)  # (hour, minute)
         self._resource_path = resource_path
 
         # Parse palettes once at construction (reused across all generations)
@@ -694,7 +695,16 @@ class SatoriApp(DisplayManagedApp):
             if self.stage and self.stage.matrix:
                 self.stage.matrix.brightness = target
             self._current_brightness = target
-            self.logger.debug("Brightness set to %d", target)
+            self.logger.info("Brightness set to %d", target)
+
+        # Periodic brightness report at :00, :15, :30, :45
+        wall = time.localtime()
+        if wall.tm_min % 15 == 0 and (wall.tm_hour, wall.tm_min) != self._last_brightness_log:
+            self._last_brightness_log = (wall.tm_hour, wall.tm_min)
+            self.logger.info(
+                "Brightness report %02d:%02d — target=%d, applied=%d",
+                wall.tm_hour, wall.tm_min, target, self._current_brightness,
+            )
 
     @staticmethod
     def get_app_instance() -> "SatoriApp":
