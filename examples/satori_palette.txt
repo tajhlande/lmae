@@ -18,3 +18,27 @@ Tranquil:  #cc99ff #cc9966 #cccc33 #669966
 Tropical:  #ff33cc #003399 #00cc00 #ffff00
 Victorian: #c19ea8 #99887e #5b484e #892b23 #d09455 #80805a #334f43 #78a495 #cad6a8 #8b4c2b
 Wood:      #98785c #64563c #362828 #f2bd79 #816d52 #fbe2ba #a4785f
+
+# Custom added
+CMYK:   #ffff00 #000000 #ff00ff #000000 #00ffff #000000
+USA:    #B31942 #FFFFFF #0A3161
+Jamaica: #009B3A #FED100 #000000
+PAF:      #E31B23 #E31B23 #000000 #12853F #12853F #000000 #EFBF04 000000
+
+
+# AI-generated palettes — designed for strong variation in hue and/or lightness
+# for good visibility on the LED matrix. Dark colors follow a perceptual floor:
+# highest component >= ~0x30 and perceptual luminance L >= 30 (where
+# L = 0.299R + 0.587G + 0.114B), because dim shades become indistinguishable
+# from off/black on LED hardware. Blue-dominant darks need extra care since
+# blue contributes little to perceived luminance.
+
+Sunset:     #4d0080 #800099 #cc0066 #ff6600 #ffcc00
+Aurora:     #003366 #006699 #00ccaa #66ffcc #9933ff
+Volcano:    #800000 #bb0000 #ff3300 #ff7700 #ffbb00
+Cyberpunk:  #4d0066 #ff0099 #7700b3 #00ccff
+Ocean:      #ffffff #77ddff #00aadd #0066aa #003a66
+Forest:     #2a5530 #447744 #669955 #99bb55 #cccc33
+Candy:      #ff0099 #00ccff #ffcc00 #9933ff
+Ember:      #663300 #994400 #cc6600 #ff9933 #ffcc66
+Mono Green: #1a4d1a #44bb44 #2d882d #77ee77
