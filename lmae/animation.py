@@ -253,18 +253,88 @@ class Sequence(Animation):
         self.set_update_time(current_time)
 
 
-class HueFade(Animation):
-    """
-    Set a color that fades through HSV space to another color. This animation can be applied to any
-    actor that has color settings, but because they are different (some have one color setting,
-    some have multiple), the mechanism here to update the actor is through a callback function
-    that the user must provide.
+class Parallel(Animation):
+    """Run multiple animations concurrently on the same actor.
+
+    All child animations start at the same time and update every frame.
+    The container is finished when all children are finished. Duration is
+    the maximum of all child durations.
+
+    Pairs naturally with Sequence — a Parallel can be an element inside a
+    Sequence to run a group of animations simultaneously during one phase
+    of the sequence::
+
+        Sequence(actor=thing, animations=[
+            Show(actor=thing),
+            Parallel(actor=thing, animations=[
+                HueFade(actor=thing, callback=thing.set_color, ...),
+                StraightMove(actor=thing, distance=(10, 0), duration=1.0),
+            ]),
+            Hide(actor=thing),
+        ])
     """
 
     def __init__(
         self,
         actor: Actor,
-        callback: Callable[[tuple[int, int, int]], None],
+        name: str | None = None,
+        repeat: bool = False,
+        animations: list[Animation] | None = None,
+    ):
+        name = name or _get_sequential_name("Parallel")
+        super().__init__(name=name, actor=actor, repeat=repeat)
+        self.animations = animations or []
+        self._compute_duration()
+
+    def add_animation(self, animation: Animation) -> None:
+        self.animations.append(animation)
+        self._compute_duration()
+
+    def add_animations(self, *animations: Animation) -> None:
+        self.animations.extend(animations)
+        self._compute_duration()
+
+    def _compute_duration(self) -> None:
+        self.duration = max((a.duration for a in self.animations), default=0.0)
+
+    def reset(self) -> None:
+        super().reset()
+        for anim in self.animations:
+            anim.reset()
+
+    def start(self, current_time: float) -> None:
+        super().start(current_time)
+        for anim in self.animations:
+            anim.start(current_time)
+
+    def is_finished(self) -> bool:
+        return all(anim.is_finished() for anim in self.animations)
+
+    def update_actor(self, current_time: float) -> None:
+        for anim in self.animations:
+            if not anim.is_finished():
+                anim.update_actor(current_time)
+        self.set_update_time(current_time)
+
+
+class HueFade(Animation):
+    """
+    Fade a color through HSV space to another color, with optional alpha.
+
+    Accepts 3-component (RGB) or 4-component (RGBA) colors. When either color
+    has an alpha component, the callback receives RGBA tuples with interpolated
+    alpha; otherwise it receives RGB tuples (backward compatible).
+
+    This animation can be applied to any actor that has color settings, but
+    because they are different (some have one color setting, some have
+    multiple), the mechanism here to update the actor is through a callback
+    function that the user must provide.
+    """
+
+    def __init__(
+        self,
+        actor: Actor,
+        callback: Callable[[tuple[int, int, int] | tuple[int, int, int, int]], None],
         name: str | None = None,
         initial_color: tuple[int, int, int] | tuple[int, int, int, int] = (255, 0, 0),
         final_color: tuple[int, int, int] | tuple[int, int, int, int] = (0, 255, 255),
@@ -277,11 +347,12 @@ class HueFade(Animation):
 
         :param name: Optional name for this animation
         :param actor: The actor to which this animation applies
-        :param initial_color: The starting color.
-        :param final_color: The finishing color.
+        :param initial_color: The starting color (RGB or RGBA).
+        :param final_color: The finishing color (RGB or RGBA).
         :param easing: The easing function to apply to the transition
         :param duration: How long it takes to transition to the final color, in seconds
-        :param callback: A function that applies the color argument to the actor
+        :param callback: A function that applies the color argument to the actor.
+            Receives RGBA when either color has alpha, RGB otherwise.
         :param repeat: Whether this animation should repeat.
         """
         name = name or _get_sequential_name("HueFade")
@@ -293,7 +364,15 @@ class HueFade(Animation):
             final_color[0] / 255.0, final_color[1] / 255.0, final_color[2] / 255.0
         )
         self.easing = easing
-        self.color_set_callback: Callable[[tuple[int, int, int]], None] = callback
+        self.color_set_callback: Callable[
+            [tuple[int, int, int] | tuple[int, int, int, int]], None
+        ] = callback
+
+        # Alpha interpolation: if either color has a 4th component, output RGBA.
+        # 3-component colors are treated as full alpha (255).
+        self._has_alpha = len(initial_color) == 4 or len(final_color) == 4
+        self._initial_alpha = initial_color[3] if len(initial_color) == 4 else 255
+        self._final_alpha = final_color[3] if len(final_color) == 4 else 255
 
     def is_finished(self) -> bool:
         return self.get_simulated_time() > self.duration
@@ -307,15 +386,10 @@ class HueFade(Animation):
         duration_fraction = 0.0 if self.duration == 0 else action_time / self.duration
         easing_fraction = self.easing.apply(duration_fraction)
 
-        adjusted_hue = self.initial_hsv[0] * easing_fraction + self.final_hsv[0] * (
-            1.0 - easing_fraction
-        )
-        adjusted_sat = self.initial_hsv[1] * easing_fraction + self.final_hsv[1] * (
-            1.0 - easing_fraction
-        )
-        adjusted_val = self.initial_hsv[2] * easing_fraction + self.final_hsv[2] * (
-            1.0 - easing_fraction
-        )
+        inv = 1.0 - easing_fraction
+        adjusted_hue = self.initial_hsv[0] * inv + self.final_hsv[0] * easing_fraction
+        adjusted_sat = self.initial_hsv[1] * inv + self.final_hsv[1] * easing_fraction
+        adjusted_val = self.initial_hsv[2] * inv + self.final_hsv[2] * easing_fraction
 
         float_rgb_color = hsv_to_rgb(adjusted_hue, adjusted_sat, adjusted_val)
         rgb_color = (
@@ -323,7 +397,14 @@ class HueFade(Animation):
             round(float_rgb_color[1] * 255),
             round(float_rgb_color[2] * 255),
         )
-        self.color_set_callback(rgb_color)
+
+        if self._has_alpha:
+            adjusted_alpha = round(
+                self._initial_alpha * (1.0 - easing_fraction) + self._final_alpha * easing_fraction
+            )
+            self.color_set_callback((*rgb_color, adjusted_alpha))
+        else:
+            self.color_set_callback(rgb_color)
         self.set_update_time(current_time)
 
 
@@ -412,7 +493,7 @@ class FrameSequence(Animation):
     def reset_frame_info(self):
         self.frames_info = []
 
-    def add_frame_info(self, frame_info: dict[str, float], recompute: bool = True):
+    def add_frame_info(self, frame_info: dict[str, str | float], recompute: bool = True):
         """
         Add a frame info dictionary to this sequence
         :param frame_info: The frame info dictionary.

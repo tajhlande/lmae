@@ -186,6 +186,12 @@ class Text(Actor):
             self._prerender_text()
             self.changes_since_last_render = True
 
+    def set_stroke_color(self, stroke_color: Color) -> None:
+        if self.stroke_color != stroke_color:
+            self.stroke_color = stroke_color
+            self._prerender_text()
+            self.changes_since_last_render = True
+
     def _prerender_text(self) -> None:
         # measure size of text
         if not self.prerender_size_image:

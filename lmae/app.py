@@ -5,12 +5,13 @@ import time
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from threading import Lock
+from typing import Self, cast
 
 from lmae.core import Actor, Animation, Stage
 
 os_name = platform.system()
 if os_name == "Linux":
-    from rgbmatrix import RGBMatrix, RGBMatrixOptions
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
 else:  # Windows or Darwin aka macOS
     from lmae.display import VirtualRGBMatrix as RGBMatrix
     from lmae.display import VirtualRGBMatrixOptions as RGBMatrixOptions
@@ -58,9 +59,9 @@ class App(ABC):
         self.logger.debug("Got command to stop")
         self.running = False
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_app_instance():
+    def get_app_instance(cls, **kwargs: object) -> Self:
         """
         This static method should return an instance of the app with default values.
         This may, if desired, be a singleton instance.
@@ -133,7 +134,8 @@ class SingleStageRenderLoopApp(App):
                 if self.pre_render_callback:
                     self.pre_render_callback()
 
-                self.stage.render_frame()
+                stage = cast(Stage, self.stage)
+                stage.render_frame()
 
                 render_end_time = time.perf_counter()
                 elapsed_render_time = render_end_time - last_time
@@ -151,14 +153,14 @@ class SingleStageRenderLoopApp(App):
         self.logger.debug("Got command to stop")
         self.running = False
 
-    @staticmethod
-    def get_app_instance():
+    @classmethod
+    def get_app_instance(cls, **kwargs: object) -> Self:
         """
         This static method should return an instance of the app with default values.
         This may, if desired, be a singleton instance.
         :return: an instance of this class
         """
-        return SingleStageRenderLoopApp()
+        return cast(Self, SingleStageRenderLoopApp())
 
 
 class DisplayManagedApp(App, ABC):
@@ -211,7 +213,8 @@ class DisplayManagedApp(App, ABC):
         self.logger.debug("Run started")
 
         # mark stage as needing rendering in case we've been run before
-        self.stage.needs_render = True
+        stage = cast(Stage, self.stage)
+        stage.needs_render = True
 
         min_time_per_frame = 1.0 / self.max_frame_rate
         self.logger.debug(f"Maximum frame rate: {self.max_frame_rate} fps")
@@ -221,8 +224,8 @@ class DisplayManagedApp(App, ABC):
             while self.running:
                 # update the view
                 self.update_view(elapsed_time=0.0)
-                if self.stage.needs_render:
-                    self.stage.render_frame()
+                if stage.needs_render:
+                    stage.render_frame()
 
                 # wait 5 minutes
                 waiting = True
@@ -233,7 +236,7 @@ class DisplayManagedApp(App, ABC):
                     current_time = time.time()
                     elapsed_time = current_time - wait_start
                     self.update_view(elapsed_time=elapsed_time)
-                    self.stage.render_frame()
+                    stage.render_frame()
                     waiting = elapsed_time < self.refresh_time
 
                     # calculate the frame rate and render that

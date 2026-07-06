@@ -3,8 +3,11 @@ import json
 import os.path
 import time
 from datetime import datetime
+from typing import cast
 
 from PIL import Image, ImageEnhance, ImageFilter, ImageFont
+from PIL.Image import Image as PILImage
+from PIL.ImageFont import ImageFont as PILImageFont
 
 from examples.openweather.openweather_client import (
     get_conditions_and_forecast_by_lat_long,
@@ -14,6 +17,7 @@ from lmae.actor import Line, SpriteImage, StillImage, Text
 from lmae.animation import Easing, Sequence, Still, StraightMove
 from lmae.app import DisplayManagedApp
 from lmae.component import Carousel
+from lmae.core import Actor, Stage
 
 
 class WeatherApp(DisplayManagedApp):
@@ -33,7 +37,7 @@ class WeatherApp(DisplayManagedApp):
         super().__init__(max_frame_rate=60, refresh_time=refresh_time)
         self.resource_path = resource_path
         self.fresh_weather_data = False
-        self.last_weather_data_at: float = None
+        self.last_weather_data_at: float | None = None
         self.api_key = api_key
         self.latitude = latitude
         self.longitude = longitude
@@ -45,55 +49,59 @@ class WeatherApp(DisplayManagedApp):
         self.pre_render_callback = None
         self.conditions_and_forecast = None
         self.call_status = "ok"
-        self.primary_text_font = ImageFont.truetype(
-            os.path.join(resource_path, "fonts/Roboto/Roboto-Light.ttf"), 15
+        self.primary_text_font = cast(
+            PILImageFont,
+            ImageFont.truetype(os.path.join(resource_path, "fonts/Roboto/Roboto-Light.ttf"), 15),
         )
-        self.temperature_label: Text = None
-        self.secondary_text_font = ImageFont.truetype(
-            os.path.join(resource_path, "fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf"),
-            5,
+        self.temperature_label: Text | None = None
+        self.secondary_text_font = cast(
+            PILImageFont,
+            ImageFont.truetype(
+                os.path.join(resource_path, "fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf"),
+                5,
+            ),
         )
-        self.dewpoint_label: Text = None
-        self.feels_like_label: Text = None
-        self.humidity_label: Text = None
-        self.low_temp_label: Text = None
-        self.high_temp_label: Text = None
-        self.temps_carousel: Carousel = None
-        self.background_image: StillImage = None
-        self.condition_description_label: Text = None
+        self.dewpoint_label: Text = None  # type: ignore
+        self.feels_like_label: Text = None  # type: ignore
+        self.humidity_label: Text = None  # type: ignore
+        self.low_temp_label: Text = None  # type: ignore
+        self.high_temp_label: Text = None  # type: ignore
+        self.temps_carousel: Carousel = None  # type: ignore
+        self.background_image: StillImage = None  # type: ignore
+        self.condition_description_label: Text = None  # type: ignore
 
-        self.temperature_str: str = None
-        self.dewpoint_str: str = None
-        self.feels_like_str: str = None
-        self.humidity_str: str = None
-        self.low_temp_str: str = None
-        self.high_temp_str: str = None
-        self.sunrise: int = None
-        self.sunset: int = None
-        self.condition_code: int = None
-        self.condition_short_desc: str = None
-        self.condition_long_desc: str = None
+        self.temperature_str: str = None  # type: ignore
+        self.dewpoint_str: str = None  # type: ignore
+        self.feels_like_str: str = None  # type: ignore
+        self.humidity_str: str = None  # type: ignore
+        self.low_temp_str: str = None  # type: ignore
+        self.high_temp_str: str = None  # type: ignore
+        self.sunrise: int = None  # type: ignore
+        self.sunset: int = None  # type: ignore
+        self.condition_code: int = None  # type: ignore
+        self.condition_short_desc: str = None  # type: ignore
+        self.condition_long_desc: str = None  # type: ignore
         self.condition_short_desc_list: list[str] = []
         self.condition_long_desc_list: list[str] = []
-        self.combined_short_desc: str = None
-        self.combined_long_desc: str = None
-        self.condition_description_label_position: tuple[int, int] = None
+        self.combined_short_desc: str = None  # type: ignore
+        self.combined_long_desc: str = None  # type: ignore
+        self.condition_description_label_position: tuple[int, int] = None  # type: ignore
         self.need_to_update_condition_desc_animation: bool = True
-        self.moon_phase_num: float = None
-        self.is_daytime: bool = None
-        self.moonrise: int = None
-        self.moonset: int = None
-        self.is_moon_out: bool = None
+        self.moon_phase_num: float = None  # type: ignore
+        self.is_daytime: bool = None  # type: ignore
+        self.moonrise: int = None  # type: ignore
+        self.moonset: int = None  # type: ignore
+        self.is_moon_out: bool = None  # type: ignore
 
-        self.main_daytime_image: SpriteImage = None
-        self.daytime_image_shadow: SpriteImage = None
-        self.support_daytime_image_1: SpriteImage = None
-        self.support_daytime_image_2: SpriteImage = None
-        self.moon_phase_image: SpriteImage = None
-        self.timer_line: Line = None
+        self.main_daytime_image: SpriteImage = None  # type: ignore
+        self.daytime_image_shadow: SpriteImage = None  # type: ignore
+        self.support_daytime_image_1: SpriteImage = None  # type: ignore
+        self.support_daytime_image_2: SpriteImage = None  # type: ignore
+        self.moon_phase_image: SpriteImage = None  # type: ignore
+        self.timer_line: Line = None  # type: ignore
         self.refresh_time: int = refresh_time  # 900 seconds = 15 minutes
         self.logger.info(f"Refreshing weather data every {self.refresh_time} seconds")
-        self.old_brightness: int = None
+        self.old_brightness: int = None  # type: ignore
 
         self.blue_sky_image = Image.open(
             os.path.join(resource_path, "images/backgrounds/blue_sky.png")
@@ -205,7 +213,7 @@ class WeatherApp(DisplayManagedApp):
         )
 
         # conditions image actor
-        sprite_sheet: Image = Image.open(
+        sprite_sheet: PILImage = Image.open(
             os.path.join(self.resource_path, "images/weather-sprites.png")
         ).convert("RGBA")
         with open(os.path.join(self.resource_path, "images/weather-sprites.json")) as spec_file:
@@ -266,22 +274,24 @@ class WeatherApp(DisplayManagedApp):
 
     def prepare(self):
         super().prepare()
+        stage = cast(Stage, self.stage)
+        stage.animations.clear()
+        stage.actors.clear()
 
-        self.stage.animations.clear()
-        self.stage.actors.clear()
-
-        self.stage.actors.append(self.background_image)
-        self.stage.actors.append(self.temperature_label)
-        self.stage.actors.append(self.temps_carousel)
-        self.stage.add_animations(self.temps_carousel.get_animations())
-        self.logger.debug(f"Stage has {len(self.stage.animations)} animations")
-        self.stage.actors.append(self.condition_description_label)
-        self.stage.actors.append(self.daytime_image_shadow)
-        self.stage.actors.append(self.main_daytime_image)
-        self.stage.actors.append(self.moon_phase_image)
-        self.stage.actors.append(self.support_daytime_image_1)
-        self.stage.actors.append(self.support_daytime_image_2)
-        self.stage.actors.append(self.timer_line)
+        actors = cast(list[Actor], stage.actors)
+        actors.append(self.background_image)
+        if self.temperature_label:
+            actors.append(self.temperature_label)
+        actors.append(self.temps_carousel)
+        stage.add_animations(self.temps_carousel.get_animations())
+        self.logger.debug(f"Stage has {len(stage.animations)} animations")
+        actors.append(self.condition_description_label)
+        actors.append(self.daytime_image_shadow)
+        actors.append(self.main_daytime_image)
+        actors.append(self.moon_phase_image)
+        actors.append(self.support_daytime_image_1)
+        actors.append(self.support_daytime_image_2)
+        actors.append(self.timer_line)
 
         self.need_to_update_condition_desc_animation = True
 

@@ -11,11 +11,16 @@ Palette data:   examples/satori_palette.txt
 
 Architecture:
     SatoriApp (DisplayManagedApp)
-      └─ SatoriPattern (StillImage) — owns all satori state + zero-copy buffers
+      ├─ SatoriPattern (StillImage) — owns all satori state + zero-copy buffers
+      └─ Text — transient palette-name overlay (fade in/out + optional scroll)
 
 SatoriPattern IS-A lmae StillImage: it inherits render() (alpha_composite into
 the stage canvas) and holds a persistent RGBA bytearray with an Image.frombuffer
 zero-copy view. Per-frame work mutates the buffer in place — no allocation.
+
+The palette-name overlay is a separate Text actor driven by standard lmae
+animations (Show, Parallel(HueFade x2) for RGBA alpha fade on text+stroke,
+Still/StraightMove for hold/scroll, Hide, all wrapped in a one-shot Sequence).
 """
 
 import math
@@ -23,11 +28,13 @@ import os
 import random
 import time
 from array import array
+from typing import Self, cast
 
-from PIL import Image
+from PIL import Image, ImageFont
 
 from lmae import app_runner
-from lmae.actor import StillImage
+from lmae.actor import StillImage, Text
+from lmae.animation import Hide, HueFade, Parallel, Sequence, Show, Still, StraightMove
 from lmae.app import DisplayManagedApp
 from lmae.core import Stage
 
@@ -154,7 +161,7 @@ class SatoriPattern(StillImage):
         num_knots: int = 3,
         style1: str = "",
         style2: str = "",
-        randomize_palette: bool = True,
+        randomize_palette: bool = False,
         stripes: bool = False,
         palette_name: str = "",
         palette_speed: float = 12.0,
@@ -204,6 +211,7 @@ class SatoriPattern(StillImage):
         self._style2_name: str = ""
         self._flow_scale: int = 0  # C-style int(100 / num_knots)
         self._wave_scale: int = 0
+        self._current_palette_name: str = ""
 
         # Generate the first drawing
         self.regenerate()
@@ -264,7 +272,8 @@ class SatoriPattern(StillImage):
         self._compute_grayscale()
 
         # --- Build the color table ---
-        palette_colors = self._pick_palette()
+        palette_name, palette_colors = self._pick_palette()
+        self._current_palette_name = palette_name
         self._build_color_table(palette_colors, rng)
 
         # Refresh the RGBA buffer for the initial frame (offset 0)
@@ -297,14 +306,21 @@ class SatoriPattern(StillImage):
             )
         return self._rng.choice(_ALL_STYLES)
 
-    def _pick_palette(self) -> list[tuple[int, int, int]]:
-        """Return the preferred palette's colors, or a random palette's."""
+    def _pick_palette(self) -> tuple[str, list[tuple[int, int, int]]]:
+        """Return (name, colors) for the preferred or a random palette."""
         if self._palette_name_pref and self._palette_name_pref in self._palettes:
-            return self._palettes[self._palette_name_pref]
+            return self._palette_name_pref, self._palettes[self._palette_name_pref]
         if self._palettes:
-            return self._rng.choice(list(self._palettes.values()))
+            names = list(self._palettes.keys())
+            chosen = self._rng.choice(names)
+            return chosen, self._palettes[chosen]
         # Fallback if no palettes loaded (shouldn't happen in normal use)
-        return [(255, 255, 255), (0, 0, 0)]
+        return "Default", [(255, 255, 255), (0, 0, 0)]
+
+    @property
+    def palette_name(self) -> str:
+        """The name of the currently displayed palette."""
+        return self._current_palette_name
 
     # ------------------------------------------------------------------
     # Grayscale computation (called only on regeneration)
@@ -452,15 +468,31 @@ class SatoriPattern(StillImage):
 
         # B. Select the key color for each band
         band_colors: list[tuple[int, int, int]] = [(0, 0, 0)] * nsteps
-        for ii in range(nsteps):
-            if stripes and (ii % 2 == 1):
-                band_colors[ii] = (0, 0, 0)  # black stripe
-            elif randomize:
-                band_colors[ii] = rng.choice(key_colors)  # random, with replacement
-            else:
-                # Sequential palette colors (skip black-stripe slots)
-                idx = ii // 2 if stripes else ii
-                band_colors[ii] = key_colors[idx % ncolors]
+        if randomize:
+            # Ensure every key color appears at least once so no palette
+            # color is entirely absent from the display. Start with a
+            # shuffled copy of key_colors, fill remaining color slots with
+            # random choices (with replacement), then shuffle again.
+            num_color_slots = nsteps // 2 if stripes else nsteps
+            guaranteed = list(key_colors)
+            rng.shuffle(guaranteed)
+            extra = max(0, num_color_slots - ncolors)
+            color_choices = guaranteed + [rng.choice(key_colors) for _ in range(extra)]
+            rng.shuffle(color_choices)
+            ci = 0
+            for ii in range(nsteps):
+                if stripes and (ii % 2 == 1):
+                    band_colors[ii] = (0, 0, 0)  # black stripe
+                else:
+                    band_colors[ii] = color_choices[ci]
+                    ci += 1
+        else:
+            for ii in range(nsteps):
+                if stripes and (ii % 2 == 1):
+                    band_colors[ii] = (0, 0, 0)  # black stripe
+                else:
+                    idx = ii // 2 if stripes else ii
+                    band_colors[ii] = key_colors[idx % ncolors]
 
         # C. Blend each band into its slice of the 256-slot table
         ctable: list[tuple[int, int, int]] = [(0, 0, 0)] * 256
@@ -542,7 +574,7 @@ class SatoriApp(DisplayManagedApp):
         num_knots: int = 3,
         style1: str = "",
         style2: str = "",
-        randomize_palette: bool = True,
+        randomize_palette: bool = False,
         stripes: bool = False,
         palette_name: str = "",
         palette_speed: float = 24.0,
@@ -584,6 +616,9 @@ class SatoriApp(DisplayManagedApp):
 
         # The pattern actor — created once in prepare(), reused on re-prepare
         self._pattern: SatoriPattern | None = None
+
+        # Palette-name overlay Text actor — created once in prepare()
+        self._palette_label: Text | None = None
 
         # Timing (reset in prepare)
         self._run_start: float = 0.0
@@ -630,6 +665,26 @@ class SatoriApp(DisplayManagedApp):
             )
             self.stage.actors.append(self._pattern)
 
+        # Create the palette-name overlay label once
+        if self._palette_label is None:
+            font_path = os.path.join(
+                self._resource_path, "fonts/teeny-tiny-pixls-font/TeenyTinyPixls-o2zo.ttf"
+            )
+            font: ImageFont.ImageFont = cast(ImageFont.ImageFont, ImageFont.truetype(font_path, 5))
+            self._palette_label = Text(
+                font=font,
+                name="PaletteNameOverlay",
+                position=(0, self._height - 7),
+                text="",
+                color=(224, 224, 224, 0),
+                stroke_color=(0, 0, 0, 0),
+                stroke_width=1,
+            )
+            self._palette_label.set_visible(False)
+            self.stage.actors.append(self._palette_label)
+            # Show the overlay for the initial palette
+            self._show_palette_overlay(self._pattern.palette_name)
+
         # Reset the timing clock
         self._run_start = time.perf_counter()
         self._last_gen = self._run_start
@@ -673,6 +728,111 @@ class SatoriApp(DisplayManagedApp):
             return round(day + (night - day) * frac)
         return night
 
+    # Overlay timing (seconds)
+    _OVERLAY_FADE_IN: float = 1.0
+    _OVERLAY_HOLD: float = 8.0
+    _OVERLAY_FADE_OUT: float = 1.0
+
+    def _show_palette_overlay(self, palette_name: str) -> None:
+        """Build and start the palette-name overlay animation sequence.
+
+        Creates a one-shot Sequence: Show -> Parallel(fade-in) -> hold/scroll
+        -> Parallel(fade-out) -> Hide.
+
+        Each Parallel runs two HueFade animations concurrently: one for text
+        color alpha and one for stroke color alpha. This eliminates the need
+        for a callback wrapper — ``label.set_color`` and
+        ``label.set_stroke_color`` are passed directly as callbacks.
+        """
+        label = self._palette_label
+        stage = self.stage
+        if label is None or stage is None:
+            return
+
+        # Clear any previous overlay animations for this actor
+        stage.clear_animations_for(label)
+
+        # Set text (triggers prerender, updates size)
+        label.set_text(palette_name)
+        label.set_color((224, 224, 224, 0))
+        label.set_stroke_color((0, 0, 0, 0))
+
+        text_width = label.size[0]
+        text_height = label.size[1]
+        y = self._height - text_height  # bottom-aligned
+
+        # HueFade with RGBA: fades both color and alpha.
+        # Fade-in: start invisible (alpha=0), end visible (alpha=255/220)
+        # Fade-out: start visible, end invisible
+        text_alpha_target = math.floor(255 * 0.8)
+        shadow_alpha_target = math.floor(255 * 0.8 * 0.8)
+        fade_in = Parallel(
+            actor=label,
+            animations=[
+                HueFade(
+                    actor=label,
+                    callback=label.set_color,
+                    initial_color=(224, 224, 224, 0),
+                    final_color=(224, 224, 224, text_alpha_target),
+                    duration=self._OVERLAY_FADE_IN,
+                ),
+                HueFade(
+                    actor=label,
+                    callback=label.set_stroke_color,
+                    initial_color=(0, 0, 0, 0),
+                    final_color=(0, 0, 0, shadow_alpha_target),
+                    duration=self._OVERLAY_FADE_IN,
+                ),
+            ],
+        )
+        fade_out = Parallel(
+            actor=label,
+            animations=[
+                HueFade(
+                    actor=label,
+                    callback=label.set_color,
+                    initial_color=(224, 224, 224, text_alpha_target),
+                    final_color=(224, 224, 224, 0),
+                    duration=self._OVERLAY_FADE_OUT,
+                ),
+                HueFade(
+                    actor=label,
+                    callback=label.set_stroke_color,
+                    initial_color=(0, 0, 0, shadow_alpha_target),
+                    final_color=(0, 0, 0, 0),
+                    duration=self._OVERLAY_FADE_OUT,
+                ),
+            ],
+        )
+
+        if text_width > self._width:
+            # Scroll: pause, scroll left, pause — mirrors weather app pattern
+            scroll_dist = text_width - self._width
+            pause = 1.0
+            scroll_time = self._OVERLAY_HOLD - 2.0 * pause  # 6s with defaults
+            label.set_position((0, y))
+            hold_animations = [
+                Still(actor=label, duration=pause),
+                StraightMove(actor=label, distance=(-scroll_dist, 0), duration=scroll_time),
+                Still(actor=label, duration=pause),
+            ]
+        else:
+            # Center and hold
+            label.set_position(((self._width - text_width) // 2, y))
+            hold_animations = [Still(actor=label, duration=self._OVERLAY_HOLD)]
+
+        sequence = Sequence(
+            actor=label,
+            animations=[
+                Show(actor=label),
+                fade_in,
+                *hold_animations,
+                fade_out,
+                Hide(actor=label),
+            ],
+        )
+        stage.add_animation(sequence)
+
     def update_view(self, elapsed_time: float) -> None:
         """Advance palette cycling and optionally regenerate.
 
@@ -684,21 +844,24 @@ class SatoriApp(DisplayManagedApp):
         total_elapsed = now - self._run_start
 
         # Regenerate periodically if enabled
+        pattern = cast(SatoriPattern, self._pattern)
         if self._do_regenerate and (now - self._last_gen) >= self.refresh_time:
-            self._pattern.regenerate()
+            pattern.regenerate()
+            self._show_palette_overlay(pattern.palette_name)
             self._last_gen = now
             self.logger.debug("Regenerated satori drawing")
 
         # Advance the palette offset and refresh the RGBA buffer in place
         offset = int(total_elapsed * self._palette_speed) % 256
-        self._pattern.update_frame(offset)
+        pattern.update_frame(offset)
 
         # Apply brightness (wall-clock dimming or fixed override).
         # Only writes to the matrix when the value actually changes.
         target = self._compute_brightness()
         if target != self._current_brightness:
             if self.stage and self.stage.matrix:
-                self.stage.matrix.brightness = target
+                stage = cast(Stage, self.stage)
+                stage.matrix.brightness = target
             self._current_brightness = target
             self.logger.info("Brightness set to %d", target)
 
@@ -714,11 +877,14 @@ class SatoriApp(DisplayManagedApp):
                 self._current_brightness,
             )
 
-    @staticmethod
-    def get_app_instance() -> "SatoriApp":
-        """Return a default instance (lmae convention)."""
+    @classmethod
+    def get_app_instance(cls, **kwargs: object) -> DisplayManagedApp:
+        """Return an instance with optional overrides (lmae convention).
+
+        Keyword arguments are forwarded to the SatoriApp constructor.
+        """
         resource_path = os.path.dirname(__file__)
-        return SatoriApp(resource_path=resource_path)
+        return SatoriApp(resource_path=resource_path, **kwargs) # type: ignore
 
 
 # ---------------------------------------------------------------------------
@@ -726,4 +892,32 @@ class SatoriApp(DisplayManagedApp):
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app_runner.start_app(SatoriApp.get_app_instance())
+    import argparse
+    import sys
+
+    palettes = _parse_palettes(os.path.join(os.path.dirname(__file__), "satori_palette.txt"))
+    parser = argparse.ArgumentParser(description="Satori knot plasma for lmae")
+    parser.add_argument(
+        "--palette",
+        choices=sorted(palettes.keys()),
+        default="",
+        help="Palette name (default: random per generation)",
+    )
+    parser.add_argument("--seed", type=int, default=-1, help="RNG seed (-1 = random)")
+    parser.add_argument("--knots", type=int, default=3, help="Number of knot focal points")
+    parser.add_argument(
+        "--palette-speed", type=float, default=24.0, help="Palette cycling speed (units/sec)"
+    )
+
+    # parse_known_args leaves LED matrix options for app_runner's parser
+    args, remaining = parser.parse_known_args()
+    sys.argv = [sys.argv[0], *remaining]
+
+    app_runner.start_app(
+        SatoriApp.get_app_instance(
+            palette_name=args.palette,
+            seed=args.seed,
+            num_knots=args.knots,
+            palette_speed=args.palette_speed,
+        )
+    )

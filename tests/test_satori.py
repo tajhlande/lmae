@@ -1,11 +1,11 @@
-"""Unit tests for the Satori app's brightness dimming schedule."""
+"""Unit tests for the Satori app's brightness dimming schedule and color table."""
 
 import os
 import time
 import unittest
 from unittest.mock import patch
 
-from examples.satori import SatoriApp
+from examples.satori import SatoriApp, SatoriPattern
 
 
 def _mock_localtime(hour: int, minute: int = 0, second: int = 0) -> time.struct_time:
@@ -196,6 +196,57 @@ class BrightnessOverrideTest(unittest.TestCase):
         self.assertEqual(app._nighttime_brightness, 1)
         self.assertEqual(self._brightness_at(app, 12), 100)
         self.assertEqual(self._brightness_at(app, 0), 1)
+
+
+class ColorTableTest(unittest.TestCase):
+    """Validate that all palette colors appear in the color table."""
+
+    def test_all_palette_colors_present_with_randomize(self):
+        """With randomize=True, every key color must appear in the table.
+
+        Random selection with replacement can skip colors entirely, causing
+        a palette color to be absent from the display. This test verifies
+        the fix that guarantees all key colors are included.
+        """
+        jamaica = [(0, 155, 58), (254, 209, 0), (0, 0, 0)]
+        for seed in range(50):
+            pattern = SatoriPattern(
+                width=64,
+                height=32,
+                num_knots=3,
+                palette_name="Jamaica",
+                randomize_palette=True,
+                palettes={"Jamaica": jamaica},
+                seed=seed,
+            )
+            ct = pattern._color_table_flat
+            for key_color in jamaica:
+                found = False
+                for i in range(256):
+                    if (ct[i * 3], ct[i * 3 + 1], ct[i * 3 + 2]) == key_color:
+                        found = True
+                        break
+                self.assertTrue(
+                    found,
+                    f"Color {key_color} missing from table with seed={seed}",
+                )
+
+    def test_all_palette_colors_present_without_randomize(self):
+        """With randomize=False, colors are sequential and always present."""
+        jamaica = [(0, 155, 58), (254, 209, 0), (0, 0, 0)]
+        pattern = SatoriPattern(
+            width=64,
+            height=32,
+            num_knots=3,
+            palette_name="Jamaica",
+            randomize_palette=False,
+            palettes={"Jamaica": jamaica},
+            seed=0,
+        )
+        ct = pattern._color_table_flat
+        for key_color in jamaica:
+            found = any((ct[i * 3], ct[i * 3 + 1], ct[i * 3 + 2]) == key_color for i in range(256))
+            self.assertTrue(found, f"Color {key_color} missing from table")
 
 
 if __name__ == "__main__":
