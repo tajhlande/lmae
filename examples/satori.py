@@ -313,8 +313,10 @@ class SatoriPattern(StillImage):
         if self._palettes:
             names = list(self._palettes.keys())
             chosen = self._rng.choice(names)
+            self.logger.info(f"Switching to {chosen} palette")
             return chosen, self._palettes[chosen]
         # Fallback if no palettes loaded (shouldn't happen in normal use)
+        self.logger.info(f"Using default palette")
         return "Default", [(255, 255, 255), (0, 0, 0)]
 
     @property
@@ -863,19 +865,19 @@ class SatoriApp(DisplayManagedApp):
                 stage = cast(Stage, self.stage)
                 stage.matrix.brightness = target
             self._current_brightness = target
-            self.logger.info("Brightness set to %d", target)
+            # self.logger.info("Brightness set to %d", target)
 
         # Periodic brightness report at :00, :15, :30, :45
         wall = time.localtime()
         if wall.tm_min % 15 == 0 and (wall.tm_hour, wall.tm_min) != self._last_brightness_log:
             self._last_brightness_log = (wall.tm_hour, wall.tm_min)
-            self.logger.info(
-                "Brightness report %02d:%02d — target=%d, applied=%d",
-                wall.tm_hour,
-                wall.tm_min,
-                target,
-                self._current_brightness,
-            )
+            # self.logger.info(
+            #     "Brightness report %02d:%02d — target=%d, applied=%d",
+            #     wall.tm_hour,
+            #     wall.tm_min,
+            #     target,
+            #     self._current_brightness,
+            # )
 
     @classmethod
     def get_app_instance(cls, **kwargs: object) -> SatoriApp:
