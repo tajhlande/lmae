@@ -878,7 +878,7 @@ class SatoriApp(DisplayManagedApp):
             )
 
     @classmethod
-    def get_app_instance(cls, **kwargs: object) -> DisplayManagedApp:
+    def get_app_instance(cls, **kwargs: object) -> SatoriApp:
         """Return an instance with optional overrides (lmae convention).
 
         Keyword arguments are forwarded to the SatoriApp constructor.
