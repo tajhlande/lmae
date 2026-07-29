@@ -14,7 +14,7 @@ Rainbow:   #ff0066 #ff7f00 #ffff00 #99ff00 #33ff99 #0066ff #9900cc
 Romantic:  #ffff66 #ff99cc #9933ff #990099
 Southwest: #ddbb7b #5c5447 #cabdb5 #883c2e #4a5d5b #dabfa2
 Subdued:   #669966 #cccc99 #666633 #336666
-Tranquil:  #cc99ff #cc9966 #cccc33 #669966
+# Tranquil:  #cc99ff #cc9966 #cccc33 #669966
 Tropical:  #ff33cc #003399 #00cc00 #ffff00
 Victorian: #c19ea8 #99887e #5b484e #892b23 #d09455 #80805a #334f43 #78a495 #cad6a8 #8b4c2b
 Wood:      #98785c #64563c #362828 #f2bd79 #816d52 #fbe2ba #a4785f
@@ -31,15 +31,15 @@ Racer:       #e0e000 #ffffff #ff0000 #000000
 Matrix:      #00ff00 #000000 #000000 #000000
 Tron:        #193f4a #f4af2d #fffffe #2f8ca3 #030504
 Amethyst:    #8b69ca #795ab3 #63469c #492d79 #37225b
-Marsh Dusk:  #f2f3ef #debf6e #5c6e4e #597277 #022831 
-Tron 2:      #00a8ff  #00eaff #000000 #26b4ca  #59b4c7 #000000
+Marsh Dusk:  #debf6e #5c6e4e #597277 #022831 
+Tron 2:      #00a8ff #00eaff #000000 #26b4ca #59b4c7 #000000
 Avengers:    #a50000 #3268bd #00991f #999999 #460061
 Warning:     #ff8800 #ffff00 
 Riviera:     #FFE74C #FF5964 #FFFFFF #38618C #35A7FF
 Santorini:   #FFFFFF #38618C #35A7FF
 Copper:      #5c2011 #3d1702 #0b5e55 #00face #c0ffee
 Coffee:      #6F4E37 #5A3E2D #6F574E #B3826C #927869 #BA9D8A
-Wheat Field: #E4D96F #D5E46F #E4D57F #A2E46F #A2E46F #E4B96F
+# Wheat Field: #E4D96F #D5E46F #E4D57F #A2E46F #A2E46F #E4B96F
 
 # AI-generated palettes — designed for strong variation in hue and/or lightness
 # for good visibility on the LED matrix. Dark colors follow a perceptual floor:
