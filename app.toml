@@ -27,3 +27,12 @@ description = "World time zone map display"
 parameters = [
   { name = "refresh_time", display_name = "Refresh Interval (s)", type = "integer", default = "300" },
 ]
+
+[apps.satori]
+main_file = "examples/satori_app.py"
+display_name = "Satori"
+entry_class = "SatoriApp"
+description = "Satori screensaver reborn"
+parameters = [
+  
+]
