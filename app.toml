@@ -29,7 +29,7 @@ parameters = [
 ]
 
 [apps.satori]
-main_file = "examples/satori_app.py"
+main_file = "examples/satori.py"
 display_name = "Satori"
 entry_class = "SatoriApp"
 description = "Satori screensaver reborn"
