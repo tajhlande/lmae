@@ -9,3 +9,9 @@
 - Consider the requirements of the project and the architectural guidelines before making major changes.
 - When the guidelines and existing project don't clearly show an architectural direction or preference for library, ask the user.
 - Open design or architecture questions that the user needs to answer should be written to /agent-docs/QUESTIONS.md.  As those questions are answered, and the answers reflected in the design and implementation files, they should be removed fron the QUESTIONS.md doc.
+
+## lmae app guidance
+
+- When working on apps, follow the rules in app-memory-and-rerunnability.md to ensure
+  memory use does not grow unbounded over continuous app runtime or cycling between
+  running apps in a sequence.
