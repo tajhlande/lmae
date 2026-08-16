@@ -31,6 +31,7 @@ I am driving it with a Raspberry Pi 3B and a [matrix bonnet](https://www.adafrui
       * [Component classes](#component-classes)
   * [App framework](#app-framework)
     * [App classes](#app-classes)
+  * [Memory efficiency and re-runnability](#memory-efficiency-and-re-runnability)
 <!-- TOC -->
 
 ## LMAE Basics
@@ -206,6 +207,12 @@ it doesn't furnish current conditions, only forecast predictions.
 
 # Creating new apps
 
+See [Memory-Efficient, Re-Runnable lmae Apps](app-memory-and-rerunnability.md) before
+writing a new app: apps run for weeks inside a long-lived process that repeatedly
+calls `prepare()` / `run()` / `stop()`, and that document explains the rules
+(build once, idempotent `prepare()`, fixed animation names, buffer reuse) that
+keep memory flat over long runs.
+
 ## Important classes
 
 #### Core classes
@@ -300,6 +307,17 @@ classes in `lmae.app` that your app can choose to extend:
    to achieve high frame rates, and so calls to data services should be cached.
    The call to `update_view()` includes `elapsed_time` since the app started running.
    The app will only render new frames if the contents of the stage have changed in some
-   way to require it.  Each actor tracks its own state to know if a state change requires
-   re-rendering. As with the above, it will run at a frame rate up
-   to the maximum frame rate, which defaults to 120 fps.
+    way to require it.  Each actor tracks its own state to know if a state change requires
+    re-rendering. As with the above, it will run at a frame rate up
+    to the maximum frame rate, which defaults to 120 fps.
+
+## Memory efficiency and re-runnability
+
+Apps in this project are expected to run for weeks on a Raspberry Pi inside
+long-lived processes that repeatedly run and stop them. The guide
+[Memory-Efficient, Re-Runnable lmae Apps](app-memory-and-rerunnability.md)
+collects the required practices (with examples and a soak-test snippet):
+build resources once in `__init__`, keep `prepare()` idempotent, give
+re-created animations fixed names (unnamed animations leak permanent
+loggers), reuse buffers instead of allocating per frame, and never tear down
+resources in `stop()`.
