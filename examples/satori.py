@@ -745,6 +745,13 @@ class SatoriApp(DisplayManagedApp):
         color alpha and one for stroke color alpha. This eliminates the need
         for a callback wrapper — ``label.set_color`` and
         ``label.set_stroke_color`` are passed directly as callbacks.
+
+        Every animation here gets a FIXED name (like the weather app's
+        condition-scroll animations). Unnamed animations receive unique
+        sequential names, and each name creates a Logger that Python's
+        logging registry retains forever — a slow, unbounded memory leak on
+        long-running sequences. Fixed names mean this method reuses the same
+        loggers on every regeneration instead of accumulating new ones.
         """
         label = self._palette_label
         stage = self.stage
@@ -770,9 +777,11 @@ class SatoriApp(DisplayManagedApp):
         shadow_alpha_target = math.floor(255 * 0.8 * 0.8)
         fade_in = Parallel(
             actor=label,
+            name="Satori-overlay-fade-in",
             animations=[
                 HueFade(
                     actor=label,
+                    name="Satori-overlay-fade-in-text",
                     callback=label.set_color,
                     initial_color=(224, 224, 224, 0),
                     final_color=(224, 224, 224, text_alpha_target),
@@ -780,6 +789,7 @@ class SatoriApp(DisplayManagedApp):
                 ),
                 HueFade(
                     actor=label,
+                    name="Satori-overlay-fade-in-stroke",
                     callback=label.set_stroke_color,
                     initial_color=(0, 0, 0, 0),
                     final_color=(0, 0, 0, shadow_alpha_target),
@@ -789,9 +799,11 @@ class SatoriApp(DisplayManagedApp):
         )
         fade_out = Parallel(
             actor=label,
+            name="Satori-overlay-fade-out",
             animations=[
                 HueFade(
                     actor=label,
+                    name="Satori-overlay-fade-out-text",
                     callback=label.set_color,
                     initial_color=(224, 224, 224, text_alpha_target),
                     final_color=(224, 224, 224, 0),
@@ -799,6 +811,7 @@ class SatoriApp(DisplayManagedApp):
                 ),
                 HueFade(
                     actor=label,
+                    name="Satori-overlay-fade-out-stroke",
                     callback=label.set_stroke_color,
                     initial_color=(0, 0, 0, shadow_alpha_target),
                     final_color=(0, 0, 0, 0),
@@ -814,23 +827,31 @@ class SatoriApp(DisplayManagedApp):
             scroll_time = self._OVERLAY_HOLD - 2.0 * pause  # 6s with defaults
             label.set_position((0, y))
             hold_animations = [
-                Still(actor=label, duration=pause),
-                StraightMove(actor=label, distance=(-scroll_dist, 0), duration=scroll_time),
-                Still(actor=label, duration=pause),
+                Still(actor=label, name="Satori-overlay-pause-1", duration=pause),
+                StraightMove(
+                    actor=label,
+                    name="Satori-overlay-scroll-left",
+                    distance=(-scroll_dist, 0),
+                    duration=scroll_time,
+                ),
+                Still(actor=label, name="Satori-overlay-pause-2", duration=pause),
             ]
         else:
             # Center and hold
             label.set_position(((self._width - text_width) // 2, y))
-            hold_animations = [Still(actor=label, duration=self._OVERLAY_HOLD)]
+            hold_animations = [
+                Still(actor=label, name="Satori-overlay-hold", duration=self._OVERLAY_HOLD)
+            ]
 
         sequence = Sequence(
             actor=label,
+            name="Satori-overlay-sequence",
             animations=[
-                Show(actor=label),
+                Show(actor=label, name="Satori-overlay-show"),
                 fade_in,
                 *hold_animations,
                 fade_out,
-                Hide(actor=label),
+                Hide(actor=label, name="Satori-overlay-hide"),
             ],
         )
         stage.add_animation(sequence)
