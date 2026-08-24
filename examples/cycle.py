@@ -15,6 +15,8 @@ import psutil
 import examples.advent_app
 import examples.weather_app
 import examples.world_clock
+import examples.satori
+
 from lmae import app_runner
 from lmae.app import App
 
@@ -129,9 +131,10 @@ def run_apps_in_subprocess_cycle(app_script_list: list[str], cycle_timeout=600):
 
 def create_apps_list():
     return [
-        examples.advent_app.AdventApp.get_app_instance(),
+        # examples.advent_app.AdventApp.get_app_instance(),
         examples.world_clock.WorldClock.get_app_instance(),
-        examples.weather_app.WeatherApp.get_app_instance(),
+        #examples.weather_app.WeatherApp.get_app_instance(),
+        examples.satori.SatoriApp.get_app_instance(),
     ]
 
 

@@ -1,5 +1,6 @@
 """Unit tests for the Satori app's brightness dimming schedule and color table."""
 
+import logging
 import os
 import time
 import unittest
@@ -247,6 +248,166 @@ class ColorTableTest(unittest.TestCase):
         for key_color in jamaica:
             found = any((ct[i * 3], ct[i * 3 + 1], ct[i * 3 + 2]) == key_color for i in range(256))
             self.assertTrue(found, f"Color {key_color} missing from table")
+
+
+class _FakeClock:
+    """Deterministic stand-in for time.perf_counter.
+
+    SatoriApp drives regeneration and palette cycling off perf_counter, so
+    tests can move time forward in exact steps.
+    """
+
+    def __init__(self, start: float = 1000.0):
+        self.now = start
+
+    def advance(self, seconds: float) -> None:
+        self.now += seconds
+
+
+def _logger_count() -> int:
+    """Count real loggers registered with the logging manager."""
+    return sum(
+        1 for v in logging.Logger.manager.loggerDict.values() if isinstance(v, logging.Logger)
+    )
+
+
+class ResumeRegenerationTest(unittest.TestCase):
+    """Verify pattern regeneration across stop/restart cycles.
+
+    Sequence runners such as examples/cycle.py prepare, run, and stop the
+    same SatoriApp instance repeatedly. By default the generation clock must
+    persist across restarts (standalone refresh cadence, gap time included);
+    with ``regenerate_on_start`` a fresh pattern is drawn on every start.
+    """
+
+    def setUp(self):
+        self.resource_path = os.path.join(os.path.dirname(__file__), "..", "examples")
+        self.clock = _FakeClock(1000.0)
+
+    def _make_app(self, **kwargs) -> SatoriApp:
+        return SatoriApp(resource_path=self.resource_path, **kwargs)
+
+    def _run_scenario(self, app: SatoriApp, script) -> list:
+        """Run ``script()`` under a controlled clock, counting regenerate calls.
+
+        The count starts at the SatoriPattern constructed in prepare()
+        (whose __init__ performs the first generation).
+        """
+        calls: list = []
+        original_regenerate = SatoriPattern.regenerate
+
+        def counting_regenerate(pattern_self):
+            calls.append(pattern_self)
+            original_regenerate(pattern_self)
+
+        with (
+            patch.object(time, "perf_counter", new=lambda: self.clock.now),
+            patch.object(SatoriPattern, "regenerate", counting_regenerate),
+        ):
+            script(calls)
+        return calls
+
+    def test_first_prepare_generates_once_and_sets_clock(self):
+        """First prepare builds the pattern and stamps the generation clock."""
+        app = self._make_app()
+
+        def script(calls):
+            app.prepare()
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(app._last_gen, self.clock.now)
+
+        self._run_scenario(app, script)
+
+    def test_resume_within_refresh_period_keeps_pattern(self):
+        """A short stop/restart gap does not regenerate: pattern continues."""
+        app = self._make_app()  # refresh_time=120 default
+
+        def script(calls):
+            app.prepare()
+            app.update_view(0.0)
+            app.stop()
+            self.clock.advance(30.0)  # gap shorter than the refresh period
+            app.prepare()
+            app.update_view(0.0)
+            self.assertEqual(len(calls), 1)
+
+        self._run_scenario(app, script)
+
+    def test_resume_after_refresh_period_regenerates_on_first_frame(self):
+        """After refresh_time has elapsed, the resumed app draws a new pattern."""
+        app = self._make_app()  # refresh_time=120 default
+
+        def script(calls):
+            app.prepare()
+            app.update_view(0.0)
+            app.stop()
+            self.clock.advance(200.0)  # gap longer than the refresh period
+            app.prepare()
+            # Default behavior defers to update_view (which runs before the
+            # first render, so the stale pattern is never displayed):
+            self.assertEqual(len(calls), 1)
+            app.update_view(0.0)
+            self.assertEqual(len(calls), 2)
+            self.assertEqual(app._last_gen, self.clock.now)
+
+        self._run_scenario(app, script)
+
+    def test_continuous_run_regenerates_after_refresh_time(self):
+        """Standalone behavior is unchanged: regenerate at the refresh period."""
+        app = self._make_app()  # refresh_time=120 default
+
+        def script(calls):
+            app.prepare()
+            self.clock.advance(119.0)
+            app.update_view(0.0)
+            self.assertEqual(len(calls), 1)
+            self.clock.advance(1.0)
+            app.update_view(0.0)
+            self.assertEqual(len(calls), 2)
+
+        self._run_scenario(app, script)
+
+    def test_regenerate_on_start_draws_new_pattern_each_start(self):
+        """With regenerate_on_start, every restart eagerly draws a new pattern."""
+        app = self._make_app(regenerate_on_start=True)
+
+        def script(calls):
+            app.prepare()
+            self.assertEqual(len(calls), 1)
+            app.stop()
+            self.clock.advance(5.0)  # short gap: still regenerates on start
+            app.prepare()
+            self.assertEqual(len(calls), 2)
+            self.assertEqual(app._last_gen, self.clock.now)
+            # The overlay label announces the (possibly new) palette name
+            self.assertEqual(app._palette_label.text, app._pattern.palette_name)
+
+        self._run_scenario(app, script)
+
+    def test_regenerate_on_start_first_start_no_double_generation(self):
+        """The first start already generates in __init__; no eager re-roll."""
+        app = self._make_app(regenerate_on_start=True)
+
+        def script(calls):
+            app.prepare()
+            self.assertEqual(len(calls), 1)
+
+        self._run_scenario(app, script)
+
+    def test_repeated_restart_cycles_do_not_leak_loggers(self):
+        """Soak check: repeated restart regenerations must not accumulate loggers."""
+        app = self._make_app(regenerate_on_start=True)
+
+        def script(calls):
+            app.prepare()
+            before = _logger_count()
+            for _ in range(50):
+                app.stop()
+                app.prepare()
+            delta = _logger_count() - before
+            self.assertLessEqual(delta, 0, f"logger leak across restart cycles: +{delta}")
+
+        self._run_scenario(app, script)
 
 
 if __name__ == "__main__":

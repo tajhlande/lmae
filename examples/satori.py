@@ -567,6 +567,10 @@ class SatoriApp(DisplayManagedApp):
     - ``""`` for style/palette names means **random per generation**.
     - ``seed = -1`` means **nondeterministic**; ``>= 0`` is reproducible.
     - ``brightness = 0`` means **wall-clock dimming**; ``1-100`` is a fixed override.
+    - ``regenerate_on_start = False`` keeps the standalone regeneration cadence
+      when the app is resumed by a sequence runner (the clock set at the last
+      generation persists across stop/restart); ``True`` draws a fresh pattern
+      every time the app is started.
     """
 
     def __init__(
@@ -584,6 +588,7 @@ class SatoriApp(DisplayManagedApp):
         seed: int = -1,
         palette_file: str = "satori_palette.txt",
         regenerate: bool = True,
+        regenerate_on_start: bool = False,
         refresh_time: int = 120,
         max_frame_rate: int = 30,
         daytime_brightness: int = 100,
@@ -604,6 +609,7 @@ class SatoriApp(DisplayManagedApp):
         self._zoom = zoom
         self._seed = seed
         self._do_regenerate = regenerate
+        self._regenerate_on_start = regenerate_on_start
         self._daytime_brightness = max(1, min(100, daytime_brightness))
         self._nighttime_brightness = max(1, min(100, nighttime_brightness))
         # 0 = wall-clock dimming; 1-100 = fixed override (skips the clock)
@@ -622,7 +628,9 @@ class SatoriApp(DisplayManagedApp):
         # Palette-name overlay Text actor — created once in prepare()
         self._palette_label: Text | None = None
 
-        # Timing (reset in prepare)
+        # Timing. _run_start (palette-cycling offset) is reset in prepare();
+        # _last_gen (last pattern generation) persists across restarts so a
+        # cycled app regenerates on the same cadence as a standalone one.
         self._run_start: float = 0.0
         self._last_gen: float = 0.0
 
@@ -635,7 +643,8 @@ class SatoriApp(DisplayManagedApp):
 
         Idempotent: on re-prepare (after stop/restart) the existing stage and
         pattern are reused — buffers are kept, not reallocated. Only the
-        timing clock is reset.
+        palette-cycling clock is reset; the generation clock persists (or is
+        restarted when regenerate_on_start is set).
         """
         # Create the stage with the correct canvas size (DisplayManagedApp
         # defaults to 64x32; we honor the constructor's width/height).
@@ -649,7 +658,11 @@ class SatoriApp(DisplayManagedApp):
         else:
             self.stage.blank_canvas()
 
-        # Create the pattern actor once
+        # Create the pattern actor once. The generation clock starts at the
+        # first generation and deliberately persists across stop/restart: on
+        # re-prepare it is NOT reset, so a cycled app keeps the standalone
+        # cadence (update_view regenerates once refresh_time has elapsed since
+        # the last generation, gap included).
         if self._pattern is None:
             self._pattern = SatoriPattern(
                 name="Satori-pattern",
@@ -667,6 +680,16 @@ class SatoriApp(DisplayManagedApp):
                 palettes=self._palettes,
             )
             self.stage.actors.append(self._pattern)
+            self._last_gen = time.perf_counter()
+        elif self._regenerate_on_start:
+            # Resuming an already-built app; the caller asked for a fresh
+            # drawing every time the app is started. (The first start already
+            # generates a new pattern in SatoriPattern.__init__, so it is not
+            # handled here.) regenerate() reuses the existing buffers.
+            pattern = cast(SatoriPattern, self._pattern)
+            pattern.regenerate()
+            self._show_palette_overlay(pattern.palette_name)
+            self._last_gen = time.perf_counter()
 
         # Create the palette-name overlay label once
         if self._palette_label is None:
@@ -688,9 +711,10 @@ class SatoriApp(DisplayManagedApp):
             # Show the overlay for the initial palette
             self._show_palette_overlay(self._pattern.palette_name)
 
-        # Reset the timing clock
+        # Reset the palette-cycling clock only. _last_gen is intentionally
+        # preserved here (see above) so resumed apps rotate patterns after the
+        # defined refresh period, exactly like the standalone app.
         self._run_start = time.perf_counter()
-        self._last_gen = self._run_start
         # Force brightness re-application on (re-)start
         self._current_brightness = -1
 
@@ -867,7 +891,10 @@ class SatoriApp(DisplayManagedApp):
         now = time.perf_counter()
         total_elapsed = now - self._run_start
 
-        # Regenerate periodically if enabled
+        # Regenerate periodically if enabled. _last_gen survives stop/restart,
+        # so a resumed app either continues mid-cycle or (if refresh_time
+        # elapsed while it was stopped) regenerates on this first frame,
+        # before anything is rendered.
         pattern = cast(SatoriPattern, self._pattern)
         if self._do_regenerate and (now - self._last_gen) >= self.refresh_time:
             pattern.regenerate()
@@ -908,7 +935,7 @@ class SatoriApp(DisplayManagedApp):
         Keyword arguments are forwarded to the SatoriApp constructor.
         """
         resource_path = os.path.dirname(__file__)
-        return SatoriApp(resource_path=resource_path, **kwargs) # type: ignore
+        return SatoriApp(resource_path=resource_path, **kwargs)  # type: ignore
 
 
 # ---------------------------------------------------------------------------
@@ -932,6 +959,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--palette-speed", type=float, default=24.0, help="Palette cycling speed (units/sec)"
     )
+    parser.add_argument(
+        "--regenerate-on-start",
+        action="store_true",
+        help="Draw a new pattern each time the app starts (default: keep the "
+        "standalone refresh cadence across restarts)",
+    )
 
     # parse_known_args leaves LED matrix options for app_runner's parser
     args, remaining = parser.parse_known_args()
@@ -943,5 +976,6 @@ if __name__ == "__main__":
             seed=args.seed,
             num_knots=args.knots,
             palette_speed=args.palette_speed,
+            regenerate_on_start=args.regenerate_on_start,
         )
     )
