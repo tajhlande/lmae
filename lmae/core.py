@@ -252,7 +252,10 @@ class Stage(LMAEObject):
         self.size = size  # size in pixels
         self.actors = actors or []
         self.animations = animations or []
-        self.canvas = Canvas(size=self.size)
+        # Fixed, stage-derived canvas name: unnamed LMAEObjects get sequential
+        # names whose loggers are retained forever by the logging registry
+        # (see app-memory-and-rerunnability.md, Rule 3).
+        self.canvas = Canvas(name=f"{name}-Canvas", size=self.size)
         self.matrix = matrix or (RGBMatrix(options=matrix_options) if matrix_options else None)
         if not self.matrix:
             self.logger.warning("No matrix or matrix options were provided to the stage")

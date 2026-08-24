@@ -652,6 +652,7 @@ class SatoriApp(DisplayManagedApp):
         # Create the pattern actor once
         if self._pattern is None:
             self._pattern = SatoriPattern(
+                name="Satori-pattern",
                 width=self._width,
                 height=self._height,
                 num_knots=self._num_knots,
