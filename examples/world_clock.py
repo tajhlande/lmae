@@ -297,8 +297,10 @@ class WorldClock(DisplayManagedApp):
         self.last_view_update_datetime_utc = None
 
     @staticmethod
-    def get_app_instance():
-        return WorldClock(resource_path=os.path.dirname(__file__))
+    def get_app_instance(**kwargs):
+        # kwargs are parameter values passed by the web panel runner
+        # (e.g. refresh_time); forwarded to the constructor as-is.
+        return WorldClock(resource_path=os.path.dirname(__file__), **kwargs)
 
 
 if __name__ == "__main__":

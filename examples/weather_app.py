@@ -752,23 +752,38 @@ class WeatherApp(DisplayManagedApp):
         self.fresh_weather_data = False
 
     @staticmethod
-    def get_app_instance():
-        # get environment variables
-        env_api_key = app_runner.get_env_parameter("OW_API_KEY", "openweather", "ow_api_key")
-        env_latitude = app_runner.get_env_parameter("LATITUDE", "location", "latitude")
-        env_longitude = app_runner.get_env_parameter("LONGITUDE", "location", "longitude")
-        env_refresh_time = int(
-            app_runner.get_env_parameter(
-                "REFRESH_TIME", "settings", "refresh_time", default=60 * 15
+    def get_app_instance(**kwargs):
+        """Return a WeatherApp instance.
+
+        Parameter values may be passed directly as keyword arguments (the
+        web panel runner does this, using the TOML parameter names). Any
+        value not provided falls back to the environment-variable/env.ini
+        lookup, so running this file standalone keeps working unchanged.
+        """
+        api_key = kwargs.get("api_key") or app_runner.get_env_parameter(
+            "OW_API_KEY", "openweather", "ow_api_key"
+        )
+        latitude = kwargs.get("latitude") or app_runner.get_env_parameter(
+            "LATITUDE", "location", "latitude"
+        )
+        longitude = kwargs.get("longitude") or app_runner.get_env_parameter(
+            "LONGITUDE", "location", "longitude"
+        )
+        refresh_time = kwargs.get("refresh_time")
+        if refresh_time is None:
+            # default to 15 minutes
+            refresh_time = int(
+                app_runner.get_env_parameter(
+                    "REFRESH_TIME", "settings", "refresh_time", default=60 * 15
+                )
             )
-        )  # default to 15 minutes
 
         resource_path = os.path.dirname(__file__)
         return WeatherApp(
-            api_key=env_api_key,
-            latitude=env_latitude,
-            longitude=env_longitude,
-            refresh_time=env_refresh_time,
+            api_key=api_key,
+            latitude=latitude,
+            longitude=longitude,
+            refresh_time=refresh_time,
             resource_path=resource_path,
         )
 

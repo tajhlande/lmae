@@ -319,11 +319,13 @@ class AdventApp(DisplayManagedApp):
         self.last_hour = -1
 
     @staticmethod
-    def get_app_instance():
+    def get_app_instance(**kwargs):
+        # kwargs are parameter values passed by the web panel runner
+        # (e.g. refresh_time); forwarded to the constructor as-is.
         resource_path = os.path.dirname(__file__)
         font_path = os.path.join(resource_path, "fonts")
         images_path = os.path.join(resource_path, "images")
-        return AdventApp(font_path=font_path, image_path=images_path)
+        return AdventApp(font_path=font_path, image_path=images_path, **kwargs)
 
 
 if __name__ == "__main__":
